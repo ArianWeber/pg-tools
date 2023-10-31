@@ -1,0 +1,13 @@
+
+
+
+prompt:
+  prompt_format: " %s"
+  debug:    "D "
+  verbose:  "V "
+  info:     "➜ "
+  warn:     "⚡"
+  error:    "✘ "
+  empty:    "~ "
+  success:  "✓ "
+  question: "» "

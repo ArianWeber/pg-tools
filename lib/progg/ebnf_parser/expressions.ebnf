@@ -1,0 +1,33 @@
+/*
+    This grammar accepts a combination of 
+    Note that boolean variables are not supported, thus
+    this expression will be rejected: 'A && true'
+*/
+
+[1] Action ::= Assignment ('|' Assignment)*
+[2] Guard  ::= BoolExpr
+[3] Precon ::= BoolExpr
+
+[4] Assignment  ::= VARIABLE ':=' IntExpr
+[5] Expression  ::= BoolExpr | IntExpr
+
+[6] BoolExpr     ::= Equivalence
+[7] Equivalence  ::= Implication (('<->' | '<!>') Implication)*
+[8] Implication  ::= Disjunction ('->' Disjunction)*
+[9] Disjunction  ::= Konjunction ('||' Konjunction)*
+[10] Konjunction ::= Negation ('&&' Negation)*
+[11] Negation    ::= '!' Comparison | Comparison
+
+[12] Comparison ::= BOOL | Sum (CMPOP Sum)+
+
+[13] IntExpr  ::= Sum
+[14] Sum      ::= Product (('+' | '-') Product)*
+[15] Product  ::= Value (('*' | '/') Value)*
+[16] Value    ::= NUMBER | VARIABLE | '(' Expression ')'
+
+[17] NUMBER   ::= '-'?[0-9]+
+[18] BOOL     ::= 'true' | 'false' | '(' BoolExpr ')'
+// Note that we do have to exclude 'true' & 'false' because otherwise 'true' & 'false'
+// would be legal Integer expressions as they would be considered variables
+[19] VARIABLE ::= [^('true' | 'false')][a-zA-Z_][a-zA-Z0-9_]* | [a-zA-Z_]
+[20] CMPOP    ::= '<=' | '>=' | '<' | '>' | '==' | '!='

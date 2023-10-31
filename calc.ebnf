@@ -1,0 +1,21 @@
+[1] Assignment  ::= VARIABLE ':=' IntExpr
+[2] Expression  ::= BoolExpr
+
+[3] BoolExpr    ::= Equivalence
+[4] Equivalence ::= Implication (('<->' | '<!>') Implication)*
+[5] Implication ::= Disjunction ('=>' Disjunction)*
+[6] Disjunction ::= Konjunction ('||' Konjunction)*
+[7] Konjunction ::= Negation ('&&' Negation)*
+[8] Negation    ::= '!' Comparison | Comparison
+
+[9] Comparison ::= Sum (CMPOP Sum)*
+
+[10] IntExpr  ::= Sum
+[11] Sum      ::= Product (('+' | '-') Product)*
+[12] Product  ::= Value (('*' | '/') Value)*
+[13] Value    ::= NUMBER | BOOL | VARIABLE | '(' Expression ')'
+
+[14] NUMBER   ::= [0-9]+
+[15] BOOL     ::= 'true' | 'false'
+[16] VARIABLE ::= [a-zA-Z_][a-zA-Z0-9_]*
+[17] CMPOP    ::= '<=' | '>=' | '<' | '>' | '==' | '!='

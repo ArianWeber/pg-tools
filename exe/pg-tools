@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+require_relative '../bin/progg.rb'
+
+Progg::ProggCLI.new.run()
