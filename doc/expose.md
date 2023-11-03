@@ -78,7 +78,10 @@ Language Servers ermöglichen es, effizient Sprach-Features zu implementieren. D
 - Fehler-Überprüfung und -diagnose
 - Springen zur Definition einer Funktion
 
-Durch die Integration von pg-tools in einen Language Server möchten wir es den Entwickler:innen ermöglichen:
+Wir möchten versuchen, pg-tools in einen Language Server zu integrieren. Allerdungs wissen wir mangels eigener Erfahrung nicht, ob das mit angemessenem Aufwand möglich ist und können
+deshalb nicht versprechen, dass dieses Fearture am Ende im Produkt enthalten ist.
+
+Durch diese Integration möchten wir den Entwickler:innen ermöglichen:
 - Sich auf die Modellierung der Graphen zu konzentrieren, anstatt wieder und wieder die gleiche Variable auszuschreiben
 - Sofort zu sehen, was falsch ist, anstatt stundenlang selbst nach Fehlern zu suchen
 - Somit möglichst produktiv zu arbeiten
