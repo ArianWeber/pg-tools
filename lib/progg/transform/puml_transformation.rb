@@ -1,7 +1,7 @@
 
 
 module Progg
-    module Tranform
+    module Transform
 
         class PumlTransformation
 

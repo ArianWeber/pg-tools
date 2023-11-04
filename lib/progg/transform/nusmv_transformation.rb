@@ -1,18 +1,21 @@
 
 
 module Progg
-    module Tranform
+    module Transform
 
         class NuSmvTransformation
 
-            def transform_graph(programm_graph)
-                variables  = programm_graph.all_variables
-                components = programm_graph.components
+            def transform_graph(program_graph)
+                variables  = program_graph.all_variables
+                components = program_graph.components
 
                 var_s  = transform_variables(variables)
                 cmp_s  = transform_components(components, variables)
                 main_s = transform_main_module(components)
-                return "#{var_s}\n\n#{cmp_s}\n\n#{main_s}"
+
+                specs = transform_specification(program_graph.specification, variables)
+
+                return "#{var_s}\n\n#{cmp_s}\n\n#{main_s}\n\n#{specs}\n"
             end
 
             def transform_variables(varset)
@@ -44,18 +47,47 @@ module Progg
                 name += "(v)"
 
                 # Generate the INIT block. Each component initializes it's own variables
-                cmp_vars = varset.select_by_owner(component.name).to_a
-                init = cmp_vars.map { |var|
-                    # Allow variables to omit the initital value as to choose an indeterministic value
+                owned_vars = varset.select_by_owner(component.name).to_a
+                init = owned_vars.map { |var|
+                    # Allow variables to omit the initial value as to choose an indeterministic value
                     next if var.initial_value.nil?
                     "v.#{transform_varname(var.name)} = #{transform_const(var.initial_value)}"
                 }.compact.join(" & ")
 
+                # Transform all transitions which are defined in this component
                 trans = component.transitions.map { |transition|
                     trans_s = transform_transition(varset, component, transition)
                     "( #{trans_s} )"
-                }.join(" | \n")
-                trans += ";"
+                }
+
+                # Create a default transition which is taken whenever no other
+                # transitions can.
+                tau_transition = []
+                # Combine the precondition, guard and source state conditions
+                # For each transition of this component
+                other_transitions = component.transitions.map { |transition| 
+                    precon_s = transform_expression(transition.precon, varset)
+                    guard_s  = transform_expression(transition.guard, varset)
+
+                    cmp_varname = transform_varname(component.name)
+                    this_state = transform_const(transition.src_state)
+                    state_s = "v.#{cmp_varname} = #{this_state}"
+
+                    [ state_s, precon_s, guard_s ].compact.reject(&:empty?).join(' & ')
+                }.compact.reject(&:empty?)
+                # Only take the tau transition when all other transitions do not match 
+                tau_transition << "!(\n\t#{other_transitions.join(" | \n\t")})\n\t"
+
+                # Keep this components state when using the default transition
+                # Keep all owned variables equal when using the default transition
+                tau_transition += owned_vars.map { |var|
+                    varname = "v.#{transform_varname(var.name)}"
+                    "next(#{varname}) = #{varname}"
+                }
+                # Add the tau transition
+                trans << "(#{tau_transition.join(" & ")})"
+
+                trans = trans.join(" | \n") + ";"
 
                 return module_string(name, init: init, trans: trans)
             end
@@ -72,56 +104,88 @@ module Progg
 
                 precon_s = transform_expression(transition.precon, varset)
                 guard_s  = transform_expression(transition.guard, varset)
-                action_s = transform_expression(transition.action, varset)
+
+                action_s, assigned_var = transform_assignment(transition.action, component, varset)
+                
+                keep_vars_constant = varset.select_by_owner(component.name).names
+                    .reject { |v| v.to_s == assigned_var.to_s }
+                    .reject { |v| v.to_s == component.name.to_s }
+                    .map { |v| "next(v.#{transform_varname(v)}) = v.#{transform_varname(v)}" }
+                    .join(' & ')
+
                 expression << precon_s
                 expression << guard_s
                 expression << action_s
+                expression << keep_vars_constant
 
-                # TODO: Actions, preconditions and guards
-                # ( v.V_UmgebungPosition = L_Moving & next(v.V_UmgebungPosition) = L_Moving & ((v.V_Position < 90) & (v.V_Position < 90)) & (next(v.V_Position) = (v.V_Position + v.V_Speed)))  |
-                # ( v.V_FailureSensor = L_No & next(v.V_FailureSensor) = L_Yes & TRUE & (TRUE))  |
-                return expression.compact.join(' & ')
+                return expression.compact.reject(&:empty?).join(' & ')
             end
 
-            def transform_assignment()
-                "Position := Velocity * Speed"
-                "next(v.V_Position) = ()"
+            def transform_assignment(assignment_expression, component, varset)
+                return nil if assignment_expression.nil?
 
+                parts = assignment_expression.to_s.split(":=")
 
+                assigned_variable = parts[0].strip
+
+                unless varset.varname?(assigned_variable)
+                    error = "Assigning to unknown variable '#{assigned_variable}'!"
+                    error += "Expression: #{assignment_expression}\n"
+                    error += "Variables: #{varset}"
+                    raise error
+                end
+
+                unless varset[assigned_variable].owner_name == component.name
+                    error = "Assigning to variable which is not owned '#{assigned_variable}'!"
+                    error += "Expression: #{assignment_expression}\n"
+                    error += "Component: #{component.name}, Owner: #{varset[assigned_variable].owner_name}"
+                    raise error
+                end
+
+                assigned_variable_s = "next(v.#{transform_varname(assigned_variable)})"
+
+                expression = parts[1].strip
+                expression = transform_expression(Model::ParsedExpression.new(expression, nil), varset)
+
+                assignment_s = "#{assigned_variable_s} = #{expression}"
+
+                return assignment_s, assigned_variable
             end
 
             def transform_expression(expression, varset)
                 return nil if expression.nil?
 
+                variables, constants = [], []
+                expression.word_tokens.select { |w| 
+                    if varset.names.include?(w)
+                        variables << w
+                    elsif  varset.values.include?(w)
+                        constants << w
+                    else
+                        error = "Encountered unknown token '#{w}'! This is neither a variable, nor literal.\n"
+                        error += "Expression: #{expression}\n"
+                        error += "Variables: #{varset}"
+                        raise error
+                    end
+                }
+                variables, constants = variables.uniq, constants.uniq
+
+                constants = expression.word_tokens.select { |w| varset.values.include?(w) }.uniq
+
                 expression_s = expression.to_s
 
-                expression_s = expression_s.gsub(/(\w+)\s*:=/) {
-                    assigned_var = Regexp.last_match[1]
-                    "next(#{assigned_var}) ="
-                }
-
-                expression.used_variables.uniq.each { |symbol|
-
-                    symbol_s = varset.varname?(symbol) \
-                        ? "v.#{transform_varname(symbol)}" \
-                        : transform_const(symbol)
-                    puts "REPL #{symbol} by #{symbol_s} in '#{expression}'"
-
-
-                    expression_s = expression_s.gsub(/\bword\b(?!\w)/, symbol_s) { |match|
-                        puts "MATCH: '#{match}'"
-                    }
-                }
+                variables.each { |v| expression_s = expression_s.gsub(v.to_s, "v." + transform_varname(v))  }
+                constants.each { |c| expression_s = expression_s.gsub(c.to_s, transform_const(c))  }
 
                 expression_s = expression_s.gsub('&&', '&')
                 expression_s = expression_s.gsub('||', '|')
                 expression_s = expression_s.gsub('||', '|')
                 expression_s = expression_s.gsub('==', '=')
-
+                expression_s = expression_s.gsub('=>', '->')
+                expression_s = expression_s.gsub('<=>', '<->')
 
                 return expression_s
             end
-
 
             def transform_main_module(components)
                 # Instantiate variable module as v
@@ -159,6 +223,17 @@ module Progg
 
             def transform_module_instance_name(name)
                 "p_#{name}"
+            end
+
+            def transform_specification(specification, varset) 
+                return specification.flatten().map { |s| transform_spec(s, varset) }.join("\n")
+            end
+
+            def transform_spec(spec, varset)
+                expression = Model::ParsedExpression.new(spec.expression, nil)
+                expression_s  = "-- #{spec.text}\n"
+                expression_s += "LTLSPEC " + transform_expression(expression, varset)
+                return expression_s
             end
 
         end

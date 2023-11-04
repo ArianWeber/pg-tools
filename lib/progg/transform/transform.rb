@@ -2,6 +2,6 @@
 Dir[File.join(__dir__, "**", '*.rb')].sort.each { |file| require file }
 
 module Progg
-    module Tranform
+    module Transform
     end
 end

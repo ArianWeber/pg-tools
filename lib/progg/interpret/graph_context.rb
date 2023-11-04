@@ -22,6 +22,26 @@ module Progg
                 return cmp
             end
 
+            def transient(name)
+                cmp = component(name) do
+                    all_states = [ :off, :on ]
+                    states(*all_states)
+                    all_states.product(all_states).each { |s1, s2| transition({ s1 => s2}) }
+                end
+                cmp.represents_fault = true
+                return cmp
+            end
+
+            def error(name)
+                return name
+            end
+
+            def no_errors()
+                return @components.select(&:represents_fault?).map { |cmp|
+                    "#{cmp.name} == no"
+                }.join(' && ')
+            end
+
             # DSL method for declaring a new specification in this graph
             def specify(text, &blk)
                 specset = SpecSetContext.new(text, nil)

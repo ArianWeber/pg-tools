@@ -10,6 +10,7 @@ require_relative "progg/transform/transform.rb"
 require_relative "progg/nusmv/nusmv.rb"
 require 'config'
 require 'fileutils'
+require 'open3'
 
 module Progg
 

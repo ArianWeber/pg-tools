@@ -13,6 +13,7 @@ Beispielprojekt. Es handelt sich um eine leicht modifizierte Version
 des "Weidezaun"-Projektes aus der Vorlesung.
 Die Ausgaben sind teilweise noch von Hand erstellt, da die Implementierung noch
 nicht weit genug fortgeschritten ist.
+Die beschriebene Funktionalität dient natürlich erstmal als Gesprächsgrundlage.
 
 ### Die Entwicklungsumgebung
 
@@ -59,7 +60,7 @@ persistent error :Breaks
 transient error :Sensor
 
 # Validität unter Ausschluss von Fehlern
-# 'no_erros' kann hier automatisch generiert wrden
+# 'no_erros' kann hier automatisch generiert werden
 specify "The train" do
     assuming "there are no errors" => no_errors do
         it "reaches BEP" => :"G Tain.position > #{BEP}"
@@ -111,6 +112,7 @@ Im Folgenden haben wir einige Ideen für Features aufgelistet:
 - Automatische DCCA
 - Installation über ein Kommando (`gem install pg-tools`)
 - Einfache Einarbeitung (mit Kommando `pg-tools init`)
+    - Hier wird ein Beispielprojekt angelegt um die Projektstruktur vorzugeben
 - Ansprechende Dokumentation
 - Konfigurationsmöglichkeiten  
 - Hilfreiche Fehlermeldungen
@@ -166,5 +168,13 @@ auf verschiednen Systemen sichergestellt werden.
 ## Automatisierung und Flexibilität
 
 CLI-Programme können einfach in Arbeitsabläufe eingebunden werden.
-Beispielsweise wäre es möglich, Tests für Modelle zu schreiben, die mittles "continuous integration"
+Beispielsweise wäre es möglich, Tests für Modelle zu schreiben, die mittels "continuous integration"
 für jeden Pull Request auf GitHub ausgeführt werden.
+(Das `pg-tools init` Kommando könnte eine solche CI Pipeline automatisch definieren)
+
+## Zielgruppe
+
+Da die Zielgruppe unseres Projektes Informatikstudenten sind,
+kann man grundlegende Kenntnisse im Umgang mit CLI-Programmen erwarten.
+Die einheitliche Meinung von Kommolitonen aus unserem Jahrgang ist es,
+dass die beschriebene Anwednung die Arbeit am Projekt erleichtert hätte.

@@ -17,16 +17,17 @@ module Progg
             # and thus owns
             attr_accessor :owned_variables
 
-            # Backreference to the parent graph
+            # Back reference to the parent graph
             attr_accessor :parent_graph
 
-            # A list of variable names to be imported by this component 
-            # attr_accessor :imported_variables
-    
+            # Flag on whether this component is used to represent a fault.
+            attr_accessor :represents_fault
+
             def initialize(name, parent_graph)
                 @name, @parent_graph = name, parent_graph
                 @states_list, @transition_list = [], []
                 @owned_variables = []
+                @represents_fault = false
                 # @imported_variables = []
             end
 
@@ -82,7 +83,7 @@ module Progg
                 params[:states] = @states_list
                 # Convert the transitions to their model representation
                 params[:transitions] = @transition_list.map(&:to_model)
-                
+                params[:represents_fault] = @represents_fault
                 # Create a model component using these params
                 Model::Component.new(params)
             end

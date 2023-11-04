@@ -17,16 +17,13 @@ module Progg
                 spec_sets.map(&:get_specs).flatten
             end
 
-            def flat_specs()
-                specs = get_specs()
-                specs.each { |spec|
+            def flatten()
+                return get_specs().map { |spec|
                     parents = spec.parents
                     prefix = parents.map { |spec_set|
-                        if (spec_set.assumption.nil?)
-                            spec_set.text
-                        else
-                            "assuming #{spec_set.assumption[:text]}".c_sidenote
-                        end
+                        spec_set.assumption.nil? \
+                            ? spec_set.text \
+                            : "(assuming #{spec_set.assumption[:text]})" #.c_sidenote
                     }.join(" ")
                     text = "#{prefix} #{spec.text}"
 
@@ -38,16 +35,11 @@ module Progg
                     expression = assumption_expression.empty? \
                         ? spec.expression \
                         : "( #{assumption_expression} ) => #{spec.expression}"
-
-
-                    puts "[ #{'PASSED'.c_success} ] " + text
-                    puts "           " + expression.c_blue
-                    puts
+                    
+                    Spec.new(text, expression, nil)
                 }
-                puts "=> [ #{specs.length}/#{specs.length} ] specifications are valid!".c_success
             end
 
         end
-
     end
 end

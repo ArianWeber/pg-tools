@@ -11,20 +11,31 @@ module Progg
 
             desc "test", "Shows the ProgramGraph"
             def test()
-
                 script = Interpret::ProggScript.new
                 model = script.interpret('program-graph.rb')
 
-                model.specification.flat_specs()
+                runner = NuSMV::Runner.new()
+                results = runner.run_specs(model)
 
+                results.each { |result|
+                    stat_string = result.success ? "PASSED".c_success : "FAILED".c_error
+                    puts "[ #{stat_string} ] #{result.spec.text}"
+                    puts "           #{result.spec.expression.c_blue}"
+                    puts result.trace.map(&:c_error).join("\n") unless result.success
+                }
+
+                # File.write("pg.smv", nusmv_s)
+
+                # output, err, status = Open3.capture3({}, "NuSMV-2.6.0-Darwin/bin/NuSMV pg.smv")
+
+                # puts "Result: #{status}"
+                # puts output
             end
 
             desc "show", "Shows the ProgramGraph"
             option :yell, :type => :boolean
             def show()
-
                 puts options[:yell]
-
                 # parser  = EbnfParser::ExpressionParser2.new(type: :Sum)
                 # puts parser.parse!("1 + 2").map
                 # return
@@ -32,13 +43,13 @@ module Progg
                 script = Interpret::ProggScript.new
                 model = script.interpret('program-graph.rb')
 
-                puml = Tranform::PumlTransformation.new.transform_graph(model)
+                puml = Transform::PumlTransformation.new.transform_graph(model)
                 png = PlantumlBuilder::Formats::PNG.new(puml).load
                 File.binwrite("diagram.png", png)
                 
                 return
 
-                nusmv_t = Tranform::NuSmvTransformation.new
+                nusmv_t = Transform::NuSmvTransformation.new
                 nusmv_s = nusmv_t.transform_graph(model)
 
                 puts "Validating Model..."

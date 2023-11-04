@@ -35,8 +35,9 @@ module Progg
             end
 
             def [](name)
+                name = name.to_sym
                 raise "No such variable #{name}!" unless @map.key?(name)
-                return @map[key]
+                return @map[name]
             end
 
             def include?(name_or_var)
@@ -52,7 +53,7 @@ module Progg
             end
 
             def varname?(name)
-                return @map.key?(name)
+                return @map.key?(name.to_sym)
             end
 
             def constname?(name)

@@ -18,6 +18,13 @@ module Progg
                 # @ast  = result.ast
             end
 
+            def word_tokens()
+                words = expression_string.scan(/[a-zA-Z_][a-zA-Z0-9_]*/).flatten.compact
+                words = words.reject { |w| w.match(/\A[GFXRU]+\z/) }
+                words = words.reject { |w| w == "TRUE" || w == "FALSE" }
+                return words.map(&:to_sym)
+            end
+
             def used_variables()
                 return expression_string.scan(/[a-zA-Z_][a-zA-Z0-9_]*/).flatten.compact.map(&:to_sym)
             end
