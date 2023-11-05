@@ -1,10 +1,10 @@
 # PG-Tools
 
-PG-Tools ist ein textbasiertes CLI Programm zur Entwicklung und Einbindung von
+PG-Tools ist ein textbasiertes CLI-Programm zur Entwicklung und Einbindung von
 Programmgraphen im Kontext der formalen Sicherheitsanalyse.
 
 Ziel ist es, ein anwenderfreundliches, robustes und zukunftssicheres System zu entwickeln,
-dass möglichst im Hintergrund bleibt und Platz für das Wesentliche lässt: Das Modellieren.
+das möglichst im Hintergrund bleibt und Platz für das Wesentliche lässt: Das Modellieren.
 
 ## Beispielprojekt
 
@@ -19,22 +19,24 @@ Die beschriebene Funktionalität dient natürlich erstmal als Gesprächsgrundlag
 
 Da wir vorhaben, ein CLI-Programm zu erstellen, das mit "Plain Text" arbeitet,
 ist jede Entwicklungsumgebung denkbar.
-Das folgende Bild zeigt also nur ein Beispiel für eine Möglichkeit.
+Das folgende Bild zeigt also nur ein Beispiel.
 (Mehr dazu [hier](#warum-cli-und-plain-text))
 
 ![alt text](./definition.png)
 
 Links im Bild sieht man die Definition eines Programmgraphen über die
-Ruby DSL. Rechts sieht man die generierte Grafik. Die Grafik wird aktualisiert, sobald
+Ruby DSL. Rechts sieht man die generierte Grafik. Die Grafik wird aktualisiert sobald
 man `pg-tools show` ausführt, so wie unten abgebildet.
 
-### Validitätsüberprüfungen
+### Validitätsprüfungen
 
-Oben im Bild ist die Definition von Spezifikationen zur Validitätsprüfung.
+![alt text](./validity.png)
+
+Oben im Bild ist die Definition von Spezifikationen zur Validitätsprüfung dargestellt.
 Führt man `pg-tools test` aus, erhält man die unten dargestellte Ausgabe.
 (Das Feature ist noch nicht implementiert. Tatsächlich wären hier einige Tests fehlgeschlagen.)
 Die Syntax ist vom beliebten Test-Framework [Rspec](https://rspec.info/) inspiriert. 
-Im Fehlerfall wird der Ablauf ausgegeben, der die Formel verletzt.
+Im Fehlerfall würde der Ablauf ausgegeben, der die Formel verletzt.
 
 Nach der Fehlerintegration könnte man Fehler beispielsweise so ausschließen:
 
@@ -52,7 +54,7 @@ end
 
 Zudem kann man die Ruby DSL so erweitern, dass Fehlerautomaten
 im internen Datenmodell von gewöhnlichen Komponenten unterschieden werden können.
-Damit kann man eine knappe Syntax anbieten und die DCCA vollautomaitsch durchführen:
+Damit kann man eine knappe Syntax anbieten und die DCCA vollautomatisch durchführen:
 
 ```ruby
 # Erzeugt Fehlerautomaten für die Bremse & den Zugsensor
@@ -79,8 +81,7 @@ Language Servers ermöglichen es, effizient Sprach-Features zu implementieren. D
 - Fehler-Überprüfung und -diagnose
 - Springen zur Definition einer Funktion
 
-Wir möchten versuchen, pg-tools in einen Language Server zu integrieren. Allerdungs wissen wir mangels eigener Erfahrung nicht, ob das mit angemessenem Aufwand möglich ist und können
-deshalb nicht versprechen, dass dieses Fearture am Ende im Produkt enthalten ist.
+Wir möchten versuchen, pg-tools in einen Language Server zu integrieren. Allerdings wissen wir mangels eigener Erfahrung nicht, ob das mit angemessenem Aufwand möglich ist und können deshalb nicht versprechen, dass dieses Fearture am Ende im Produkt enthalten sein wird.
 
 Durch diese Integration möchten wir den Entwickler:innen ermöglichen:
 - Sich auf die Modellierung der Graphen zu konzentrieren, anstatt wieder und wieder die gleiche Variable auszuschreiben
@@ -105,7 +106,7 @@ Im Folgenden haben wir einige Ideen für Features aufgelistet:
 
 - Einlesen von Modellen über Ruby-DSL, JSON und YAML
 - Ausgeben von Modellen in JSON, YAML, PlantUML
-- Integration von NuSMV, Prism und weiterer Model Checker.
+- Integration von NuSMV, Prism und ggf. weiterer Model Checker.
 - Simulation von Modellen und Ausgabe als Video oder GIF
 - Integriertes Test-Framework zur Validitätsprüfung
 - Deklarative Syntax zur Verwendung der "LTL-Pattern" aus der Vorlesung
@@ -116,7 +117,7 @@ Im Folgenden haben wir einige Ideen für Features aufgelistet:
 - Ansprechende Dokumentation
 - Konfigurationsmöglichkeiten  
 - Hilfreiche Fehlermeldungen
-- Unterstützung eines Language Servers für pg-tools
+- Unterstützung eines Language Servers
 - Implementierung eines Language Clients für Visual Studio Code
 
 # Warum CLI und Plain Text
@@ -126,8 +127,7 @@ Erst durch die Konzeptualisierung ist es möglich, Modelle festzuhalten, zu komm
 Denkfehler aufzudecken und sie maschinell zu verarbeiten.
 
 Mit den folgenden Argumenten wollen wir darstellen, warum die Verwendung von "Plain Text" und eines CLI-Programms
-für die Konzeptualisierung bzw. Festschreibung von Modellen besser geeignet ist als eine Graphische
-Lösung.
+für die Konzeptualisierung bzw. Festschreibung von Modellen besser geeignet ist als eine graphische Lösung.
 (Mit "Pain Text" meinen wir den Ansatz, dass alle Projektdateien ausschließlich Text enthaten,
 der schon für sich und ohne die Verwendung von Tools verständlich ist)
 
@@ -138,7 +138,7 @@ Dabei liegt ihr Vorteil aber in der effizienten *Aufnahme* von Informationen,
 durch den Betrachter.
 
 Bei der *Ausgabe* der eignenen Gedanken können graphische Editoren oft hinderlich sein.
-Nebensächlichkeiten, wie das Layout und eine umständliche Navigation in der UI
+Nebensächlichkeiten, wie das Layout und eine umständliche Navigation im UI
 stehen dem eigentlichen Ziel - der Modellierung - eher im Weg.
 
 Wir wollen die Verständlichkeit einer graphischen Ausgabe
@@ -152,11 +152,11 @@ funktionieren deutlich besser mit "Plain Text".
 
 ## Zeitlosigkeit & Technologie-Unabhängigkeit
 
-Die Wartung und Instandhaltung von von UI-basierten Programmen ist nur mit großem Aufwand möglich.
+Die Wartung und Instandhaltung von UI-basierten Programmen ist nur mit großem Aufwand möglich.
 Bibliotheken veralten und Design Trends ändern sich. Während Programme wie Eclipse schlecht gealtert sind, 
 erfreuen sich Command Line Tools wie "git" oder "make" nach wie vor großer Beliebtheit.
 
-Trotz des Aufkommens neuer Technologien stellen CLI Programme und und die Verwendung von
+Trotz des Aufkommens neuer Technologien stellen CLI-Programme und und die Verwendung von
 Plain Text eine Konstante dar.
 
 ## Einfache Installation
@@ -174,7 +174,7 @@ für jeden Pull Request auf GitHub ausgeführt werden.
 
 ## Zielgruppe
 
-Da die Zielgruppe unseres Projektes Informatikstudenten sind,
+Da die Zielgruppe unseres Projektes Informatikstudierende sind,
 kann man grundlegende Kenntnisse im Umgang mit CLI-Programmen erwarten.
-Die einheitliche Meinung von Kommolitonen aus unserem Jahrgang ist es,
+Die einheitliche Meinung von Kommiliton:innen aus unserem Jahrgang ist es,
 dass die beschriebene Anwednung die Arbeit am Projekt erleichtert hätte.
