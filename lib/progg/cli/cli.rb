@@ -9,7 +9,7 @@ module Progg
 
         class BaseCommand < Thor
 
-            desc "test", "Shows the ProgramGraph"
+            desc "test", ""
             def test()
                 script = Interpret::ProggScript.new
                 model = script.interpret('program-graph.rb')
@@ -32,6 +32,26 @@ module Progg
                 # puts output
             end
 
+            desc "dcca", ""
+            def dcca()
+
+                script = Interpret::ProggScript.new
+                model = script.interpret('program-graph.rb')
+
+                runner = NuSMV::Runner.new()
+                
+                dcca = Model::DCCA.new(model, runner)
+                result = dcca.perform()
+
+                result.each { |hazard, crit_sets|
+                    puts hazard.text
+
+                    crit_sets.each { |set|
+                        puts "{ #{set.map(&:to_s).map(&:c_blue).join(', ')} }"
+                    }
+                }
+            end
+
             desc "show", "Shows the ProgramGraph"
             option :yell, :type => :boolean
             def show()
@@ -44,8 +64,9 @@ module Progg
                 model = script.interpret('program-graph.rb')
 
                 puml = Transform::PumlTransformation.new.transform_graph(model)
-                png = PlantumlBuilder::Formats::PNG.new(puml).load
-                File.binwrite("diagram.png", png)
+                File.write("diagram.puml", puml)
+                # png = PlantumlBuilder::Formats::PNG.new(puml).load
+                # File.binwrite("diagram.png", png)
                 
                 return
 

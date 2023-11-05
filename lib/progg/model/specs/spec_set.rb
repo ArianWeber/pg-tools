@@ -13,6 +13,13 @@ module Progg
 
             attr_accessor :parent
 
+            def self.wrap(specs)
+                spec_set = self.new("", nil, nil, nil)
+                specs.each { |spec| spec.parent = spec_set }
+                spec_set.children = specs
+                return spec_set
+            end
+
             def initialize(text, assumption, parent, children)
                 @text, @assumption, @parent, @children = text, assumption, parent, children
             end

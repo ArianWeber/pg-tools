@@ -11,6 +11,14 @@ module Progg
                 @spec, @success, @trace = spec, success, trace
             end
 
+            def success?
+                return @success
+            end
+            
+            def failure?()
+                return !@success
+            end
+
         end
 
     end

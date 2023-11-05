@@ -7,15 +7,20 @@ module Progg
             # All Model::Component's which are part of this graph
             attr_accessor :components
 
-            # A Model::VariableSet of all integer variables declared by
+            # A Model::VariableSet of all non-state variables declared by
             # components in this graph
             attr_accessor :variables
 
+            # The Model::Specification of this graph
             attr_accessor :specification
 
-            def initialize(components: [], variables: VariableSet.new(), specification: Specification.empty())
+            # An array of Model::Hazards for this graph
+            attr_accessor :hazards
+
+            def initialize(components: [], variables: VariableSet.new(), specification: Specification.empty(), hazards: [])
                 raise "Not a variable set #{variables}" unless variables.is_a?(VariableSet)
-                @components, @variables, @specification = components, variables, specification
+                raise "Not a specification #{specification}" unless specification.is_a?(Specification)
+                @components, @variables, @specification, @hazards = components, variables, specification, hazards
             end
 
             # Returns a list of state variables for each component in this graph
@@ -31,6 +36,10 @@ module Progg
             # Returns all variables used in this graph including state variables
             def all_variables()
                 return state_variables() + @variables
+            end
+
+            def fault_components()
+                return @components.select(&:represents_fault?)
             end
 
             def validate()

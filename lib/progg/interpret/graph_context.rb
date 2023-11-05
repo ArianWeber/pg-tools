@@ -8,10 +8,13 @@ module Progg
             attr_accessor :components
 
             attr_accessor :specs
+
+            attr_accessor :hazards
     
             def initialize()
                 @components = []
                 @specs = []
+                @hazards = []
             end
     
             # DSL method for declaring a new component in this graph
@@ -24,7 +27,7 @@ module Progg
 
             def transient(name)
                 cmp = component(name) do
-                    all_states = [ :off, :on ]
+                    all_states = [ :no, :yes ]
                     states(*all_states)
                     all_states.product(all_states).each { |s1, s2| transition({ s1 => s2}) }
                 end
@@ -36,12 +39,6 @@ module Progg
                 return name
             end
 
-            def no_errors()
-                return @components.select(&:represents_fault?).map { |cmp|
-                    "#{cmp.name} == no"
-                }.join(' && ')
-            end
-
             # DSL method for declaring a new specification in this graph
             def specify(text, &blk)
                 specset = SpecSetContext.new(text, nil)
@@ -49,11 +46,17 @@ module Progg
                 @specs << specset
             end
 
+            def hazard(hash)
+                text = hash.keys.first
+                expression = hash[text]
+                @hazards << Model::Hazard.new(text, expression)
+            end
+
             def to_model()
                 components = @components.map(&:to_model)
                 variables = Model::VariableSet.new(*@components.map(&:owned_variables).flatten())
                 specification = Model::Specification.new(@specs.map { |s| s.to_model(nil) })
-                Model::Graph.new(components: components, variables: variables, specification: specification)
+                Model::Graph.new(components: components, variables: variables, specification: specification, hazards: @hazards)
             end
     
             def get_binding()
