@@ -8,6 +8,7 @@ require_relative "progg/interpret/interpret.rb"
 require_relative "progg/cli/cli.rb"
 require_relative "progg/transform/transform.rb"
 require_relative "progg/nusmv/nusmv.rb"
+require_relative "progg/simulation/simulation.rb"
 require 'config'
 require 'fileutils'
 require 'open3'

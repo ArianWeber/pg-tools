@@ -28,6 +28,15 @@ module Progg
                 # }
              end
 
+             
+             def to_s()     
+                label = [ @precon, @guard ].map(&:to_s).reject(&:empty?).join(" && ")
+                label += "/ " + @action.to_s unless @action.nil?
+
+                label = ": #{label}" unless label.strip.empty?
+                return "#{@src_state} -> #{@tgt_state} #{label}"
+             end
+
         end
 
     end

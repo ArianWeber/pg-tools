@@ -52,6 +52,18 @@ module Progg
                 }
             end
 
+            desc "sim", ""
+            def sim()
+                script = Interpret::ProggScript.new
+                model = script.interpret('program-graph.rb')
+
+                simulator = Simulation::Simulator.new(model)
+                states = simulator.run()
+
+                puts states.map(&:to_s).join("\n---------\n")
+
+            end
+
             desc "show", "Shows the ProgramGraph"
             option :yell, :type => :boolean
             def show()
