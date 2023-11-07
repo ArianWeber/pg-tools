@@ -5,21 +5,22 @@ workdir: <%= File.expand_path('.progg', Dir.home)  %>
 numsv:
   path: /Users/arian/Documents/projects/progg/NuSMV-2.6.0-Darwin/bin/NuSMV
 
+puml:
+  active_state_color: "#FF0000/FFFF00"
+
 # Enable/Disable colored printing all together
 use_colors: true
 # Enable/Disable colored printing when the output of vsutil
 # is not piped into a TTY directly.
 use_colors_in_pipe: false
 # Colors theme for the TTY
-colors:
+theme:
   state: ["deepskyblue", "bold"]
   trans: [ "springgreen", "italic" ]
   var:   [ "limegreen", "italic" ]
   cmp:   ["deepskyblue", "bold", "italic"]
-
   num: dodgerblue
   success: springgreen
   warn: khaki
   error: red
-
   sidenote: "darkslategray"

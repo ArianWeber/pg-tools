@@ -23,7 +23,7 @@ module Progg
         config_paths.select! { |path| File.file?(path) }
         Config.load_and_set_settings(*config_paths)
 
-        Colorizer.attach(Settings.colors.to_h)
+        Colorizer.attach(Settings.theme.to_h)
     end
 
     def self.root()

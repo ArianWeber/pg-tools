@@ -34,6 +34,10 @@ module Progg
                 return @range.to_a
             end
 
+            def state_variable?()
+                return @name == @owner_name
+            end
+
 
         end
 

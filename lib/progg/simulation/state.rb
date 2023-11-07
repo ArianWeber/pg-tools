@@ -30,6 +30,10 @@ module Progg
                 @value_map[var] = value
             end
 
+            def variables()
+                return @value_map.keys
+            end
+
             def names()
                 return @value_map.keys.map(&:name)
             end

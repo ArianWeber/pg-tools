@@ -58,20 +58,23 @@ module Progg
                 model = script.interpret('program-graph.rb')
 
                 simulator = Simulation::Simulator.new(model)
-                states = simulator.run()
+                states = simulator.run(steps: 5)
+
+                FileUtils.mkdir_p("video")
+
+                states.each_with_index.map { |state, index|
+                    puml = Transform::PumlTransformation.new.transform_graph(model, variable_state: state)
+                    puts puml
+                    png = PlantumlBuilder::Formats::PNG.new(puml).load
+                    File.binwrite("video/#{index}.png", png)
+                }
 
                 puts states.map(&:to_s).join("\n---------\n")
 
             end
 
             desc "show", "Shows the ProgramGraph"
-            option :yell, :type => :boolean
             def show()
-                puts options[:yell]
-                # parser  = EbnfParser::ExpressionParser2.new(type: :Sum)
-                # puts parser.parse!("1 + 2").map
-                # return
-
                 script = Interpret::ProggScript.new
                 model = script.interpret('program-graph.rb')
 

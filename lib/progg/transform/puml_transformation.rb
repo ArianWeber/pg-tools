@@ -5,10 +5,20 @@ module Progg
 
         class PumlTransformation
 
-            def transform_graph(graph)
-                str = graph.components.map { |c| transform_component(graph, c) }.join("\n\n")
-                
-                return "@startuml Programmgraph\n#{str}\n@enduml\n"
+            def transform_graph(graph, variable_state: nil)
+                parts = []
+                parts << graph.components.map { |c| transform_component(graph, c) }.join("\n\n")
+                parts << transform_variable_state(variable_state) unless variable_state.nil?
+                parts = parts.compact.join("\n\n")
+                return "@startuml Programmgraph\n#{parts}\n@enduml\n"
+            end
+
+            def transform_variable_state(variable_state)
+                vars = variable_state.variables.select(&:state_variable?)
+                return vars.map { |var|
+                    state = variable_state[var]
+                    "rectangle #{state} as #{var.name}_#{state} #{Settings.puml.active_state_color}"
+                }.join("\n")
             end
         
             def transform_component(graph, component)
@@ -47,7 +57,7 @@ module Progg
             end
         
             def transform_transition(component, transition)
-                abel = [ transition.precon, transition.guard ].map(&:to_s).reject(&:empty?).join(" && ")
+                label = [ transition.precon, transition.guard ].map(&:to_s).reject(&:empty?).join(" && ")
                 label += transition.guard.to_s
                 label += "/ " + transition.action.to_s unless transition.action.nil?
 
