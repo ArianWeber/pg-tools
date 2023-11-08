@@ -191,7 +191,7 @@ Die bisherigen Beispiele wurden in der Ruby DSL verfasst.
 Wir planen aber zusätzlich eine eigene Eingabesprache anzubieten, die mit
 einem language server integriert ist (mehr dazu [hier](#language-server)).
 
-Es folgt eine Gegenüberstelung von verschiedenen Möglichkeiten für eine solche 
+Es folgt eine Gegenüberstellung von verschiedenen Möglichkeiten für eine solche 
 Eingabesprache. Das resultierende Modell wäre in allen Fällen identisch.
 
 In der Ruby DSL:
@@ -217,7 +217,7 @@ model :FarmFence do
 end
 ```
 
-Von Ruby und Json inspiererte Möglichkeit für eine Eingabesprache:
+Von Ruby und Json inspirierte Möglichkeit für eine Eingabesprache:
 
 ```
 model FarmFence {
@@ -235,7 +235,7 @@ model FarmFence {
 }
 ```
 
-Von Python und Yaml inspiererte Möglichkeit für eine Eingabesprache:
+Von Python und Yaml inspirierte Möglichkeit für eine Eingabesprache:
 
 ```
 model FarmFence:
