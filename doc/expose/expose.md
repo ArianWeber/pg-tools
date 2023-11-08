@@ -28,6 +28,74 @@ Links im Bild sieht man die Definition eines Programmgraphen über die
 Ruby DSL. Rechts sieht man die generierte Grafik. Die Grafik wird aktualisiert sobald
 man `pg-tools show` ausführt, so wie unten abgebildet.
 
+### Das Weidezaun-Beispiel in der Ruby DSL
+
+Zur besseren Lesbarkeit folgt das Weidezaun-Beispiel in der Ruby DSL:
+
+```ruby
+model :FarmFence do
+    # Define a component called 'Hand'.
+    graph :Hand do
+        # The hand can be touching the fence or be somewhere else
+        # It starts in 'somewhere' as that state is listed first
+        states :somewhere, :at_fence
+
+        # Transition non-deterministically between those states
+        transition :somewhere => :somewhere
+        transition :somewhere => :at_fence
+        transition :at_fence => :somewhere
+        transition :at_fence => :at_fence
+    end
+
+    # Define another component called 'PowerSwitch', which also
+    # transitions non-deterministically.
+    graph :PowerSwitch do
+        states :off, :on
+        transition :off => :off
+        transition :off => :on
+        transition :on  => :off
+        transition :on  => :on
+    end
+
+    graph :Fence do
+        # The fence has no states we are interested in
+        states :exists
+
+        # The fence has a voltage which can go up to 15
+        var :voltage => (0..15), init: 0
+
+        # The voltage increases when the power switch is on
+        transition :exists => :exists do
+            guard "PowerSwitch == on"
+            action "voltage := voltage + 1"
+        end
+        # ..and instantly stops when the switch is off
+        transition :exists => :exists do
+            guard "PowerSwitch == off"
+            action "voltage := 0"
+        end
+
+    end
+
+    graph :Pain do
+        # We can either be in pain or not
+        states :No, :Yes
+        # Using regular variables with string interpolation
+        pain_threshold = 7
+        transition :No => :Yes do
+            guard "Hand == at_fence && voltage >= #{pain_threshold}"
+        end
+        transition :Yes => :No do
+            guard "Hand == somewhere || voltage < #{pain_threshold}"
+        end
+    end
+end
+```
+
+Und hier die generierte Grafik:
+
+![alt text](./diagram.png)
+
 ### Validitätsprüfungen
 
 ![alt text](./validity.png)
@@ -74,6 +142,116 @@ hazard "Train on unsecured railroad crossing" \
     => :"Barrier.angle > #{barrier_closed_angle} && Train.position >= #{train_pos_gep} && Train.position <= #{tain_pos_sp}"
 ```
 
+### Validitätsprüfungen in der Ruby DSL
+
+Zur besseren Lesbarkeit ist hier nochmal die Spezifikation der
+Validitätsprüfungen für das Weidezaun-Beispiel in der Ruby DSL:
+
+```ruby
+# Specification of validity characteristics regarding the hand.
+# The 'specify' block serves as a namespace/container for the contained specifications
+specify "The Hand" do
+    # Define some simple specs using a description text and an LTL expression
+    it "isn't always touching the fence"  => :"F Hand == somewhere"
+    it "isn't always away form the fence" => :"F Hand == at_fence"
+end
+
+# Specification of validity characteristics regarding the pain
+specify "The pain" do
+    # Use a regular LTL Formula as the expression
+    it "is felt at some point" => :"F Pain == yes"
+    # Use a more declarative syntax. This becomes useful for complex expressions
+    # as LTL patterns can be used very easily
+    it "is always felt at some point" => ltl.globally.exists(:"Pain == yes")
+
+    # Pattern: 'Universality', range: 'after q'
+    it "is felt after the switch is activated" => ltl.after(:"PowerSwitch == on").exists(:"Pain == yes")
+    # Pattern: 'Absence', range: 'before q'
+    it "is never felt before the switch is activated" => ltl.before(:"PowerSwitch == on").never(:"Pain == yes")
+    # Pattern: 'Reaction', range: 'global'
+    it "always reacts to the switch being activated"  => ltl.globally.reacts(:"PowerSwitch == on", :"Pain == yes")
+
+    # Define an assumption. That assumption must be true for all contained specs
+    assuming "the switch is never activated" => :"G PowerSwitch == off" do
+        it "is never felt " => :"G Pain == no"
+    end
+
+    # Assumptions can be nested and used with the declarative syntax.
+    assuming "the switch is activated" => ltl.globally.exists(:"PowerSwitch == on") do
+        assuming "the hand never touches the fence" => :"G Hand != at_fence" do
+            it "is never felt " => :"G Pain == no"
+        end
+    end
+end
+```
+
+## Eingabesprachen
+
+Die bisherigen Beispiele wurden in der Ruby DSL verfasst.
+Wir planen aber zusätzlich eine eigene Eingabesprache anzubieten, die mit
+einem language server integriert ist (mehr dazu [hier](#language-server)).
+
+Es folgt eine Gegenüberstelung von verschiedenen Möglichkeiten für eine solche 
+Eingabesprache. Das resultierende Modell wäre in allen Fällen identisch.
+
+In der Ruby DSL:
+
+```ruby
+model :FarmFence do
+
+    graph :Fence do
+        states :exists
+
+        var voltage: (0..15), init "voltage >= 1 && voltage <= 5"
+
+        transition :exists => :exists {
+            guard  "PowerSwitch == on"
+            action "voltage := voltage + 1"
+        }
+        transition :exists => :exists {
+            guard  "PowerSwitch == on"
+            action "voltage := voltage + 1"
+        }
+    end
+
+end
+```
+
+Von Ruby und Json inspiererte Möglichkeit für eine Eingabesprache:
+
+```
+model FarmFence {
+
+    graph Fence (exists) {
+        var voltage (0..15) : voltage >= 1 && voltage <= 5
+
+        transition exists => exists {
+            PowerSwitch == on / voltage := voltage + 1
+        }
+        transition exists => exists {
+            PowerSwitch == off / voltage := voltage + 1
+        }
+    }
+}
+```
+
+Von Python und Yaml inspiererte Möglichkeit für eine Eingabesprache:
+
+```
+model FarmFence:
+
+    graph Fence { exists }:
+        var voltage (0..15) init voltage >= 1 && voltage <= 5
+
+        transition exists => exists: 
+            PowerSwitch == on / voltage := voltage + 1
+
+        transition exists => exists: 
+            PowerSwitch == off / voltage := 0
+
+```
+
+
 ## Language Server
 
 Language Servers ermöglichen es, effizient Sprach-Features zu implementieren. Dazu gehören zum Beispiel:
@@ -104,7 +282,8 @@ Zudem ist es wahrscheinlich möglich, die oben angesprochenen Validitätsüberpr
 
 Im Folgenden haben wir einige Ideen für Features aufgelistet:
 
-- Einlesen von Modellen über Ruby-DSL, JSON und YAML
+- Einlesen von Modellen über Ruby DSL, JSON und YAML
+- Einlesen einer eigenen Eingabesprache mit Unterschützung durch einen Language Server
 - Ausgeben von Modellen in JSON, YAML, PlantUML
 - Integration von NuSMV, Prism und ggf. weiterer Model Checker.
 - Simulation von Modellen und Ausgabe als Video oder GIF

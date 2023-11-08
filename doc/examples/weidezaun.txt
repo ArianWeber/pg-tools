@@ -1,0 +1,29 @@
+---- Ruby/Json style ----
+
+model FarmFence {
+
+    graph Fence (exists) {
+        var voltage (0..15) : 0
+
+        transition exists => exists {
+            PowerSwitch == on / voltage := voltage + 1
+        }
+        transition exists => exists {
+            PowerSwitch == off / voltage := voltage + 1
+        }
+    }
+
+}
+
+---- Yaml/Python style ----
+
+model FarmFence:
+
+    graph Fence { exists }:
+        voltage (0..15) init 0
+
+        transition exists => exists: 
+            PowerSwitch == on / voltage := voltage + 1
+
+        transition exists => exists: 
+            PowerSwitch == off / voltage := 0
