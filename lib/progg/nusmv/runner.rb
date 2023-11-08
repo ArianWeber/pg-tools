@@ -6,7 +6,7 @@ module Progg
 
             def run_specs(program_graph)
                 nusmv_s = Transform::NuSmvTransformation.new.transform_graph(program_graph)
-                output = eval(nusmv_s)
+                output = eval_nusmv(nusmv_s)
                 specs = program_graph.specification.flatten()
                 return parse_spec_results(specs, output)
             end
@@ -34,9 +34,10 @@ module Progg
                 }
             end
 
-            def eval(string)
-                File.write("pg.smv", string)
-                return eval_file("pg.smv")
+            def eval_nusmv(nusmv_string)
+                tmp_file = Progg.tmp_file("pg.smv")
+                File.write(tmp_file, nusmv_string)
+                return eval_file(tmp_file)
             end
 
             def eval_file(file)
@@ -45,12 +46,6 @@ module Progg
                 return output
             end
 
-            def load_file(file)
-                output, err, status = Open3.capture3({}, "NuSMV-2.6.0-Darwin/bin/NuSMV pg.smv")
-                puts ``
-            end
-
         end
-
     end
 end

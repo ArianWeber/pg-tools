@@ -22,6 +22,7 @@ module Progg
             end
 
             def +(varset)
+                varset = VariableSet.new(*varset) if varset.is_a?(Array)
                 raise "Not a variable set '#{varset}'" unless varset.is_a?(VariableSet)
                 return VariableSet.new(*(self.to_a() + varset.to_a()))
             end
@@ -64,8 +65,10 @@ module Progg
                 return "{#{@map.map { |name, var| "#{name}:#{var.range}(#{var.owner_name})" }.join(", ")}}"
             end
 
-            def select_by_owner(owner_name)
-                found = self.to_a().select { |var| var.owner_name == owner_name }
+            def select_by_owner(owner)
+                owner = owner.name if owner.is_a?(Model::Component)
+                owner = owner.to_sym if owner.is_a?(String)
+                found = self.to_a().select { |var| var.owner_name == owner }
                 return VariableSet.new(*found)
             end
 

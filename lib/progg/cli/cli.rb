@@ -7,6 +7,43 @@ require 'plantuml_builder'
 module Progg
     module Cli
 
+        class ShowCommand < Thor
+
+            desc "puml", "Shows the ProgramGraph"
+            def puml()
+                script = Interpret::ProggScript.new
+                model = script.interpret('program-graph.rb')
+                puml = Transform::PumlTransformation.new.transform_graph(model)
+                puts puml
+            end
+
+            desc "png", "Shows the ProgramGraph"
+            def png()
+                script = Interpret::ProggScript.new
+                model = script.interpret('program-graph.rb')
+                puml = Transform::PumlTransformation.new.transform_graph(model)
+                png = PlantumlBuilder::Formats::PNG.new(puml).load
+                File.binwrite("program-graph..png", png)
+            end
+
+            desc "yaml", "Shows the ProgramGraph"
+            def yaml()
+                script = Interpret::ProggScript.new
+                model = script.interpret('program-graph.rb')
+                hash = Transform::HashTransformation.new.transform_graph(model)
+                puts hash.to_yaml
+            end
+
+            desc "yaml", "Shows the ProgramGraph"
+            def json()
+                script = Interpret::ProggScript.new
+                model = script.interpret('program-graph.rb')
+                hash = Transform::HashTransformation.new.transform_graph(model)
+                puts JSON.pretty_generate(hash)
+            end
+
+        end
+
         class BaseCommand < Thor
 
             desc "test", ""
@@ -14,8 +51,7 @@ module Progg
                 script = Interpret::ProggScript.new
                 model = script.interpret('program-graph.rb')
 
-                runner = NuSMV::Runner.new()
-                results = runner.run_specs(model)
+                results = NuSMV::Runner.new().run_specs(model)
 
                 results.each { |result|
                     stat_string = result.success ? "PASSED".c_success : "FAILED".c_error
@@ -23,18 +59,10 @@ module Progg
                     puts "           #{result.spec.expression.c_blue}"
                     puts result.trace.map(&:c_error).join("\n") unless result.success
                 }
-
-                # File.write("pg.smv", nusmv_s)
-
-                # output, err, status = Open3.capture3({}, "NuSMV-2.6.0-Darwin/bin/NuSMV pg.smv")
-
-                # puts "Result: #{status}"
-                # puts output
             end
 
             desc "dcca", ""
             def dcca()
-
                 script = Interpret::ProggScript.new
                 model = script.interpret('program-graph.rb')
 
@@ -73,40 +101,43 @@ module Progg
 
             end
 
-            desc "show", "Shows the ProgramGraph"
-            def show()
-                script = Interpret::ProggScript.new
-                model = script.interpret('program-graph.rb')
+            desc "show", ""
+            subcommand 'show', ShowCommand
 
-                puml = Transform::PumlTransformation.new.transform_graph(model)
-                File.write("diagram.puml", puml)
-                # png = PlantumlBuilder::Formats::PNG.new(puml).load
-                # File.binwrite("diagram.png", png)
+            # desc "show", "Shows the ProgramGraph"
+            # def show()
+            #     script = Interpret::ProggScript.new
+            #     model = script.interpret('program-graph.rb')
+
+            #     puml = Transform::PumlTransformation.new.transform_graph(model)
+            #     File.write("diagram.puml", puml)
+            #     # png = PlantumlBuilder::Formats::PNG.new(puml).load
+            #     # File.binwrite("diagram.png", png)
                 
-                return
+            #     return
 
-                nusmv_t = Transform::NuSmvTransformation.new
-                nusmv_s = nusmv_t.transform_graph(model)
+            #     nusmv_t = Transform::NuSmvTransformation.new
+            #     nusmv_s = nusmv_t.transform_graph(model)
 
-                puts "Validating Model..."
-                errors = model.validate()
-                puts errors.map(&:to_s).join("\n\n")
+            #     puts "Validating Model..."
+            #     errors = model.validate()
+            #     puts errors.map(&:to_s).join("\n\n")
 
-                nusmv_file = File.expand_path('nusmv.tmp', Settings.workdir)
-                FileUtils.mkdir_p(File.dirname(nusmv_file))
-                File.write(nusmv_file, nusmv_s)
-                nurunner = NuSMV::NuSMVRunner.new()
-                nurunner.load_file(nusmv_file)
+            #     nusmv_file = File.expand_path('nusmv.tmp', Settings.workdir)
+            #     FileUtils.mkdir_p(File.dirname(nusmv_file))
+            #     File.write(nusmv_file, nusmv_s)
+            #     nurunner = NuSMV::NuSMVRunner.new()
+            #     nurunner.load_file(nusmv_file)
 
-                return
+            #     return
 
 
-                desc_str = model.specs.map(&:text).join("\n")
-                expr_str = model.specs.map(&:expression).map(&:to_s).join("\n")
-                puts desc_str.line_combine(expr_str)
+            #     desc_str = model.specs.map(&:text).join("\n")
+            #     expr_str = model.specs.map(&:expression).map(&:to_s).join("\n")
+            #     puts desc_str.line_combine(expr_str)
 
-                # 
-            end
+            #     # 
+            # end
 
         end
 

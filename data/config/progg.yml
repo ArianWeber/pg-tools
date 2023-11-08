@@ -1,6 +1,6 @@
 
 # The working directory for temporary files and caches
-workdir: <%= File.expand_path('.progg', Dir.home)  %>
+workdir: <%= File.expand_path('.pg-work', Dir.pwd)  %>
 
 numsv:
   path: /Users/arian/Documents/projects/progg/NuSMV-2.6.0-Darwin/bin/NuSMV

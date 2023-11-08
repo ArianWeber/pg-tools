@@ -1,5 +1,3 @@
-
-
 module Progg
     module Transform
 
