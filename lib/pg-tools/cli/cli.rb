@@ -11,7 +11,7 @@ module PgTools
 
             desc "puml", "Shows the ProgramGraph"
             def puml()
-                script = Interpret::PgToolsScript.new
+                script = Interpret::PgScript.new
                 model = script.interpret('program-graph.rb')
                 puml = Transform::PumlTransformation.new.transform_graph(model)
                 puts puml
@@ -19,7 +19,7 @@ module PgTools
 
             desc "png", "Shows the ProgramGraph"
             def png()
-                script = Interpret::PgToolsScript.new
+                script = Interpret::PgScript.new
                 model = script.interpret('program-graph.rb')
                 puml = Transform::PumlTransformation.new.transform_graph(model)
                 png = PlantumlBuilder::Formats::PNG.new(puml).load
@@ -28,7 +28,7 @@ module PgTools
 
             desc "yaml", "Shows the ProgramGraph"
             def yaml()
-                script = Interpret::PgToolsScript.new
+                script = Interpret::PgScript.new
                 model = script.interpret('program-graph.rb')
                 hash = Transform::HashTransformation.new.transform_graph(model)
                 puts hash.to_yaml
@@ -36,7 +36,7 @@ module PgTools
 
             desc "yaml", "Shows the ProgramGraph"
             def json()
-                script = Interpret::PgToolsScript.new
+                script = Interpret::PgScript.new
                 model = script.interpret('program-graph.rb')
                 hash = Transform::HashTransformation.new.transform_graph(model)
                 puts JSON.pretty_generate(hash)
@@ -48,7 +48,7 @@ module PgTools
 
             desc "test", ""
             def test()
-                script = Interpret::PgToolsScript.new
+                script = Interpret::PgScript.new
                 model = script.interpret('program-graph.rb')
 
                 results = NuSMV::Runner.new().run_specs(model)
@@ -63,7 +63,7 @@ module PgTools
 
             desc "dcca", ""
             def dcca()
-                script = Interpret::PgToolsScript.new
+                script = Interpret::PgScript.new
                 model = script.interpret('program-graph.rb')
 
                 runner = NuSMV::Runner.new()
@@ -82,7 +82,7 @@ module PgTools
 
             desc "sim", ""
             def sim()
-                script = Interpret::PgToolsScript.new
+                script = Interpret::PgScript.new
                 model = script.interpret('program-graph.rb')
 
                 simulator = Simulation::Simulator.new(model)
@@ -106,7 +106,7 @@ module PgTools
 
             # desc "show", "Shows the ProgramGraph"
             # def show()
-            #     script = Interpret::PgToolsScript.new
+            #     script = Interpret::PgScript.new
             #     model = script.interpret('program-graph.rb')
 
             #     puml = Transform::PumlTransformation.new.transform_graph(model)

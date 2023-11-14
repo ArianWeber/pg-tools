@@ -6,7 +6,7 @@ RSpec.describe PgTools::Transform::HashTransformation do
 
         script_file = File.join(PgTools.root, 'spec', 'res', 'weidezaun.rbx')
 
-        model_1 = PgTools::Interpret::PgToolsScript.new.interpret(script_file)
+        model_1 = PgTools::Interpret::PgScript.new.interpret(script_file)
         yaml_1  = transformer.transform_graph(model_1).to_yaml
 
         model_2 = transformer.parse_graph(YAML.load(yaml_1))

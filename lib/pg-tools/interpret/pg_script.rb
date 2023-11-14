@@ -2,7 +2,7 @@
 module PgTools
     module Interpret
 
-        class PgToolsScript
+        class PgScript
 
             # List of components for this graph
             attr_accessor :components

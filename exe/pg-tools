@@ -1,4 +1,4 @@
 #!/usr/bin/env ruby
-require_relative '../bin/progg.rb'
+require_relative '../bin/pg-tools.rb'
 
 PgTools::PgToolsCLI.new.run()

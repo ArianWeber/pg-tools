@@ -3,7 +3,7 @@
 workdir: <%= File.expand_path('.pg-work', Dir.pwd)  %>
 
 numsv:
-  path: /Users/arian/Documents/projects/progg/NuSMV-2.6.0-Darwin/bin/NuSMV
+  path: /Users/arian/Documents/projects/pg-tools/NuSMV-2.6.0-Darwin/bin/NuSMV
 
 puml:
   active_state_color: "#FF0000/FFFF00"

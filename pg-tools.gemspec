@@ -1,16 +1,16 @@
 # frozen_string_literal: true
 
-require_relative "lib/progg/version"
+require_relative "lib/pg-tools/version"
 
 Gem::Specification.new do |spec|
-  spec.name = "progg"
+  spec.name = "pg-tools"
   spec.version = PgTools::VERSION
   spec.authors = ["Arian Weber"]
   spec.email = ["weber.arian@web.de"]
 
   spec.summary = "Tool for the decleration and transformation of program graphs"
   # spec.description = "TODO: Write a longer description or delete this line."
-  spec.homepage = "https://github.com/ArianWeber/progg"
+  spec.homepage = "https://github.com/ArianWeber/pg-tools"
   spec.required_ruby_version = ">= 2.6.0"
 
   # spec.metadata["allowed_push_host"] = "TODO: Set to your gem server 'https://example.com'"

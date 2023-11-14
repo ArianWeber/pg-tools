@@ -1,5 +1,5 @@
 require "bundler/setup"
-require 'progg'
+require 'pg-tools'
 
 module PgTools
     
@@ -14,7 +14,7 @@ module PgTools
 
             # self.parse(ARGV)
 
-            # script = PgToolsScript.new()
+            # script = PgScript.new()
             # script.interpret('program-graph.rb')
 
             # if params[:help]
