@@ -1,8 +1,8 @@
 
-RSpec.describe Progg::EbnfParser::ExpressionParser do
+RSpec.describe PgTools::EbnfParser::ExpressionParser do
 
     def parser(type: :Expression)
-        Progg::EbnfParser::ExpressionParser.new(type: type)
+        PgTools::EbnfParser::ExpressionParser.new(type: type)
     end
 
     INT_ATOMS  = [ "1334", "-42", "variable" ]

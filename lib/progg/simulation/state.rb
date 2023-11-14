@@ -1,4 +1,4 @@
-module Progg
+module PgTools
     module Simulation
 
         class State

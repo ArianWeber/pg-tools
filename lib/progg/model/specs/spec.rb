@@ -1,4 +1,4 @@
-module Progg
+module PgTools
     module Model
 
         # A single specification and a leave in the tree

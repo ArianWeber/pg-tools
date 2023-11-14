@@ -13,7 +13,7 @@ require 'config'
 require 'fileutils'
 require 'open3'
 
-module Progg
+module PgTools
 
     def self.init()
         config_paths = []
@@ -38,4 +38,4 @@ module Progg
 
 end
 
-Progg.init()
+PgTools.init()

@@ -1,4 +1,4 @@
-module Progg
+module PgTools
     module Model
 
         # Class used to represent a mathematical expression

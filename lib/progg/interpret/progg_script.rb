@@ -1,8 +1,8 @@
 
-module Progg
+module PgTools
     module Interpret
 
-        class ProggScript
+        class PgToolsScript
 
             # List of components for this graph
             attr_accessor :components

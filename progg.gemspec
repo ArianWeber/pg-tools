@@ -4,7 +4,7 @@ require_relative "lib/progg/version"
 
 Gem::Specification.new do |spec|
   spec.name = "progg"
-  spec.version = Progg::VERSION
+  spec.version = PgTools::VERSION
   spec.authors = ["Arian Weber"]
   spec.email = ["weber.arian@web.de"]
 

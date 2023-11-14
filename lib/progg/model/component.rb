@@ -1,5 +1,5 @@
 
-module Progg
+module PgTools
     module Model
 
         class Component

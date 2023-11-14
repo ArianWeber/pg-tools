@@ -1,6 +1,6 @@
 require_relative 'validation_error.rb'
 
-module Progg
+module PgTools
     module Model
 
         module UnkownVariableValidation

@@ -1,5 +1,5 @@
 
-module Progg
+module PgTools
     module Interpret
 
         class ComponentContext

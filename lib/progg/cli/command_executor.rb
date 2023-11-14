@@ -1,6 +1,6 @@
 
 
-module Progg
+module PgTools
 
     module Cli
 

@@ -4,14 +4,14 @@ Dir[File.join(__dir__, '*.rb')].sort.each { |file| require file }
 require 'thor'
 require 'plantuml_builder'
 
-module Progg
+module PgTools
     module Cli
 
         class ShowCommand < Thor
 
             desc "puml", "Shows the ProgramGraph"
             def puml()
-                script = Interpret::ProggScript.new
+                script = Interpret::PgToolsScript.new
                 model = script.interpret('program-graph.rb')
                 puml = Transform::PumlTransformation.new.transform_graph(model)
                 puts puml
@@ -19,7 +19,7 @@ module Progg
 
             desc "png", "Shows the ProgramGraph"
             def png()
-                script = Interpret::ProggScript.new
+                script = Interpret::PgToolsScript.new
                 model = script.interpret('program-graph.rb')
                 puml = Transform::PumlTransformation.new.transform_graph(model)
                 png = PlantumlBuilder::Formats::PNG.new(puml).load
@@ -28,7 +28,7 @@ module Progg
 
             desc "yaml", "Shows the ProgramGraph"
             def yaml()
-                script = Interpret::ProggScript.new
+                script = Interpret::PgToolsScript.new
                 model = script.interpret('program-graph.rb')
                 hash = Transform::HashTransformation.new.transform_graph(model)
                 puts hash.to_yaml
@@ -36,7 +36,7 @@ module Progg
 
             desc "yaml", "Shows the ProgramGraph"
             def json()
-                script = Interpret::ProggScript.new
+                script = Interpret::PgToolsScript.new
                 model = script.interpret('program-graph.rb')
                 hash = Transform::HashTransformation.new.transform_graph(model)
                 puts JSON.pretty_generate(hash)
@@ -48,7 +48,7 @@ module Progg
 
             desc "test", ""
             def test()
-                script = Interpret::ProggScript.new
+                script = Interpret::PgToolsScript.new
                 model = script.interpret('program-graph.rb')
 
                 results = NuSMV::Runner.new().run_specs(model)
@@ -63,7 +63,7 @@ module Progg
 
             desc "dcca", ""
             def dcca()
-                script = Interpret::ProggScript.new
+                script = Interpret::PgToolsScript.new
                 model = script.interpret('program-graph.rb')
 
                 runner = NuSMV::Runner.new()
@@ -82,7 +82,7 @@ module Progg
 
             desc "sim", ""
             def sim()
-                script = Interpret::ProggScript.new
+                script = Interpret::PgToolsScript.new
                 model = script.interpret('program-graph.rb')
 
                 simulator = Simulation::Simulator.new(model)
@@ -106,7 +106,7 @@ module Progg
 
             # desc "show", "Shows the ProgramGraph"
             # def show()
-            #     script = Interpret::ProggScript.new
+            #     script = Interpret::PgToolsScript.new
             #     model = script.interpret('program-graph.rb')
 
             #     puml = Transform::PumlTransformation.new.transform_graph(model)

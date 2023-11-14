@@ -24,16 +24,16 @@ class String
     end
 
     def display_length()
-        str = Progg::Colorizer.uncolorize(self)
+        str = PgTools::Colorizer.uncolorize(self)
         str.length() + ( str.count("\t") * 4 )
     end
 
     def line_combine(other, separator: " ")
-        Progg::StringUtil.line_combine(self, other, separator: separator)
+        PgTools::StringUtil.line_combine(self, other, separator: separator)
     end
 
     def indented(num: 1, str: " " * 4)
-        Progg::StringUtil.indented(self, num_indents: num, indent_string: str)
+        PgTools::StringUtil.indented(self, num_indents: num, indent_string: str)
     end
 
     def remove_before(substring)

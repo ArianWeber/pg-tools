@@ -1,9 +1,9 @@
 require "bundler/setup"
 require 'progg'
 
-module Progg
+module PgTools
     
-    class ProggCLI
+    class PgToolsCLI
 
         def run()
 
@@ -14,7 +14,7 @@ module Progg
 
             # self.parse(ARGV)
 
-            # script = ProggScript.new()
+            # script = PgToolsScript.new()
             # script.interpret('program-graph.rb')
 
             # if params[:help]

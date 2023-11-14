@@ -1,5 +1,5 @@
 
-module Progg
+module PgTools
     module NuSMV
 
         class Runner
@@ -35,7 +35,7 @@ module Progg
             end
 
             def eval_nusmv(nusmv_string)
-                tmp_file = Progg.tmp_file("pg.smv")
+                tmp_file = PgTools.tmp_file("pg.smv")
                 File.write(tmp_file, nusmv_string)
                 return eval_file(tmp_file)
             end

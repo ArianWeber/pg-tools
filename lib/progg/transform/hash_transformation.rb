@@ -1,4 +1,4 @@
-module Progg
+module PgTools
     module Transform
 
         class HashTransformation

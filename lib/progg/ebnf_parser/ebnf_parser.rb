@@ -8,7 +8,7 @@ require 'json'
 # Require all module files
 Dir[File.join(__dir__, "**", '*.rb')].sort.each { |file| require file }
 
-module Progg
+module PgTools
     module EbnfParser
 
         def self.parse_expression(expression, type: :Expression)
