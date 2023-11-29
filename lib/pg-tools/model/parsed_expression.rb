@@ -4,18 +4,23 @@ module PgTools
 
         class ParsedExpression
 
+            # Guards and preconditions
+            TYPE_GUARD = :guard
+            # Actions
+            TYPE_ACTION = :action
+            # Propositional logic
+            TYPE_PL = :pl
+            # Temporal logic (LTL or CTL)
+            TYPE_TL = :tl
+            # Linear temporal logic
+            TYPE_LTL = :ltl
+            # Computation tree logic
+            TYPE_CTL = :ctl
+
             attr_accessor :expression_string
-            attr_accessor :type
-            attr_accessor :ast
 
             def initialize(expression_string, type)
-                # result = EbnfParser.parse_expression(expression_string, type: type)
-                # TODO: Custom error
-                # raise result.error if result.error?()
-
                 @expression_string = expression_string
-                # @type = type
-                # @ast  = result.ast
             end
 
             def word_tokens()

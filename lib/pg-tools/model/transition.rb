@@ -10,9 +10,9 @@ module PgTools
 
             def initialize(src_state, tgt_state, guard: "", action: "", precon: "")
                 @src_state, @tgt_state = src_state, tgt_state
-                @guard  = guard.nil? ? nil : ParsedExpression.new(guard, :Guard)
-                @action = action.nil? ? nil : ParsedExpression.new(action, :Action)
-                @precon = precon.nil? ? nil : ParsedExpression.new(precon, :Precon)
+                @precon = precon.nil? ? nil : ParsedExpression.new(precon, ParsedExpression::TYPE_GUARD)
+                @guard  = guard.nil? ? nil : ParsedExpression.new(guard, ParsedExpression::TYPE_GUARD)
+                @action = action.nil? ? nil : ParsedExpression.new(action, ParsedExpression::TYPE_ACTION)
             end
 
              def validate!()
