@@ -19,8 +19,11 @@ module PgTools
 
             attr_accessor :expression_string
 
-            def initialize(expression_string, type)
+            attr_accessor :source_location
+
+            def initialize(expression_string, type, source_location: nil)
                 @expression_string = expression_string
+                @source_location = source_location
             end
 
             def word_tokens()

@@ -7,10 +7,25 @@ require 'plantuml_builder'
 module PgTools
     module Cli
 
+        class NoSuchScriptError < Core::Error
+            def initialize(script_path)
+                @script_path = script_path
+            end
+
+            def formatted()
+                title = "Could not find script at #{@script_path}"
+                body = "No script file at #{@script_path.c_error}!"
+                hint = "Make sure to create a program graph script at \n#{File.expand_path(@script_path)}"
+                return title, body, hint
+            end
+
+        end
+
         class ShowCommand < Thor
 
             desc "puml", "Shows the ProgramGraph"
             def puml()
+                # raise NoSuchScriptError.new('program-graph.rb')
                 script = Interpret::PgScript.new
                 model = script.interpret('program-graph.rb')
                 puml = Transform::PumlTransformation.new.transform_graph(model)

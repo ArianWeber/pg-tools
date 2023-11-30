@@ -8,11 +8,9 @@ module PgTools
 
             attr_accessor :guard, :precon, :action
 
-            def initialize(src_state, tgt_state, guard: "", action: "", precon: "")
+            def initialize(src_state, tgt_state, guard: nil, action: nil, precon: nil)
                 @src_state, @tgt_state = src_state, tgt_state
-                @precon = precon.nil? ? nil : ParsedExpression.new(precon, ParsedExpression::TYPE_GUARD)
-                @guard  = guard.nil? ? nil : ParsedExpression.new(guard, ParsedExpression::TYPE_GUARD)
-                @action = action.nil? ? nil : ParsedExpression.new(action, ParsedExpression::TYPE_ACTION)
+                @guard, @precon, @action = guard, precon, action
             end
 
              def validate!()

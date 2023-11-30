@@ -12,12 +12,15 @@ module PgTools
             attr_accessor :transitions
             # Flag on whether this component is used to represent a fault.
             attr_accessor :represents_fault
+            # The source location of this components definition 
+            attr_accessor :source_location
 
             def initialize(args = {})
                 @name = ( args[:name] || raise('Blubb') )
                 @states = ( args[:states] || [] )
                 @transitions = ( args[:transitions] || [] )
                 @represents_fault = args[:represents_fault].nil? ? false : args[:represents_fault]
+                @source_location =  ( args[:source_location] )
             end
 
             def initial_state()

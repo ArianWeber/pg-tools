@@ -8,6 +8,8 @@ numsv:
 puml:
   active_state_color: "#FF0000/FFFF00"
 
+full_stack_trace: false
+
 # Enable/Disable colored printing all together
 use_colors: true
 # Enable/Disable colored printing when the output of vsutil
@@ -24,3 +26,5 @@ theme:
   warn: khaki
   error: red
   sidenote: "darkslategray"
+  file: [ "limegreen", "bold" ]
+  expression: ["deepskyblue", "italic"]

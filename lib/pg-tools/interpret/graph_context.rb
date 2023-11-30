@@ -4,21 +4,20 @@ module PgTools
 
         class GraphContext
 
+            attr_accessor :parent_script
             # The list of currently declared components
             attr_accessor :components
-
             attr_accessor :specs
-
             attr_accessor :hazards
     
-            def initialize()
-                @components = []
-                @specs = []
-                @hazards = []
+            def initialize(parent_script)
+                @parent_script = parent_script
+                @components, @specs, @hazards = [], [], []
             end
     
             # DSL method for declaring a new component in this graph
-            def component(name, &blk)
+            def graph(name, &blk)
+                raise InvalidDSL_graph.new("Name '#{name}' is neither a symbol nor string") unless name.is_a?(Symbol) || name.is_a?(String)
                 cmp = ComponentContext.new(name, self)
                 cmp.instance_eval(&blk)
                 @components << cmp

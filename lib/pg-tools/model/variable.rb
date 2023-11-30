@@ -18,8 +18,12 @@ module PgTools
             # Can be nil to not provide a fixed initial value
             attr_accessor :initial_value
 
-            def initialize(name, range, owner_name, initial_value: nil)
+            # The location in source, where this variable was defined
+            attr_accessor :source_location
+
+            def initialize(name, range, owner_name, source_location, initial_value: nil)
                 @name, @range, @owner_name, @initial_value = name, range, owner_name, initial_value
+                @source_location = source_location
             end
 
             # Returns the type of this variable which can either be :int
