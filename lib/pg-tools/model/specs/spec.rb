@@ -13,7 +13,10 @@ module PgTools
             # The parent specification set for this node
             attr_accessor :parent
 
+            attr_accessor :source_location
+
             def initialize(text, expression, parent)
+                raise "Not a #{Model::ParsedExpression}: #{expression}" unless expression.is_a?(Model::ParsedExpression)
                 @text, @expression, @parent = text, expression, parent
             end
 

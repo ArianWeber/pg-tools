@@ -43,7 +43,7 @@ module PgTools
 
             # DSL method for declaring a new specification in this graph
             def specify(text, &blk)
-                specset = SpecSetContext.new(text, nil)
+                specset = SpecSetContext.new(text, self, nil)
                 specset.instance_eval(&blk)
                 @specs << specset
             end

@@ -18,38 +18,16 @@ module PgTools
                 title = "Error while interpreting script at #{@script_file}:#{@line_number}"
                 cause_str = format_cause()
 
-                lines = render_code_block(@script_file, @line_number - 1, 2)
+                sloc = Model::SourceLocation.new(@script_file, @line_number)
+                code_block = sloc.render_code_block
 
-                body = "#{lines}\n\n#{cause_str}"
+                body = "#{code_block}\n\n#{cause_str}"
                 return title, body
             end
 
             def format_cause()
                 return "#{cause}" unless cause.is_a?(Core::Error)
                 return cause.to_formatted()
-            end
-
-            def render_code_block(file, index, num_lines)
-                # Read lines and add line numbers
-                lines = File.read(file).split("\n").each_with_index.map { |l, i| "#{i.to_s.c_blue}: #{l}" }
-
-                # Get the line surrounding the error
-                start_index = [0, index - num_lines].max
-                end_index = [lines.length - 1, index + num_lines].min
-                surrounding_lines = lines[start_index..end_index]
-                error_line = lines[index]
-
-                surrounding_lines = [ "...".c_sidenote ] + surrounding_lines + [ "...".c_sidenote ]
-
-                surrounding_lines = surrounding_lines.map { |l|
-                    if l == error_line
-                        l.ljust(surrounding_lines.map(&:length).max) + " < Error".c_error
-                    else
-                        l
-                    end
-                }
-
-                return surrounding_lines.join("\n")
             end
 
         end

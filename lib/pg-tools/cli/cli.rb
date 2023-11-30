@@ -66,6 +66,18 @@ module PgTools
                 }
             end
 
+            desc "test", ""
+            method_option :script, :type => :string
+            def nusmv()
+                script_file = options[:script] || Settings.ruby_dsl.default_script_name
+                models = Interpret::PgScript.new.interpret(script_file)
+
+                models.each { |model|
+                    nusmv = Transform::NuSmvTransformation.new.transform_graph(model)
+                    puts nusmv
+                }
+            end
+
             def self.select_components(only_arg, hide_arg, model)
                 only = (only_arg || []).flatten.map(&:to_s).map(&:downcase)
                 hide = (hide_arg || []).flatten.map(&:to_s).map(&:downcase)

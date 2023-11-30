@@ -18,10 +18,11 @@ module PgTools
             TYPE_CTL = :ctl
 
             attr_accessor :expression_string
-
             attr_accessor :source_location
 
             def initialize(expression_string, type, source_location: nil)
+                expression_string = expression_string.to_s if expression_string.is_a?(Symbol)
+                raise "Not a string '#{expression_string}'::#{expression_string.class}" unless expression_string.is_a?(String)
                 @expression_string = expression_string
                 @source_location = source_location
             end

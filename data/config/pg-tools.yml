@@ -25,6 +25,8 @@ theme:
   var:   [ "limegreen", "italic" ]
   cmp:   ["deepskyblue", "bold", "italic"]
   num: dodgerblue
+  literal: dodgerblue
+  string: orange
   success: springgreen
   warn: khaki
   error: red

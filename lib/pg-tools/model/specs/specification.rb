@@ -32,11 +32,16 @@ module PgTools
                         spec_set.assumption[:expression]
                     }.compact.join(" && ")
 
-                    expression = assumption_expression.empty? \
-                        ? spec.expression \
-                        : "( #{assumption_expression} ) => #{spec.expression}"
-                    
-                    Spec.new(text, expression, nil)
+                    expression = spec.expression
+                    unless assumption_expression.empty?
+                        expression_string = "( #{assumption_expression} ) => #{spec.expression}"
+                        expression = Model::ParsedExpression.new(expression_string, Model::ParsedExpression::TYPE_TL)
+                        expression.source_location = spec.expression.source_location
+                    end
+
+                    result = Spec.new(text, expression, nil)
+                    result.source_location = spec.source_location
+                    result
                 }
             end
 

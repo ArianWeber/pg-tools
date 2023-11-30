@@ -39,7 +39,7 @@ module PgTools
             # friendly error messages.
             def re_raise_exception(file, script, ex)
                 # Determine the line in the script file where the error was raised
-                _, line_number = find_source_location(ex.backtrace)
+                line_number = find_source_location(ex.backtrace).line_number
 
                 # Include the full backtrace in the message if enabled
                 if Settings.full_stack_trace
@@ -58,7 +58,7 @@ module PgTools
                     .map { |l| l.split(":in")[0] }.reject(&:blank?)
                     .map { |l| l.split(":")[-1] }.reject(&:blank?)
                     .uniq.first.to_i
-                return [@script_file, line_number]
+                Model::SourceLocation.new(@script_file, line_number)
             end
 
             def get_binding()

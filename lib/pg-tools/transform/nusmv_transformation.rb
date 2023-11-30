@@ -127,17 +127,13 @@ module PgTools
                 assigned_variable = parts[0].strip
 
                 unless varset.varname?(assigned_variable)
-                    error = "Assigning to unknown variable '#{assigned_variable}'!"
-                    error += "Expression: #{assignment_expression}\n"
-                    error += "Variables: #{varset}"
-                    raise error
+                    raise UnknownVariableError.new(assigned_variable, assignment_expression, varset, component)
                 end
-
                 unless varset[assigned_variable].owner_name == component.name
-                    error = "Assigning to variable which is not owned '#{assigned_variable}'!"
-                    error += "Expression: #{assignment_expression}\n"
-                    error += "Component: #{component.name}, Owner: #{varset[assigned_variable].owner_name}"
-                    raise error
+                    raise ForeignVariableAssignmentError.new(assigned_variable, assignment_expression, varset, component)
+                end
+                if varset[assigned_variable].state_variable?
+                    raise AssignmentToStateVariableError.new(assigned_variable, assignment_expression, varset, component)
                 end
 
                 assigned_variable_s = "next(v.#{transform_varname(assigned_variable)})"
@@ -160,10 +156,10 @@ module PgTools
                     elsif  varset.values.include?(w)
                         constants << w
                     else
-                        error = "Encountered unknown token '#{w}'! This is neither a variable, nor literal.\n"
-                        error += "Expression: #{expression}\n"
-                        error += "Variables: #{varset}"
-                        raise error
+                        # error = "Encountered unknown token '#{w}'! This is neither a variable, nor literal.\n"
+                        # error += "Expression: #{expression}\n"
+                        # error += "Variables: #{varset}"
+                        raise UnknownTokenError.new(w, expression, varset)
                     end
                 }
                 variables, constants = variables.uniq, constants.uniq
@@ -223,14 +219,14 @@ module PgTools
                 "p_#{name}"
             end
 
-            def transform_specification(specification, varset) 
+            def transform_specification(specification, varset)
                 return specification.flatten().map { |s| transform_spec(s, varset) }.join("\n")
             end
 
             def transform_spec(spec, varset)
-                expression = Model::ParsedExpression.new(spec.expression, nil)
                 expression_s  = "-- #{spec.text}\n"
-                expression_s += "LTLSPEC " + transform_expression(expression, varset)
+                expression_s += "-- Defined in: #{spec.source_location.to_s}\n"
+                expression_s += "LTLSPEC " + transform_expression(spec.expression, varset)
                 return expression_s
             end
 

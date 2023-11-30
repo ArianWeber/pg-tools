@@ -13,12 +13,18 @@ module PgTools
 
             attr_accessor :assumption
 
-            def initialize(text, parent, children = [])
+            attr_accessor :parent_graph
+
+            attr_accessor :source_location
+
+            def initialize(text, parent_graph, parent, children = [])
                 @text, @parent, @children = text, parent, children
+                @parent_graph = parent_graph
+                @source_location = parent_graph.parent_script.find_source_location()
             end
 
             def specify(text, &blk)
-                subset = SpecSetContext.new(text, self)
+                subset = SpecSetContext.new(text, @parent_graph, self)
                 subset.instance_eval(&blk)
                 children << subset
             end
@@ -26,23 +32,17 @@ module PgTools
             def assuming(hash, &blk)
                 assumption_text = hash.keys.first
                 assumption_expression = hash.values.first
-                subset = SpecSetContext.new("", self)
+                subset = SpecSetContext.new("", @parent_graph, self)
                 subset.assumption = { text: assumption_text, expression: assumption_expression }
                 subset.instance_eval(&blk)
                 children << subset
             end
 
-            def it(text_or_hash, &blk)
-                spec = nil
-                if text_or_hash.is_a?(Hash)
-                    text = text_or_hash.keys.first
-                    expression = text_or_hash[text]
-                    spec = SpecContext.new(text, expression.to_s, self)
-                else
-                    spec = SpecContext.new(text, nil, self)
-                end
-                spec.instance_eval(&blk) unless blk.nil?
-                children << spec
+            def it(hash)
+                # TODO: Handle errors
+                text = hash.keys.first
+                expression = hash[text]
+                children << SpecContext.new(text, expression.to_s, self)
             end
 
             def ltl()
