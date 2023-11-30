@@ -14,6 +14,7 @@ module PgTools
         
             def interpret(file)
                 file = File.expand_path(file)
+                raise NoSuchScriptError.new(file) unless File.file?(file)
                 @script_file ||= file
                 
                 graph_ctx = Interpret::GraphContext.new(self)

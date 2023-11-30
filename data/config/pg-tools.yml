@@ -10,6 +10,9 @@ puml:
 
 full_stack_trace: false
 
+ruby_dsl:
+  default_script_name: "program-graph.rb"
+
 # Enable/Disable colored printing all together
 use_colors: true
 # Enable/Disable colored printing when the output of vsutil

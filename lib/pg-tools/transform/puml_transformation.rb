@@ -5,9 +5,13 @@ module PgTools
 
         class PumlTransformation
 
-            def transform_graph(graph, variable_state: nil)
+            def transform_graph(graph, variable_state: nil, only: nil)
+
+                components = graph.components
+                components = components.select { |c| only.map(&:to_s).include?(c.name.to_s) } unless only.nil?
+
                 parts = []
-                parts << graph.components.map { |c| transform_component(graph, c) }.join("\n\n")
+                parts << components.map { |c| transform_component(graph, c) }.join("\n\n")
                 parts << transform_variable_state(variable_state) unless variable_state.nil?
                 parts = parts.compact.join("\n\n")
                 return "@startuml Programmgraph\n#{parts}\n@enduml\n"

@@ -131,6 +131,20 @@ module PgTools
                 return title, body, hint
             end
         end
+
+        class NoSuchScriptError < Core::Error
+            def initialize(script_path)
+                @script_path = script_path
+            end
+
+            def formatted()
+                title = "Could not find script at #{@script_path}"
+                body = "No script file at #{@script_path.c_error}!"
+                hint = "Make sure to create a program graph script at \n#{File.expand_path(@script_path)}"
+                return title, body, hint
+            end
+
+        end
         
     end
 

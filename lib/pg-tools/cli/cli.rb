@@ -7,38 +7,33 @@ require 'plantuml_builder'
 module PgTools
     module Cli
 
-        class NoSuchScriptError < Core::Error
-            def initialize(script_path)
-                @script_path = script_path
-            end
-
-            def formatted()
-                title = "Could not find script at #{@script_path}"
-                body = "No script file at #{@script_path.c_error}!"
-                hint = "Make sure to create a program graph script at \n#{File.expand_path(@script_path)}"
-                return title, body, hint
-            end
-
-        end
-
         class ShowCommand < Thor
 
             desc "puml", "Shows the ProgramGraph"
+            method_option :only, :type => :array, repeatable: true
+            method_option :hide, :type => :array, repeatable: true
+            method_option :script, :type => :string
             def puml()
-                # raise NoSuchScriptError.new('program-graph.rb')
+                script_file = options[:script] || Settings.ruby_dsl.default_script_name
                 script = Interpret::PgScript.new
-                model = script.interpret('program-graph.rb')
-                puml = Transform::PumlTransformation.new.transform_graph(model)
+                model = script.interpret(script_file)
+                components = self.class.select_components(options[:only], options[:hide], model)
+                puml = Transform::PumlTransformation.new.transform_graph(model, only: components)
                 puts puml
             end
 
             desc "png", "Shows the ProgramGraph"
+            method_option :only, :type => :array, repeatable: true
+            method_option :hide, :type => :array, repeatable: true
+            method_option :script, :type => :string
             def png()
+                script_file = options[:script] || Settings.ruby_dsl.default_script_name
                 script = Interpret::PgScript.new
-                model = script.interpret('program-graph.rb')
-                puml = Transform::PumlTransformation.new.transform_graph(model)
+                model = script.interpret(script_file)
+                components = self.class.select_components(options[:only], options[:hide], model)
+                puml = Transform::PumlTransformation.new.transform_graph(model, only: components)
                 png = PlantumlBuilder::Formats::PNG.new(puml).load
-                File.binwrite("program-graph..png", png)
+                File.binwrite("program-graph.png", png)
             end
 
             desc "yaml", "Shows the ProgramGraph"
@@ -55,6 +50,15 @@ module PgTools
                 model = script.interpret('program-graph.rb')
                 hash = Transform::HashTransformation.new.transform_graph(model)
                 puts JSON.pretty_generate(hash)
+            end
+
+            def self.select_components(only_arg, hide_arg, model)
+                only = (only_arg || []).flatten.map(&:to_s).map(&:downcase)
+                hide = (hide_arg || []).flatten.map(&:to_s).map(&:downcase)
+                components = model.components.map(&:name)
+                components = components.select { |c| only.include?(c.to_s.downcase) } unless only.empty?
+                components = components.reject { |c| hide.include?(c.to_s.downcase) } unless hide.empty?
+                return components
             end
 
         end
