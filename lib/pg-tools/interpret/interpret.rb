@@ -118,6 +118,19 @@ module PgTools
                 return @message, nil, hint.join("\n")
             end
         end
+
+        class InvalidDSL_model <  PgTools::Core::Error
+            def initialize(type, message)
+                @type, @message = type, message
+            end
+            def formatted()
+                hint = [ "Define models like this:" ]
+                hint << "model <name> do ... end"
+                hint << "  where"
+                hint << "  <name> is a string or symbol"
+                return @message, nil, hint.join("\n")
+            end
+        end
         
         class NoSuchStateError < PgTools::Core::Error
             def initialize(state, component)

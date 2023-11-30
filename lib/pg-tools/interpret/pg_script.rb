@@ -4,12 +4,14 @@ module PgTools
 
         class PgScript
 
-            # List of components for this graph
-            attr_accessor :components
+            # List of models which are defined in this script
+            attr_accessor :models
+            # The full path to the source script file
             attr_accessor :script_file
 
+
             def initialize()
-                @components = []
+                @models = []
             end
         
             def interpret(file)
@@ -17,15 +19,20 @@ module PgTools
                 raise NoSuchScriptError.new(file) unless File.file?(file)
                 @script_file ||= file
                 
-                graph_ctx = Interpret::GraphContext.new(self)
-
                 begin
-                    Dir.chdir(File.dirname(file)) { eval(File.read(file), graph_ctx.get_binding(), file) }
+                    Dir.chdir(File.dirname(file)) { eval(File.read(file), get_binding(), file) }
                 rescue Exception => e
                     re_raise_exception(file, self, e)
                 end
                 
-                return graph_ctx.to_model()
+                return @models
+            end
+
+            def model(name, &blk)
+                raise InvalidDSL_model.new("Name '#{name}' is neither a symbol nor string") unless name.is_a?(Symbol) || name.is_a?(String)
+                graph_ctx = Interpret::GraphContext.new(name.to_sym, self)
+                graph_ctx.instance_eval(&blk)
+                @models << graph_ctx.to_model()
             end
 
             # Re-raise an exception which occurred during evaluation of a script to more user
@@ -52,6 +59,10 @@ module PgTools
                     .map { |l| l.split(":")[-1] }.reject(&:blank?)
                     .uniq.first.to_i
                 return [@script_file, line_number]
+            end
+
+            def get_binding()
+                binding()
             end
         
         end

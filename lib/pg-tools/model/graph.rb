@@ -4,6 +4,9 @@ module PgTools
 
         class Graph
 
+            # The name of this graph
+            attr_accessor :name
+
             # All Model::Component's which are part of this graph
             attr_accessor :components
 
@@ -17,9 +20,10 @@ module PgTools
             # An array of Model::Hazards for this graph
             attr_accessor :hazards
 
-            def initialize(components: [], variables: VariableSet.new(), specification: Specification.empty(), hazards: [])
+            def initialize(name, components: [], variables: VariableSet.new(), specification: Specification.empty(), hazards: [])
                 raise "Not a variable set #{variables}" unless variables.is_a?(VariableSet)
                 raise "Not a specification #{specification}" unless specification.is_a?(Specification)
+                @name = name
                 @components, @variables, @specification, @hazards = components, variables, specification, hazards
             end
 

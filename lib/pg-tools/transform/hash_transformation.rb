@@ -4,14 +4,15 @@ module PgTools
         class HashTransformation
 
             def transform_graph(graph)
-                return { "graph" => 
+                return { graph.name.to_s => 
                     graph.components.map { |c| transform_component(graph, c) }
                 }
             end
 
             def parse_graph(hash)
-                graph = Model::Graph.new()
-                components = hash["graph"].map { |c| parse_component(graph, c) }
+                name = hash.keys.first.to_sym
+                graph = Model::Graph.new(name)
+                components = name.map { |c| parse_component(graph, c) }
                 graph.components = components
                 return graph
             end

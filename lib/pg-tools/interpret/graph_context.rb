@@ -9,9 +9,12 @@ module PgTools
             attr_accessor :components
             attr_accessor :specs
             attr_accessor :hazards
+            # The name of this graph
+            attr_accessor :name
     
-            def initialize(parent_script)
+            def initialize(name, parent_script)
                 @parent_script = parent_script
+                @name = name
                 @components, @specs, @hazards = [], [], []
             end
     
@@ -55,11 +58,7 @@ module PgTools
                 components = @components.map(&:to_model)
                 variables = Model::VariableSet.new(*@components.map(&:owned_variables).flatten())
                 specification = Model::Specification.new(@specs.map { |s| s.to_model(nil) })
-                Model::Graph.new(components: components, variables: variables, specification: specification, hazards: @hazards)
-            end
-    
-            def get_binding()
-                binding()
+                Model::Graph.new(@name, components: components, variables: variables, specification: specification, hazards: @hazards)
             end
     
         end
