@@ -9,7 +9,7 @@ module PgTools
 
         class ShowCommand < Thor
 
-            desc "puml", "Shows the ProgramGraph"
+            desc "puml", "Shows the model in PlantUML format"
             method_option :only, :type => :array, repeatable: true
             method_option :hide, :type => :array, repeatable: true
             method_option :script, :type => :string
@@ -23,7 +23,7 @@ module PgTools
                 }
             end
 
-            desc "png", "Shows the ProgramGraph"
+            desc "png", "Shows the model as a PNG image"
             method_option :only, :type => :array, repeatable: true
             method_option :hide, :type => :array, repeatable: true
             method_option :script, :type => :string
@@ -42,7 +42,7 @@ module PgTools
                 }
             end
 
-            desc "yaml", "Shows the ProgramGraph"
+            desc "yaml", "Shows the model in YAML format"
             method_option :script, :type => :string
             def yaml()
                 script_file = options[:script] || Settings.ruby_dsl.default_script_name
@@ -54,7 +54,7 @@ module PgTools
                 }
             end
 
-            desc "yaml", "Shows the ProgramGraph"
+            desc "json", "Shows the model in Json format"
             method_option :script, :type => :string
             def json()
                 script_file = options[:script] || Settings.ruby_dsl.default_script_name
@@ -66,7 +66,7 @@ module PgTools
                 }
             end
 
-            desc "test", ""
+            desc "nusmv", "Shows the model in NuSMV format"
             method_option :script, :type => :string
             def nusmv()
                 script_file = options[:script] || Settings.ruby_dsl.default_script_name
