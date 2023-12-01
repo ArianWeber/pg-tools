@@ -17,6 +17,7 @@ module PgTools
                 script_file = options[:script] || Settings.ruby_dsl.default_script_name
                 models = Interpret::PgScript.new.interpret(script_file)
                 models.each { |model|
+                    Model::Validation.validate!(model)
                     components = self.class.select_components(options[:only], options[:hide], model)
                     puml = Transform::PumlTransformation.new.transform_graph(model, only: components)
                     puts puml

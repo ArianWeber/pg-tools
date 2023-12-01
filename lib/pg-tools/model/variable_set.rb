@@ -58,7 +58,7 @@ module PgTools
             end
 
             def constname?(name)
-                @map.values.include?(name)
+                values().map(&:to_s).include?(name.to_s)
             end
 
             def to_s()

@@ -130,7 +130,7 @@ module PgTools
                     raise UnknownVariableError.new(assigned_variable, assignment_expression, varset, component)
                 end
                 unless varset[assigned_variable].owner_name == component.name
-                    raise ForeignVariableAssignmentError.new(assigned_variable, assignment_expression, varset, component)
+                    raise Model::Validation::ForeignVariableAssignmentError.new(assigned_variable, assignment_expression, varset, component)
                 end
                 if varset[assigned_variable].state_variable?
                     raise AssignmentToStateVariableError.new(assigned_variable, assignment_expression, varset, component)
@@ -156,10 +156,7 @@ module PgTools
                     elsif  varset.values.include?(w)
                         constants << w
                     else
-                        # error = "Encountered unknown token '#{w}'! This is neither a variable, nor literal.\n"
-                        # error += "Expression: #{expression}\n"
-                        # error += "Variables: #{varset}"
-                        raise UnknownTokenError.new(w, expression, varset)
+                        raise Model::Validation::UnknownTokenError.new(w, expression, varset)
                     end
                 }
                 variables, constants = variables.uniq, constants.uniq

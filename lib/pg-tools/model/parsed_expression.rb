@@ -17,14 +17,19 @@ module PgTools
             # Computation tree logic
             TYPE_CTL = :ctl
 
+            TYPES = [ TYPE_GUARD, TYPE_ACTION, TYPE_PL, TYPE_TL, TYPE_LTL, TYPE_CTL ]
+
             attr_accessor :expression_string
             attr_accessor :source_location
+            attr_accessor :type
 
             def initialize(expression_string, type, source_location: nil)
                 expression_string = expression_string.to_s if expression_string.is_a?(Symbol)
+                raise "Unknown expression type '#{type}'" unless TYPES.include?(type)
                 raise "Not a string '#{expression_string}'::#{expression_string.class}" unless expression_string.is_a?(String)
                 @expression_string = expression_string
                 @source_location = source_location
+                @type = type
             end
 
             def word_tokens()
@@ -40,6 +45,13 @@ module PgTools
 
             def to_s()
                 @expression_string
+            end
+
+            def assigned_variables()
+                raise "Not an action" unless @type == TYPE_ACTION
+                return expression_string.split("|").map { |sub_action|
+                    sub_action.split(":=")[0].strip
+                }
             end
 
         end
