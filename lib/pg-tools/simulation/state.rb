@@ -8,7 +8,7 @@ module PgTools
             def self.for_variable_set(var_set)
                 value_map = var_set.map { |var|
                     # TODO: Choose random one when nil
-                    init_val = var.initial_value
+                    raise "TODO: Implement this"
                     [var, init_val]
                 }.to_h
                 return self.new(value_map)

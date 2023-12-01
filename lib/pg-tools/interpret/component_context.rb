@@ -44,8 +44,17 @@ module PgTools
                 raise InvalidDSL_var.new("Range '#{range}' is not a range or array") unless range.is_a?(Range) && range.first.is_a?(Integer)
                 sloc = @parent_graph.parent_script.find_source_location()
                 variable = Model::Variable.new(name, range, @name, sloc)
-                # puts variable.inspect
-                variable.initial_value = hash[:init] if hash.key?(:init) 
+
+                # The "init" argument can be an expression, or a value out of the
+                # range of that variable
+                if hash.key?(:init)
+                    init_expr = variable.values().include?(hash[:init]) \
+                        ? "#{variable.name} == #{hash[:init]}" \
+                        : hash[:init]
+                    raise "Neither a string, nor a valid initial value: #{hash[:init]}" unless init_expr.is_a?(String)
+                    variable.init_expression = Model::ParsedExpression.new(init_expr, Model::ParsedExpression::TYPE_PL)
+                end
+
                 @owned_variables << variable
                 return variable
             end

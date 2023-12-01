@@ -48,9 +48,8 @@ module PgTools
                 owned_vars = varset.select_by_owner(component.name).to_a
                 # TODO: Implement init expressions as well
                 init = owned_vars.map { |var|
-                    # Allow variables to omit the initial value as to choose an indeterministic value
-                    next if var.initial_value.nil?
-                    "v.#{transform_varname(var.name)} = #{transform_const(var.initial_value)}"
+                    next if var.init_expression.nil?
+                    transform_expression(var.init_expression, varset)
                 }.compact.join(" & ")
                 init = "TRUE" if init.empty?
 

@@ -46,10 +46,7 @@ module PgTools
                 str += "#{initial_state_name} --> #{component.name}_#{component.initial_state}"
         
                 vars = graph.variables.select_by_owner(component.name)
-                init_var_s = vars.map { |v|
-                    next if v.initial_value.nil?
-                    "#{v.name} == #{v.initial_value}" 
-                }.compact.join(' && ')
+                init_var_s = vars.map(&:init_expression).compact.join(' && ')
         
                 str += ": #{init_var_s}" unless init_var_s.empty?
                 str += "\n"

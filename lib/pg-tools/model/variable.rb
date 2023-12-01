@@ -14,15 +14,16 @@ module PgTools
             # states of components like [:Idle, :Breaking]
             attr_accessor :range
 
-            # Initial value of the variable as an integer
-            # Can be nil to not provide a fixed initial value
-            attr_accessor :initial_value
+            # An expression to be used to initialize this variable
+            # While this can be something simple like "my_var = 10", it can
+            # also be something more involved like "my_var > 10 && my_var < 15".
+            attr_accessor :init_expression
 
             # The location in source, where this variable was defined
             attr_accessor :source_location
 
-            def initialize(name, range, owner_name, source_location, initial_value: nil)
-                @name, @range, @owner_name, @initial_value = name, range, owner_name, initial_value
+            def initialize(name, range, owner_name, source_location, init: nil)
+                @name, @range, @owner_name, @init = name, range, owner_name, init
                 @source_location = source_location
             end
 

@@ -36,8 +36,8 @@ module PgTools
                     puml = Transform::PumlTransformation.new.transform_graph(model, only: components)
                     png = PlantumlBuilder::Formats::PNG.new(puml).load
                     out_name = File.basename(script_file, '.*')
-                    out_name += model.name.gsub(/\W+/, '_')
-                    out_name += "png"
+                    out_name += "-" + model.name.to_s.gsub(/\W+/, '_')
+                    out_name += ".png"
                     File.binwrite(out_name, png)
                 }
             end

@@ -43,15 +43,15 @@ module PgTools
             def transform_variable(variable)
                 return { variable.name.to_s => {
                     "range" => variable.range,
-                    "init" => variable.initial_value
+                    "init" => variable.init_expression
                 }}
             end
 
             def parse_variable(owner_name, hash)
                 name = hash.keys.first
                 range = hash[name]["range"]
-                initial_value = hash[name]["init"]
-                return Model::Variable.new(name.to_sym, range, owner_name.to_sym, initial_value:  initial_value)
+                init_expression = hash[name]["init"]
+                return Model::Variable.new(name.to_sym, range, owner_name.to_sym, init: init_expression)
             end
 
             def transform_transition(transition)
