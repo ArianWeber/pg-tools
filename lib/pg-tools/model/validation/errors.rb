@@ -39,6 +39,27 @@ module PgTools
                 end
             end
 
+            class UnknownVariableError <  PgTools::Core::Error
+                def initialize(assigned_variable, assignment_expression, var_set)
+                    @assigned_variable, @assignment_expression, @var_set = assigned_variable, assignment_expression, var_set
+                end
+                def formatted()
+                    title = "Unknown variable '#{@assigned_variable}'"
+                    
+                    body = []
+                    body << @assignment_expression.source_location.to_s.c_sidenote
+                    body << @assignment_expression.source_location.render_code_block()
+                    body << ""
+                    body << "The expression '#{@assignment_expression.to_s.c_expression}' uses variable #{@assigned_variable.to_s.c_var}."
+                    body << "However there is no such variable in the context of this model."
+                    body << "Known variables: #{@var_set.names.map(&:to_s).map(&:c_var).join(', ')}."
+    
+                    hint = "Declare variables before using them in expressions"
+    
+                    return title, body.join("\n"), hint
+                end
+            end
+
             class ForeignVariableAssignmentError <  PgTools::Core::Error
                 def initialize(variable, expression, varset, component)
                     @variable, @expression, @varset = variable, expression, varset
@@ -61,7 +82,25 @@ module PgTools
                 end
             end
 
-
+            class AssignmentToStateVariableError < PgTools::Core::Error
+                def initialize(variable, expression, varset)
+                    @variable, @expression, @varset = variable, expression, varset
+                end
+                def formatted()
+                    title = "Assignment to state variable"
+                    
+                    body = []
+                    body << @expression.source_location.to_s.c_sidenote
+                    body << @expression.source_location.render_code_block()
+                    body << ""
+                    body << "The expression '#{@expression.to_s.c_expression}' assigns a value to variable #{@variable.to_s.c_var}."
+                    body << "However this variable is a state variable and can not be written to."
+    
+                    hint = "State variables are read only"
+    
+                    return title, body.join("\n"), hint
+                end
+            end
 
         end
     end

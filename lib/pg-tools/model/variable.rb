@@ -26,22 +26,17 @@ module PgTools
                 @source_location = source_location
             end
 
-            # Returns the type of this variable which can either be :int
-            # for integer variable or :state for state variables
-            def type()
-                return @range.first.is_a?(Integer) ? :int : :state
-            end
-
             # Returns all possible values of this variable as an array
             def values()
-                return @range if type() == :state
+                return @range if @range.is_a?(Array)
                 return @range.to_a
             end
 
+            # A state variable represents the states of a component.
+            # e.g: Switch with range [:on, :off] for component switch.
             def state_variable?()
                 return @name == @owner_name
             end
-
 
         end
 

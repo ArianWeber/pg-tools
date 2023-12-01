@@ -7,7 +7,6 @@ module PgTools
                 def self.validate(model)
                     errors = []
                     varset = model.all_variables()
-                    actions = model.components
 
                     model.components.each { |component|
                         actions = component.transitions.map(&:action).compact

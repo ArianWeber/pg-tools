@@ -8,6 +8,8 @@ module PgTools
             TYPE_GUARD = :guard
             # Actions
             TYPE_ACTION = :action
+            # Term for the right part of an action
+            TYPE_TERM = :term
             # Propositional logic
             TYPE_PL = :pl
             # Temporal logic (LTL or CTL)
@@ -17,7 +19,7 @@ module PgTools
             # Computation tree logic
             TYPE_CTL = :ctl
 
-            TYPES = [ TYPE_GUARD, TYPE_ACTION, TYPE_PL, TYPE_TL, TYPE_LTL, TYPE_CTL ]
+            TYPES = [ TYPE_GUARD, TYPE_ACTION, TYPE_TERM, TYPE_PL, TYPE_TL, TYPE_LTL, TYPE_CTL ]
 
             attr_accessor :expression_string
             attr_accessor :source_location

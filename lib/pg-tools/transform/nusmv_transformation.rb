@@ -127,19 +127,19 @@ module PgTools
                 assigned_variable = parts[0].strip
 
                 unless varset.varname?(assigned_variable)
-                    raise UnknownVariableError.new(assigned_variable, assignment_expression, varset, component)
+                    raise Model::Validation::UnknownVariableError.new(assigned_variable, assignment_expression, varset)
                 end
                 unless varset[assigned_variable].owner_name == component.name
                     raise Model::Validation::ForeignVariableAssignmentError.new(assigned_variable, assignment_expression, varset, component)
                 end
                 if varset[assigned_variable].state_variable?
-                    raise AssignmentToStateVariableError.new(assigned_variable, assignment_expression, varset, component)
+                    raise Model::Validation::AssignmentToStateVariableError.new(assigned_variable, assignment_expression, varset)
                 end
 
                 assigned_variable_s = "next(v.#{transform_varname(assigned_variable)})"
 
                 expression = parts[1].strip
-                expression = transform_expression(Model::ParsedExpression.new(expression, nil), varset)
+                expression = transform_expression(Model::ParsedExpression.new(expression, Model::ParsedExpression::TYPE_TERM), varset)
 
                 assignment_s = "#{assigned_variable_s} = #{expression}"
 

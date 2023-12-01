@@ -6,6 +6,7 @@ module PgTools
                 errors = []
                 errors += UnknownTokenValidation.validate(model)
                 errors += ForeignAssignmentValidation.validate(model)
+                errors += AssignmentToStateVariableValidation.validate(model)
                 return errors
             end
 
