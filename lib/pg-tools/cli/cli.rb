@@ -103,7 +103,7 @@ module PgTools
                     results.each { |result|
                         stat_string = result.success ? "PASSED".c_success : "FAILED".c_error
                         puts "[ #{stat_string} ] #{result.spec.text}"
-                        puts "           #{result.spec.expression.c_blue}"
+                        puts "           #{result.spec.expression.to_s.c_blue}"
                         puts result.trace.map(&:c_error).join("\n") unless result.success
                     }
                 }
