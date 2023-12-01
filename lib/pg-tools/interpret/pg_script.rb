@@ -14,7 +14,7 @@ module PgTools
                 @models = []
             end
         
-            def interpret(file)
+            def interpret(file, validate: true)
                 file = File.expand_path(file)
                 raise NoSuchScriptError.new(file) unless File.file?(file)
                 @script_file ||= file
@@ -24,6 +24,8 @@ module PgTools
                 rescue Exception => e
                     re_raise_exception(file, self, e)
                 end
+
+                @models.each { |model| Model::Validation.validate!(model) } if validate
                 
                 return @models
             end
