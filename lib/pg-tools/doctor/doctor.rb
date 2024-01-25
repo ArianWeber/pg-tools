@@ -23,7 +23,7 @@ module PgTools
             checks = Doctor.methods
                 .select { |method| method.to_s.start_with?("check_") }
                 .map { |sym| sym.to_s.sub("check_", "").to_sym }
-                .reverse
+                .sort
             warnings = checks.map { |check| run_check(check) }.flatten.compact
             raise DoctorError.new(warnings) unless warnings.empty?
         end
@@ -41,7 +41,7 @@ module PgTools
             }
         end
 
-        def self.check_Can_find_NuSMV()
+        def self.check_01_Can_find_NuSMV()
             return [] unless PgTools::NuSMV::Runner.new.find_nusmv_path.nil?
             return Warning.new("Unable to locate the NuSMV executable", 
                 "Make sure to install NuSMV by unpacking it and placing the entire folder into\n" \
@@ -50,7 +50,7 @@ module PgTools
             )
         end
 
-        def self.check_Can_run_NuSMV()
+        def self.check_02_Can_run_NuSMV()
             path = PgTools::NuSMV::Runner.new.find_nusmv_path
             return :skip if path.nil?
 
