@@ -6,14 +6,12 @@ Gem::Specification.new do |spec|
   spec.name = "pg-tools"
   spec.version = PgTools::VERSION
   spec.authors = ["Arian Weber"]
-  spec.email = ["weber.arian@web.de"]
+  spec.email = ["weber.arian.dev@gmail.com"]
 
-  spec.summary = "Tool for the decleration and transformation of program graphs"
+  spec.summary = "Tool for the declaration and transformation of program graphs"
   # spec.description = "TODO: Write a longer description or delete this line."
   spec.homepage = "https://github.com/ArianWeber/pg-tools"
   spec.required_ruby_version = ">= 2.6.0"
-
-  # spec.metadata["allowed_push_host"] = "TODO: Set to your gem server 'https://example.com'"
 
   spec.metadata["homepage_uri"] = spec.homepage
   # spec.metadata["source_code_uri"] = "TODO: Put your gem's public repo URL here."
