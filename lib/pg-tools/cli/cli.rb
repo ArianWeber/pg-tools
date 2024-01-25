@@ -149,6 +149,40 @@ module PgTools
 
             end
 
+            desc "init", "Initialize a new pg-tools project"
+            method_option :directory, :type => :string
+            def init()
+
+                target = options[:directory].blank? ? Dir.pwd() : File.expand_path(options[:directory])
+                if Dir.exist?(target) && Dir.entries(target).size > 2
+                    puts "The target directory #{target.c_file} isn't empty!"
+                    exit 1
+                end
+
+                # Create target dir
+                FileUtils.mkdir_p(target)
+
+                # Copy files to target
+                template_dir = File.join(PgTools.root, "data", "project-template")
+                files = Dir.glob(File.join(template_dir, '**', '*'), File::FNM_DOTMATCH).select { |f| File.file?(f) }
+                files.each { |f| 
+                    target_file = File.join(target, f.sub(template_dir, ""))
+                    FileUtils.mkdir_p(File.dirname(target))
+                    FileUtils.cp(f, target) unless File.basename(f) == ".keep"
+                }
+
+                # Initialize git project
+                Dir.chdir(target) { 
+                    Core::CMDRunner.run_cmd("git init")
+                    Core::CMDRunner.run_cmd("git add .")
+                    Core::CMDRunner.run_cmd("git commit -m 'Initial Commit'")
+                }
+
+                puts "Successfully initialized project at #{target.c_file}!"
+                puts "You can read the #{'README.md'.c_file} to get started."
+
+            end
+
             desc "show", "Show the program graph multiple different ways"
             subcommand 'show', ShowCommand
 

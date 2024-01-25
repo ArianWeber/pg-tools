@@ -33,3 +33,4 @@ theme:
   sidenote: "darkslategray"
   file: [ "limegreen", "bold" ]
   expression: ["deepskyblue", "italic"]
+  command: ["deepskyblue", "italic"]

@@ -41,9 +41,19 @@ module PgTools
             end
 
             def eval_file(file)
+
                 output, err, status = Open3.capture3({}, "#{Settings.numsv.path} #{file}")
                 raise RawNuSMVError.new(output, err, status, file) unless status.success?
                 return output
+            end
+
+            def find_nusmv_path
+                # Return by settings path if that exists
+                return Settings.numsv.path if File.file?(Settings.numsv.path)
+
+                # Fall back to looking in the addon directory
+                candidates = Dir[File.join(PgTools.addon_dir, "*", "bin", "NuSMV")]
+                return candidates.sort.first unless candidates.empty?
             end
 
         end

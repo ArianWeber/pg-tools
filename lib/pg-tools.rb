@@ -30,6 +30,10 @@ module PgTools
         File.expand_path(File.join(__dir__, ".."))
     end
 
+    def self.addon_dir()
+        File.expand_path("addon", Dir.pwd)
+    end
+
     def self.tmp_file(relative_path)
         path = File.expand_path(relative_path, Settings.workdir)
         FileUtils.mkdir_p(File.dirname(path))

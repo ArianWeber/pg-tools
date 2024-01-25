@@ -7,8 +7,10 @@
 /tmp/
 /.vscode/
 NuSMV-*/
-program-graph.rb
+/program-graph.rb
 .pg-work/
 
 # rspec failure tracking
 .rspec_status
+
+/addon/
