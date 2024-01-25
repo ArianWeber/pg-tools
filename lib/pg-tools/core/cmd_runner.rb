@@ -37,14 +37,6 @@ module PgTools
                 return status.exitstatus
             end
 
-            def self.edit(file)
-                content_before_edit = File.read(file)
-                editor = Vsutil.config[:config, :shell, :editor]
-                editor = "nano" unless command_exists?(editor)
-                system "#{editor} #{file}"
-                return File.read(file) != content_before_edit
-            end
-
             def self.drop_into_shell()
                 shell = run_cmd("echo ${SHELL}")
                 system("#{shell}")

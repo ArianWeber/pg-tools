@@ -1,5 +1,55 @@
 module PgTools
 
+
+    module TimeUtil
+
+        SECONDS_IN_SECOND = 1
+        SECONDS_IN_MINUTE = SECONDS_IN_SECOND * 60
+        SECONDS_IN_HOUR   = SECONDS_IN_MINUTE * 60
+        SECONDS_IN_DAY    = SECONDS_IN_HOUR   * 24
+        SECONDS_IN_WEEK   = SECONDS_IN_DAY    * 7
+        SECONDS_IN_MONTH  = SECONDS_IN_WEEK   * 4
+        SECONDS_IN_YEAR   = SECONDS_IN_MONTH  * 12
+
+        def self.duration_string(seconds, short: false)
+            i_seconds = seconds.to_i
+            return "~#{'%.2f' % (seconds*1000)}#{short ? "ms" : " milliseconds"}" if i_seconds == 0
+            return duration_to_h(i_seconds, short: short)
+        end
+
+        def self.duration_to_h(seconds, short: false)
+            seconds = seconds.to_i
+            {  
+                SECONDS_IN_YEAR   => ( short ? "y" : " year"   ),
+                SECONDS_IN_MONTH  => ( short ? "M" : " month"  ),
+                SECONDS_IN_WEEK   => ( short ? "w" : " week"   ),
+                SECONDS_IN_DAY    => ( short ? "d" : " day"    ),
+                SECONDS_IN_HOUR   => ( short ? "h" : " hour"   ),
+                SECONDS_IN_MINUTE => ( short ? "m" : " minute" ),
+                SECONDS_IN_SECOND => ( short ? "s" : " second" )
+            }.each do |unit_seconds, unit_string|
+                units = seconds / unit_seconds
+                unit_string = unit_string + "s" if !short && units != 1
+                return "#{units}#{unit_string} #{duration_to_h(seconds % unit_seconds, short: short)}".strip unless units == 0
+            end
+            nil
+        end
+
+        def self.ago_h(start_time, short: false)
+            duration_to_h((Time.now - start_time).to_i, short: short) + " ago"
+        end
+
+        def self.timestamp(time = Time.new)
+            return time.utc.to_i
+        end
+
+        def self.from_timestamp(ts)
+            time = Time.at(ts.to_i).utc
+            return time
+        end
+
+    end
+
     class StringUtil
 
         def self.make_unique(string, strings, &blk)

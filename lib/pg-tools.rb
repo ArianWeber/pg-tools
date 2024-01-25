@@ -2,7 +2,8 @@
 
 require_relative "pg-tools/version"
 require_relative "pg-tools/core/core.rb"
-require_relative "pg-tools/ebnf_parser/ebnf_parser.rb"
+require_relative "pg-tools/shell/shell.rb"
+require_relative "pg-tools/doctor/doctor.rb"
 require_relative "pg-tools/model/model.rb"
 require_relative "pg-tools/interpret/interpret.rb"
 require_relative "pg-tools/cli/cli.rb"

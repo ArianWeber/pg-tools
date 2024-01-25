@@ -15,9 +15,16 @@ ruby_dsl:
 
 # Enable/Disable colored printing all together
 use_colors: true
-# Enable/Disable colored printing when the output of vsutil
+# Enable/Disable colored printing when the output of pg-tools
 # is not piped into a TTY directly.
 use_colors_in_pipe: false
+
+use_animations: true
+
+print_loading_times: true
+
+allow_right_print: true
+
 # Colors theme for the TTY
 theme:
   state: ["deepskyblue", "bold"]
@@ -34,3 +41,14 @@ theme:
   file: [ "limegreen", "bold" ]
   expression: ["deepskyblue", "italic"]
   command: ["deepskyblue", "italic"]
+
+prompt:
+  prompt_format: " %s"
+  debug:    "D "
+  verbose:  "V "
+  info:     "➜ "
+  warn:     "⚡"
+  error:    "✘ "
+  empty:    "~ "
+  success:  "✓ "
+  question: "» "

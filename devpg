@@ -1,5 +1,5 @@
 #!/bin/sh
 
-# Simple wrapper to run vsutil during development.
+# Simple wrapper to run pg-tools during development.
 
 ruby -Ilib ./exe/pg-tools "$@"

@@ -41,7 +41,6 @@ module PgTools
             end
 
             def eval_file(file)
-
                 output, err, status = Open3.capture3({}, "#{Settings.numsv.path} #{file}")
                 raise RawNuSMVError.new(output, err, status, file) unless status.success?
                 return output
