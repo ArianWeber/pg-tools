@@ -75,6 +75,7 @@ module PgTools
             test_files = Dir[File.join(PgTools.root, "integration_tests", "ruby_dsl", "*.rb")].sort
             warnings = test_files.map { |test_file|
                 model = Interpret::PgScript.new.interpret(test_file).first
+                PgTools::Model::Validation.validate!(model)
                 results = NuSMV::Runner.new().run_specs(model)
                 failures = results.reject(&:success)
                 next if failures.empty?
