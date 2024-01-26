@@ -33,7 +33,7 @@ module PgTools
                 # Transform state variables
                 return "{#{range.map { |e| transform_const(e) }.join(", ")}};" if range.is_a?(Array)
                 # Transform small integer variables
-                return "{#{range.join(", ")}};" if (range.last - range.first) < 5
+                return "{#{range.to_a.join(", ")}};" if (range.last - range.first) < 5
                 # Transform regular integer variables
                 return "#{range.first}..#{range.last};"
             end
@@ -44,14 +44,14 @@ module PgTools
                 # The component takes all variables v
                 name += "(v)"
 
-                # Generate the INIT block. Each component initializes it's own variables
+                # Grab all variables which this component defines and thus owns
                 owned_vars = varset.select_by_owner(component.name).to_a
-                # TODO: Implement init expressions as well
-                init = owned_vars.map { |var|
-                    next if var.init_expression.nil?
-                    transform_expression(var.init_expression, varset)
-                }.compact.join(" & ")
-                init = "TRUE" if init.empty?
+
+                # Create the INIT block expression which must hold initially
+                # This is used to initialize variables and decide on the initial
+                # state of this component. This can all be randomized by setting
+                # the init state to true
+                init_expression = transform_init_expression(component, varset, owned_vars)
 
                 # Transform all transitions which are defined in this component
                 trans = component.transitions.map { |transition|
@@ -88,7 +88,18 @@ module PgTools
 
                 trans = trans.join(" | \n") + ";"
 
-                return module_string(name, init: init, trans: trans)
+                return module_string(name, init: init_expression, trans: trans)
+            end
+
+            def transform_init_expression(component, varset, owned_vars)
+                # TODO: Implement init expressions as well
+                init = owned_vars.map { |var|
+                    next if var.init_expression.nil?
+                    transform_expression(var.init_expression, varset)
+                }.compact.join(" & ")
+                init = "TRUE" if init.empty?
+
+                return init
             end
 
             def transform_transition(varset, component, transition)
@@ -164,17 +175,19 @@ module PgTools
 
                 constants = expression.word_tokens.select { |w| varset.values.include?(w) }.uniq
 
-                expression_s = expression.to_s
+                expression_tokens = expression.to_s.split(/\s+/)
 
-                variables.each { |v| expression_s = expression_s.gsub(v.to_s, "v." + transform_varname(v))  }
-                constants.each { |c| expression_s = expression_s.gsub(c.to_s, transform_const(c))  }
+                variables.each { |v| expression_tokens = expression_tokens.gsub(v.to_s, "v." + transform_varname(v))  }
+                constants.each { |c| expression_tokens = expression_tokens.gsub(c.to_s, transform_const(c))  }
 
-                expression_s = expression_s.gsub('&&', '&')
-                expression_s = expression_s.gsub('||', '|')
-                expression_s = expression_s.gsub('||', '|')
-                expression_s = expression_s.gsub('==', '=')
-                expression_s = expression_s.gsub('=>', '->')
-                expression_s = expression_s.gsub('<=>', '<->')
+                expression_tokens = expression_tokens.gsub('&&', '&')
+                expression_tokens = expression_tokens.gsub('||', '|')
+                expression_tokens = expression_tokens.gsub('||', '|')
+                expression_tokens = expression_tokens.gsub('==', '=')
+                expression_tokens = expression_tokens.gsub('=>', '->')
+                expression_tokens = expression_tokens.gsub('<=>', '<->')
+
+                expression_s = expression_tokens.join(" ")
 
                 return expression_s
             end
