@@ -9,6 +9,7 @@ require_relative "pg-tools/interpret/interpret.rb"
 require_relative "pg-tools/cli/cli.rb"
 require_relative "pg-tools/transform/transform.rb"
 require_relative "pg-tools/nusmv/nusmv.rb"
+require_relative "pg-tools/puml/puml.rb"
 require_relative "pg-tools/simulation/simulation.rb"
 require 'config'
 require 'fileutils'

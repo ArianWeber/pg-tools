@@ -185,7 +185,7 @@ module PgTools
 
             desc "doctor", "Check for common problems"
             def doctor()
-                Doctor.check
+                 Doctor.check()
             end
 
             desc "show", "Show the program graph multiple different ways"

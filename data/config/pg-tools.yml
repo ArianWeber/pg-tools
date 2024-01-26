@@ -7,6 +7,7 @@ numsv:
 
 puml:
   active_state_color: "#FF0000/FFFF00"
+  path: null
 
 full_stack_trace: false
 

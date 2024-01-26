@@ -45,7 +45,8 @@ module PgTools
             return [] unless PgTools::NuSMV::Runner.new.find_nusmv_path.nil?
             return Warning.new("Unable to locate the NuSMV executable", 
                 "Make sure to install NuSMV by unpacking it and placing the entire folder into\n" \
-                "the #{'addon'.c_file} directory of your project.\n" \
+                "the #{'addon'.c_file} directory of your project. " \
+                "(#{File.expand_path('addon').c_sidenote})\n" \
                 "Alternatively you can set the #{'numsv.path'.c_string} in the configuration."
             )
         end
@@ -65,6 +66,32 @@ module PgTools
                 " - Make sure you have the required permissions"
             )
         end
+
+        # def self.check_03_Can_find_PlantUML()
+        #     return [] unless PgTools::Puml.find_path.nil?
+        #     return Warning.new("Unable to find the PlantUML executable", 
+        #         "Make sure to install PlantUML by dropping the jar into\n" \
+        #         "the #{'addon'.c_file} directory of your project. " \
+        #         "(#{File.expand_path('addon').c_sidenote})\n" \
+        #         "You can get it from here: #{"https://plantuml.com/download".c_string}\n" \
+        #         "PG-Tools will fall back to using the PlantUML web-server otherwise."
+        #     )
+        # end
+
+        # def self.check_04_Can_run_PlantUML()
+        #     path = PgTools::Puml.find_path
+        #     return :skip if path.blank?
+
+        #     return [] if Core::CMDRunner.run_for_exit_code("java -jar #{path} -help") == 0
+        #     puts "java -jar #{path} -help"
+
+        #     return Warning.new("Unable to run the PlantUML executable",
+        #         "PlantUML could be found here: #{path.c_file}\n" \
+        #         "However it could not be executed. Here are a few things to try:\n" \
+        #         " - Make sure the file is executable\n" \
+        #         " - Make sure you have the required permissions"
+        #     )
+        # end
 
     end
 end
