@@ -41,6 +41,21 @@ module PgTools
                 return words.map(&:to_sym)
             end
 
+            # Splits the expression string into an array of tokens. e.g:
+            # "(a == b) && 3 >= 2" becomes [ "(", "a", "==", "b", ")", "&&", "3", ">=", "2" ]
+            # Note that this split method very much a hack at the moment
+            def tokenize()
+                return expression_string.split(/\s+/).map { |t|
+                    t.end_with?(")") ? [ t.chop, ")" ] : t
+                }.flatten.map { |t|
+                    t.end_with?("(") ? [ t.chop, "(" ] : t
+                }.flatten.map { |t|
+                    t.start_with?(")") ? [ ")" , t.slice(1..-1)] : t
+                }.flatten.map { |t|
+                    t.start_with?("(") ? [ "(" , t.slice(1..-1)] : t
+                }.flatten.reject(&:blank?)
+            end
+
             def used_variables()
                 return expression_string.scan(/[a-zA-Z_][a-zA-Z0-9_]*/).flatten.compact.map(&:to_sym)
             end
