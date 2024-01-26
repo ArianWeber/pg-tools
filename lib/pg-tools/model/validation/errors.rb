@@ -102,6 +102,18 @@ module PgTools
                 end
             end
 
+            class EmptyStateSetError < PgTools::Core::Error
+                def initialize(component)
+                    @component = component
+                end
+                def formatted()
+                    title = "Empty state set"
+                    body = "The graph component '#{@component.name.to_s.c_cmp}' does not define any states."
+                    hint = "Each graph component needs at least one state"
+                    return title, body, hint
+                end
+            end
+
         end
     end
 end

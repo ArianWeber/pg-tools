@@ -4,6 +4,7 @@ module PgTools
 
             def self.validate(model)
                 errors = []
+                errors += EmptyStateSetValidation.validate(model)
                 errors += UnknownTokenValidation.validate(model)
                 errors += ForeignAssignmentValidation.validate(model)
                 errors += AssignmentToStateVariableValidation.validate(model)
