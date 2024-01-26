@@ -23,7 +23,7 @@ module PgTools
             attr_accessor :source_location
 
             def initialize(name, range, owner_name, source_location, init: nil)
-                @name, @range, @owner_name, @init = name, range, owner_name, init
+                @name, @range, @owner_name, @init_expression = name, range, owner_name, init
                 @source_location = source_location
             end
 
