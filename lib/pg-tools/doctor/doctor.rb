@@ -67,6 +67,34 @@ module PgTools
             )
         end
 
+        def self.check_03_Run_integration_tests()
+            return :skip if PgTools::NuSMV::Runner.new.find_nusmv_path.nil?
+
+            warnings = []
+
+            test_files = Dir[File.join(PgTools.root, "integration_tests", "ruby_dsl", "*.rb")].sort
+            warnings = test_files.map { |test_file|
+                model = Interpret::PgScript.new.interpret(test_file).first
+                results = NuSMV::Runner.new().run_specs(model)
+                failures = results.reject(&:success)
+                next if failures.empty?
+
+                test_name = File.basename(test_file, '.*').gsub("_", "-")
+                failures_s = failures.map { |f| "#{f.spec.text} (#{f.spec.expression.to_s.c_blue})" }
+                show_command = "$ pg-tools show nusmv --script #{File.expand_path(test_file)}".c_cyan
+                test_command = "$ pg-tools test --script #{File.expand_path(test_file)}".c_cyan
+                Warning.new("Failed integration test in #{test_name}", 
+                   "The test #{test_name.c_string} contains the following unsatisfied specifications:\n" \
+                   "\t- #{failures_s.join("\n\t- ")}\n" \
+                   "These specifications should be valid if pg-tools works as expected.\n" \
+                   "You can use the following commands to debug this:\n" \
+                   "  #{show_command}\n  #{test_command}"
+                )
+
+            }.compact
+            return warnings
+        end
+
         # def self.check_03_Can_find_PlantUML()
         #     return [] unless PgTools::Puml.find_path.nil?
         #     return Warning.new("Unable to find the PlantUML executable", 

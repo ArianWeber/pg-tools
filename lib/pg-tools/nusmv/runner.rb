@@ -41,7 +41,9 @@ module PgTools
             end
 
             def eval_file(file)
-                output, err, status = Open3.capture3({}, "#{Settings.numsv.path} #{file}")
+                nusmv_path = find_nusmv_path()
+                raise "NuSMV not integrated! (TODO: Make a better error message)" if nusmv_path.blank?
+                output, err, status = Open3.capture3({}, "#{nusmv_path} #{file}")
                 raise RawNuSMVError.new(output, err, status, file) unless status.success?
                 return output
             end
