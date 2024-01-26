@@ -75,7 +75,7 @@ module PgTools
                     [ state_s, precon_s, guard_s ].compact.reject(&:empty?).join(' & ')
                 }.compact.reject(&:empty?)
                 # Only take the tau transition when all other transitions do not match 
-                tau_transition << "!(\n\t#{other_transitions.join(" | \n\t")})\n\t"
+                tau_transition << "!(\n\t#{other_transitions.join(" | \n\t")})\n\t" unless other_transitions.empty?
 
                 # Keep this components state when using the default transition
                 # Keep all owned variables equal when using the default transition
