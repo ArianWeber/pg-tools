@@ -1,7 +1,7 @@
 
 RSpec.describe PgTools::Transform::HashTransformation do
 
-    test_files = Dir[File.join(PgTools.root, "integration_tests", "ruby_dsl", "*.rb")]
+    test_files = Dir[File.join(PgTools.root, "integration_tests", "ruby_dsl", "*.rb")].sort
 
     test_files.each { |test_file|
         it "round trips for '#{File.basename(test_file)}'" do
