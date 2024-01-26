@@ -93,12 +93,14 @@ module PgTools
 
             def transform_init_expression(component, varset, owned_vars)
                 # TODO: Implement init expressions as well
+
                 init = owned_vars.map { |var|
                     next if var.init_expression.nil?
                     transform_expression(var.init_expression, varset)
-                }.compact.join(" & ")
+                }
+                init << transform_expression(component.init_expression, varset) unless  component.init_expression.nil?
+                init = init.compact.join(" & ")
                 init = "TRUE" if init.empty?
-
                 return init
             end
 

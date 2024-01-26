@@ -1,6 +1,6 @@
 model :TestTransitions do
     graph :Test do
-        states :one, :two
+        states :one, :two, init: :one
         transition :one => :two
     end
     specify "The state" do

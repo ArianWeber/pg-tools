@@ -26,10 +26,13 @@ module PgTools
             # The source location of this components definition 
             attr_accessor :source_location
 
+            attr_accessor :init_expressions
+
             def initialize(name, parent_graph)
                 @name, @parent_graph = name, parent_graph
                 @states_list, @transition_list = [], []
                 @owned_variables = []
+                @init_expressions = []
                 @represents_fault = false
                 @source_location = parent_graph.parent_script.find_source_location()
             end
@@ -60,12 +63,14 @@ module PgTools
             end
 
             # DSL method to define states which this component can have
-            def states(*states)
+            def states(*states, init: nil)
                 states.each { |state|
                     raise InvalidDSL_state.new("State '#{state}' is neither a string or symbol") unless state.is_a?(String) || state.is_a?(Symbol)
                     raise InvalidDSL_state.new("State '#{state}' was already declared for component '#{name}'") if @states_list.include?(state)
+                    raise InvalidDSL_state.new("Initial state '#{init}' is none of #{state}") unless init.nil? || states.include?(init)
                 }
                 @states_list += states.map(&:to_sym)
+                self.init("#{@name} == #{init}") unless init.nil?
             end
 
             # DSL method for the definition of one state
@@ -88,6 +93,10 @@ module PgTools
                 return transition
             end
 
+            def init(string)
+                @init_expressions << string
+            end
+
             def to_model()
                 params = {}
                 # Use the name as is
@@ -99,10 +108,17 @@ module PgTools
                 params[:represents_fault] = @represents_fault
                 # Pass the source location
                 params[:source_location] = @source_location
+                # Pass the init expression
+                unless @init_expressions.empty?
+                    init_expression = @init_expressions.map { |e| "( #{e} )" }.join(" && ")
+                    init_expression = Model::ParsedExpression.new(init_expression, Model::ParsedExpression::TYPE_PL) 
+                    params[:init_expression] = init_expression
+                end
+                
                 # Create a model component using these params
                 Model::Component.new(params)
             end
-
+            
         end
 
     end
