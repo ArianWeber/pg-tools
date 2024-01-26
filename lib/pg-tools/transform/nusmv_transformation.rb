@@ -175,7 +175,7 @@ module PgTools
 
                 constants = expression.word_tokens.select { |w| varset.values.include?(w) }.uniq
 
-                expression_tokens = expression.to_s.split(/\s+/)
+                expression_tokens = expression.tokenize
 
                 variables.each { |v| expression_tokens = expression_tokens.gsub(v.to_s, "v." + transform_varname(v))  }
                 constants.each { |c| expression_tokens = expression_tokens.gsub(c.to_s, transform_const(c))  }
