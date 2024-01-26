@@ -12,7 +12,7 @@ module PgTools
             def parse_graph(hash)
                 name = hash.keys.first.to_sym
                 graph = Model::Graph.new(name)
-                components = name.map { |c| parse_component(graph, c) }
+                components = hash[hash.keys.first].map { |c| parse_component(graph, c) }
                 graph.components = components
                 return graph
             end
@@ -43,15 +43,30 @@ module PgTools
             def transform_variable(variable)
                 return { variable.name.to_s => {
                     "range" => variable.range,
-                    "init" => variable.init_expression
+                    "init" => transform_expression(variable.init_expression)
                 }}
             end
 
             def parse_variable(owner_name, hash)
                 name = hash.keys.first
                 range = hash[name]["range"]
-                init_expression = hash[name]["init"]
-                return Model::Variable.new(name.to_sym, range, owner_name.to_sym, init: init_expression)
+                init_expression = parse_expression(hash[name]["init"])
+                return Model::Variable.new(name.to_sym, range, owner_name.to_sym, nil, init: init_expression)
+            end
+
+            def transform_expression(expression)
+                return nil if expression.nil?
+                return { 
+                    "string" => expression.expression_string, 
+                    "type" => expression.type.to_s
+                }
+            end
+
+            def parse_expression(expression)
+                return nil if expression.nil?
+                string = expression["string"]
+                type = expression["type"].to_sym
+                return Model::ParsedExpression.new(string, type)
             end
 
             def transform_transition(transition)
