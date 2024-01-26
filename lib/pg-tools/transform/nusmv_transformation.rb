@@ -117,10 +117,10 @@ module PgTools
                 precon_s = transform_expression(transition.precon, varset)
                 guard_s  = transform_expression(transition.guard, varset)
 
-                action_s, assigned_var = transform_assignment(transition.action, component, varset)
+                action_s, assigned_vars = transform_assignment(transition.action, component, varset)
                 
                 keep_vars_constant = varset.select_by_owner(component.name).names
-                    .reject { |v| v.to_s == assigned_var.to_s }
+                    .reject { |v| assigned_vars&.map(&:to_s)&.include?(v.to_s) }
                     .reject { |v| v.to_s == component.name.to_s }
                     .map { |v| "next(v.#{transform_varname(v)}) = v.#{transform_varname(v)}" }
                     .join(' & ')
@@ -135,6 +135,20 @@ module PgTools
 
             def transform_assignment(assignment_expression, component, varset)
                 return nil if assignment_expression.nil?
+
+                # Handle composite actions (a := 1 | b := 2) by recursively transforming
+                # the individual actions and then combining them
+                sub_assignments = assignment_expression.to_s.split("|")
+                if sub_assignments.length > 1
+                    action_s_acc, assigned_vars_acc = [], []
+                    sub_assignments = sub_assignments.map { |a|
+                        action_s, assigned_vars = transform_assignment(a, component, varset)
+                        action_s_acc << action_s
+                        assigned_vars_acc += assigned_vars
+                    }
+                    return action_s_acc.join(" & "), assigned_vars_acc.uniq
+                end
+
 
                 parts = assignment_expression.to_s.split(":=")
 
@@ -157,7 +171,7 @@ module PgTools
 
                 assignment_s = "#{assigned_variable_s} = #{expression}"
 
-                return assignment_s, assigned_variable
+                return assignment_s, [assigned_variable]
             end
 
             def transform_expression(expression, varset)
