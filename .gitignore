@@ -14,3 +14,4 @@ NuSMV-*/
 .rspec_status
 
 /addon/
+out/

@@ -1,0 +1,71 @@
+---
+name: RSpec tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  rspec_tests:
+    name: ${{ matrix.cfg.os }}(ruby ${{ matrix.cfg.ruby }})
+    strategy:
+      matrix:
+        cfg:
+          - {os: ubuntu-latest, ruby: '3.1'}
+
+    runs-on: ${{ matrix.cfg.os }}
+    steps:
+      - name: Checkout current project version
+        uses: actions/checkout@v4
+
+      - name: Install ruby version ${{ matrix.cfg.ruby }}
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.cfg.ruby }}
+
+      - name: Update rubygems and install gems
+        run: |
+          gem update --system --silent --no-document
+          bundle config set without packaging documentation
+          bundle install --jobs 4 --retry 3
+
+      - name: Run tests on Windows
+        if: runner.os == 'Windows'
+        run: |
+          # https://github.com/ruby/ruby/pull/2791/files#diff-ff5ff976e81bebd977f0834e60416abbR97-R100
+          # Actions uses UTF8, causes test failures, similar to normal OS setup
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
+          [Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding("IBM437")
+          [Console]::InputEncoding  = [System.Text.Encoding]::GetEncoding("IBM437")
+          $Env:LOG_SPEC_ORDER = 'true'
+
+          # debug information
+          chcp
+          Get-WinSystemLocale
+          Get-ChildItem Env: | % { Write-Output "$($_.Key): $($_.Value)"  }
+          # list current OpenSSL install
+          gem list openssl
+          ruby -ropenssl -e 'puts \"OpenSSL Version - #{OpenSSL::OPENSSL_VERSION}\"; puts \"OpenSSL Library Version - #{OpenSSL::OPENSSL_LIBRARY_VERSION}\"'
+          Get-Content Gemfile.lock
+          ruby -v
+          gem --version
+          bundle --version
+
+          # Run tests
+          bundle exec rake parallel:spec[2]
+
+      - name: Run tests on Linux
+        if: runner.os == 'Linux'
+        run: |
+          # debug information
+          cat Gemfile.lock
+          ruby -v
+          gem --version
+          bundle --version
+
+          bundle exec rake
