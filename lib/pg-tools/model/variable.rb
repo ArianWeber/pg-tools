@@ -23,6 +23,7 @@ module PgTools
             attr_accessor :source_location
 
             def initialize(name, range, owner_name, source_location, init: nil)
+                init = Model::ParsedExpression.new(init, Model::ParsedExpression::TYPE_PL) if init.is_a?(String)
                 @name, @range, @owner_name, @init_expression = name, range, owner_name, init
                 @source_location = source_location
             end
