@@ -12,21 +12,21 @@ permissions:
 
 jobs:
   rspec_tests:
-    name: ${{ matrix.cfg.os }}(ruby ${{ matrix.cfg.ruby }})
+    name: ${{ matrix.os }} with Ruby v${{ matrix.ruby }}
     strategy:
       matrix:
-        cfg:
-          - {os: ubuntu-latest, ruby: '3.1'}
+        os: [ 'ubuntu-latest', 'windows-latest', 'macos-latest' ]
+        ruby: [ '3.1', '2.6' ]
 
-    runs-on: ${{ matrix.cfg.os }}
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout current project version
         uses: actions/checkout@v4
 
-      - name: Install ruby version ${{ matrix.cfg.ruby }}
+      - name: Install ruby version ${{ matrix.ruby }}
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ${{ matrix.cfg.ruby }}
+          ruby-version: ${{ matrix.ruby }}
 
       - name: Update rubygems and install gems
         run: |
@@ -48,16 +48,13 @@ jobs:
           chcp
           Get-WinSystemLocale
           Get-ChildItem Env: | % { Write-Output "$($_.Key): $($_.Value)"  }
-          # list current OpenSSL install
-          gem list openssl
-          ruby -ropenssl -e 'puts \"OpenSSL Version - #{OpenSSL::OPENSSL_VERSION}\"; puts \"OpenSSL Library Version - #{OpenSSL::OPENSSL_LIBRARY_VERSION}\"'
           Get-Content Gemfile.lock
           ruby -v
           gem --version
           bundle --version
 
           # Run tests
-          bundle exec rake parallel:spec[2]
+          bundle exec rake
 
       - name: Run tests on Linux
         if: runner.os == 'Linux'
