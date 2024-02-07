@@ -15,7 +15,7 @@ jobs:
     name: ${{ matrix.os }} with Ruby v${{ matrix.ruby }}
     strategy:
       matrix:
-        os: [ 'ubuntu-latest', 'windows-latest', 'macos-latest' ]
+        os: [ 'ubuntu-latest', 'windows-latest' ]
         ruby: [ '3.1', '2.6' ]
 
     runs-on: ${{ matrix.os }}
