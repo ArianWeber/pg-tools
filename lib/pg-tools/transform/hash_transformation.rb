@@ -42,7 +42,7 @@ module PgTools
 
             def transform_variable(variable)
                 return { variable.name.to_s => {
-                    "range" => variable.range,
+                    "range" => transform_variable_range(variable.range),
                     "init" => transform_expression(variable.init_expression)
                 }}
             end
@@ -52,6 +52,19 @@ module PgTools
                 range = hash[name]["range"]
                 init_expression = parse_expression(hash[name]["init"])
                 return Model::Variable.new(name.to_sym, range, owner_name.to_sym, nil, init: init_expression)
+            end
+
+            def transform_variable_range(range)
+                return "#{range.first}..#{range.last}"if range.is_a?(Range)
+                return range
+            end
+
+            def parse_variable_range(range)
+                if range.is_a?(String) && range.match(/\A\d+\.\.\d+\z/)
+                    first, last = range.split("..")[0], range.split("..")[-1]
+                    return Range.new(first, last)
+                end
+                return range
             end
 
             def transform_expression(expression)
