@@ -53,7 +53,7 @@ module PgTools
                 return Settings.numsv.path if File.file?(Settings.numsv.path)
 
                 # Fall back to looking in the addon directory
-                candidates = Dir[File.join(PgTools.addon_dir, "*", "bin", "NuSMV")]
+                candidates = Dir[File.join(PgTools.addon_dir, "*", "bin", "NuSMV*")]
                 return candidates.sort.first unless candidates.empty?
             end
 
