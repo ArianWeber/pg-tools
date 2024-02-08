@@ -108,7 +108,7 @@ module PgTools
             ) unless File.file?(script)
 
             begin 
-                Interpret::PgScript.new.interpret(test_file)
+                Interpret::PgScript.new.interpret(script)
             rescue Exception => e
                 return Warning.new("Failed to interpret model at #{script}", 
                     "Your default model definition at #{script.c_file}\n" \
