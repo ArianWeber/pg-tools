@@ -1,2 +1,3 @@
 .pg-work/
 addon/
+*.png
