@@ -96,6 +96,30 @@ module PgTools
             return warnings
         end
 
+        def self.check_04_Check_project_files()
+            warnings = []
+            script = Settings.ruby_dsl.default_script_name
+
+            return Warning.new("Failed to find model definition at #{script}", 
+                "If you run PG tools without any arguments it expects a program graph definition\n" \
+                "at your working directory, which should be named #{script.c_file} by default.\n" \
+                "Based on your current working directory this would be this full path:\n" \
+                "\t#{File.expand_path(script).c_file}"
+            ) unless File.file?(script)
+
+            begin 
+                Interpret::PgScript.new.interpret(test_file)
+            rescue Exception => e
+                return Warning.new("Failed to interpret model at #{script}", 
+                    "Your default model definition at #{script.c_file}\n" \
+                    "(Full path: #{File.expand_path(script).c_sidenote})\n" \
+                    "Could not be interpreted. Make sure there are no syntax errors."
+                ) 
+            end
+
+            return []
+        end
+
         # def self.check_03_Can_find_PlantUML()
         #     return [] unless PgTools::Puml.find_path.nil?
         #     return Warning.new("Unable to find the PlantUML executable", 
