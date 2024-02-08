@@ -169,6 +169,7 @@ module PgTools
                 files = Dir.glob(File.join(template_dir, '**', '*'), File::FNM_DOTMATCH).select { |f| File.file?(f) }
                 files.each { |f| 
                     target_file = File.join(target, f.sub(template_dir, ""))
+                    target_file = target_file.gsub(".resource", "")
                     FileUtils.mkdir_p(File.dirname(target))
                     FileUtils.cp(f, target) unless File.basename(f) == ".keep"
                 }

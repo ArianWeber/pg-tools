@@ -13,5 +13,6 @@ NuSMV-*/
 # rspec failure tracking
 .rspec_status
 
-/addon/
+!./data/project-template/addon
+/addon
 out/
