@@ -91,14 +91,16 @@ module PgTools
 
         class BaseCommand < Thor
 
-            desc "test", ""
+            desc "test", "Test the model specifications"
             method_option :script, :type => :string
             def test()
                 script_file = options[:script] || Settings.ruby_dsl.default_script_name
                 models = Interpret::PgScript.new.interpret(script_file)
 
                 models.each { |model|
-                    results = NuSMV::Runner.new().run_specs(model)
+                    results = Shell::LoadingPrompt.while_loading("Running specifications") {
+                        NuSMV::Runner.new().run_specs(model)
+                    }
 
                     results.each { |result|
                         stat_string = result.success ? "PASSED".c_success : "FAILED".c_error
@@ -109,7 +111,7 @@ module PgTools
                 }
             end
 
-            desc "dcca", ""
+            desc "dcca", "Run the automatic DCCA for hazards of the model"
             def dcca()
                 script = Interpret::PgScript.new
                 model = script.interpret('program-graph.rb')
@@ -128,25 +130,25 @@ module PgTools
                 }
             end
 
-            desc "sim", ""
+            desc "sim", "Simulate the model and save each step as an image"
             def sim()
-                script = Interpret::PgScript.new
-                model = script.interpret('program-graph.rb')
+                puts "Not implemented!"
+                # script = Interpret::PgScript.new
+                # model = script.interpret('program-graph.rb')
 
-                simulator = Simulation::Simulator.new(model)
-                states = simulator.run(steps: 5)
+                # simulator = Simulation::Simulator.new(model)
+                # states = simulator.run(steps: 5)
 
-                FileUtils.mkdir_p("video")
+                # FileUtils.mkdir_p("video")
 
-                states.each_with_index.map { |state, index|
-                    puml = Transform::PumlTransformation.new.transform_graph(model, variable_state: state)
-                    puts puml
-                    png = PlantumlBuilder::Formats::PNG.new(puml).load
-                    File.binwrite("video/#{index}.png", png)
-                }
+                # states.each_with_index.map { |state, index|
+                #     puml = Transform::PumlTransformation.new.transform_graph(model, variable_state: state)
+                #     puts puml
+                #     png = PlantumlBuilder::Formats::PNG.new(puml).load
+                #     File.binwrite("video/#{index}.png", png)
+                # }
 
-                puts states.map(&:to_s).join("\n---------\n")
-
+                # puts states.map(&:to_s).join("\n---------\n")
             end
 
             desc "init", "Initialize a new pg-tools project"
@@ -180,7 +182,7 @@ module PgTools
 
                 puts "Successfully initialized project at #{target.c_file}!"
                 puts "You can read the #{'README.md'.c_file} to get started."
-
+                puts "Run #{'pg-tools doctor'.c_blue} and follow the instructions to set up your environment!"
             end
 
             desc "doctor", "Check for common problems"
