@@ -47,7 +47,7 @@ module PgTools
                 "Make sure to install NuSMV by unpacking it and placing the entire folder into\n" \
                 "the #{'addon'.c_file} directory of your project. " \
                 "(#{File.expand_path('addon').c_sidenote})\n" \
-                "Alternatively you can set the #{'numsv.path'.c_string} in the configuration."
+                "Alternatively you can set the #{'nusmv.path'.c_string} in the configuration."
             )
         end
 

@@ -95,7 +95,7 @@ module PgTools
 
             def find_nusmv_path
                 # Return by settings path if that exists
-                return Settings.numsv.path if !Settings.numsv.path.blank? && File.file?(Settings.numsv.path)
+                return Settings.nusmv.path if !Settings.nusmv.path.blank? && File.file?(Settings.nusmv.path)
 
                 # Fall back to looking in the addon directory
                 candidates = Dir[File.join(PgTools.addon_dir, "*", "bin", "NuSMV*")]

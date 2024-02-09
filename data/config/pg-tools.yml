@@ -5,7 +5,7 @@ workdir: <%= File.expand_path('.pg-work', Dir.pwd) %>
 outdir: <%= File.expand_path('out', Dir.pwd) %>
 
 # Configuration for the NuSMV addon
-numsv:
+nusmv:
   # Path the the NuSMV executable. Can be omitted if NuSMV is dropped into the addon/ dir
   path: null
 
