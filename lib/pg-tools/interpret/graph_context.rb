@@ -28,10 +28,20 @@ module PgTools
             end
 
             def transient(name)
-                cmp = component(name) do
-                    all_states = [ :no, :yes ]
+                cmp = graph(name) do
+                    all_states = [ :No, :Yes ]
                     states(*all_states)
                     all_states.product(all_states).each { |s1, s2| transition({ s1 => s2}) }
+                end
+                cmp.represents_fault = true
+                return cmp
+            end
+
+            def persistent(name)
+                cmp = graph(name) do
+                    states(:No, :Yes)
+                    transition :No => :No
+                    transition :No => :Yes
                 end
                 cmp.represents_fault = true
                 return cmp
