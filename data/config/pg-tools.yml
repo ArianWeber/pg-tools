@@ -1,17 +1,22 @@
-
 # The working directory for temporary files and caches
-workdir: <%= File.expand_path('.pg-work', Dir.pwd)  %>
+workdir: <%= File.expand_path('.pg-work', Dir.pwd) %>
 
+# The default output directory for generated files like images
+outdir: <%= File.expand_path('out', Dir.pwd) %>
+
+# Configuration for the NuSMV addon
 numsv:
-  path: /Users/arian/Documents/projects/pg-tools/NuSMV-2.6.0-Darwin/bin/NuSMV
+  # Path the the NuSMV executable. Can be omitted if NuSMV is dropped into the addon/ dir
+  path: null
 
+# Configuration for the PlantUML addon
 puml:
   active_state_color: "#FF0000/FFFF00"
   path: null
 
-full_stack_trace: false
-
+# Configuration for the Ruby DSL
 ruby_dsl:
+  # Default model definition script file when pg-tools is invoked without arguments
   default_script_name: "program-graph.rb"
 
 # Enable/Disable colored printing all together
@@ -19,11 +24,11 @@ use_colors: true
 # Enable/Disable colored printing when the output of pg-tools
 # is not piped into a TTY directly.
 use_colors_in_pipe: false
-
+# Print full stack traces on any error.
+full_stack_trace: false
+# Enable/Disable shell animations
 use_animations: true
-
 print_loading_times: true
-
 allow_right_print: true
 
 # Colors theme for the TTY
