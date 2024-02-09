@@ -36,9 +36,11 @@ module PgTools
                     puml = Transform::PumlTransformation.new.transform_graph(model, only: components)
                     png = PlantumlBuilder::Formats::PNG.new(puml).load
                     out_name = File.basename(script_file, '.*')
-                    out_name += "-" + model.name.to_s.gsub(/\W+/, '_')
-                    out_name += ".png"
-                    File.binwrite(out_name, png)
+                    out_name += "-" + model.name.to_s.gsub(/\W+/, '_').downcase + ".png"
+                    out_path = File.expand_path(out_name, Settings.outdir)
+                    FileUtils.mkdir_p(Settings.outdir)
+                    File.binwrite(out_path, png)
+                    puts "Wrote #{out_path.c_file}"
                 }
             end
 
@@ -204,7 +206,7 @@ module PgTools
 
             desc "doctor", "Check for common problems"
             def doctor()
-                 Doctor.check()
+                Doctor.check()
             end
 
             desc "show", "Show the program graph multiple different ways"
