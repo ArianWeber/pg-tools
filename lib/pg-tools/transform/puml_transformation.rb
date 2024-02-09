@@ -12,15 +12,15 @@ module PgTools
 
                 parts = []
                 parts << components.map { |c| transform_component(graph, c) }.join("\n\n")
-                parts << transform_variable_state(variable_state) unless variable_state.nil?
+                parts << transform_variable_state(graph, variable_state) unless variable_state.nil?
                 parts = parts.compact.join("\n\n")
                 return "@startuml Programmgraph\n#{parts}\n@enduml\n"
             end
 
-            def transform_variable_state(variable_state)
-                vars = variable_state.variables.select(&:state_variable?)
-                return vars.map { |var|
-                    state = variable_state[var]
+            def transform_variable_state(graph, variable_state)
+                state_variables = graph.state_variables()
+                return state_variables.map { |var|
+                    state = variable_state[var.name]
                     "rectangle #{state} as #{var.name}_#{state} #{Settings.puml.active_state_color}"
                 }.join("\n")
             end

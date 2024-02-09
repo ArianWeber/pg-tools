@@ -4,4 +4,8 @@ class Array
         return self.map { |orig| orig == elem ? substitute : orig }
     end
 
+    def blank?()
+        return empty?()
+    end
+
 end

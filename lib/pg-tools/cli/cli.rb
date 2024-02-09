@@ -130,25 +130,38 @@ module PgTools
                 }
             end
 
-            desc "sim", "Simulate the model and save each step as an image"
-            def sim()
-                puts "Not implemented!"
-                # script = Interpret::PgScript.new
-                # model = script.interpret('program-graph.rb')
+            desc "simulate", "Simulate the model and save each step as an image"
+            method_option :script, :type => :string
+            method_option :steps, :type => :numeric, default: 10
+            method_option :force, :type => :numeric, default: 10
+            def simulate()
+                script_file = options[:script] || Settings.ruby_dsl.default_script_name
+                models = Interpret::PgScript.new.interpret(script_file)
+                runner = NuSMV::Runner.new
 
-                # simulator = Simulation::Simulator.new(model)
-                # states = simulator.run(steps: 5)
+                models.each { |model|
+                    trace = Shell::LoadingPrompt.while_loading("Simulating model #{model.name.to_s.c_string}") {
+                        runner.run_simulation(model, options[:steps])
+                    }
 
-                # FileUtils.mkdir_p("video")
+                    # Prepare output dir
+                    out_dir = File.expand_path("simulate-" + model.name.to_s.gsub(/\W+/, '_').downcase, Settings.outdir)
+                    FileUtils.mkdir_p(out_dir)
 
-                # states.each_with_index.map { |state, index|
-                #     puml = Transform::PumlTransformation.new.transform_graph(model, variable_state: state)
-                #     puts puml
-                #     png = PlantumlBuilder::Formats::PNG.new(puml).load
-                #     File.binwrite("video/#{index}.png", png)
-                # }
+                    # Generate images
+                    Shell::LoadingPrompt.while_loading("Rendering states") { |printer|
+                        trace.each_with_index { |variable_state, index|
 
-                # puts states.map(&:to_s).join("\n---------\n")
+                            printer.printl("Step #{index + 1}/#{trace.length}")
+                            puml = Transform::PumlTransformation.new.transform_graph(model, variable_state: variable_state)
+                            png = PlantumlBuilder::Formats::PNG.new(puml).load
+                            out_path = File.expand_path("step-#{index}.png", out_dir)
+                            File.binwrite(out_path, png)
+                        }
+                    }
+                    puts "Wrote #{trace.length.to_s.c_num} files to #{out_dir.c_file}"
+                }
+
             end
 
             desc "init", "Initialize a new pg-tools project"
@@ -173,12 +186,15 @@ module PgTools
                     FileUtils.mkdir_p(File.dirname(target))
                     FileUtils.cp(f, target) unless File.basename(f) == ".keep"
                 }
+                # Copy the actual default config into the project as that
+                # will contain all keys and should be commented
+                FileUtils.cp(File.join(PgTools.root, "data", "config", "pg-tools.yml"), File.join("template_dir", ".pg-tools.yml"))
 
                 # Initialize git project
                 Dir.chdir(target) { 
                     Core::CMDRunner.run_cmd("git init")
                     Core::CMDRunner.run_cmd("git add .")
-                    Core::CMDRunner.run_cmd("git commit -m 'Initial Commit'")
+                    Core::CMDRunner.run_cmd("git commit -m \"Initial Commit\"")
                 }
 
                 puts "Successfully initialized project at #{target.c_file}!"

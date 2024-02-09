@@ -1,3 +1,4 @@
 .pg-work/
 addon/
-*.png
+out/
+.vscode

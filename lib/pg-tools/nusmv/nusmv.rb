@@ -5,14 +5,15 @@ module PgTools
     module NuSMV
 
         class RawNuSMVError < PgTools::Core::Error
-            def initialize(out, err, status, file)
-                @out, @err, @status, @file = out, err, status, file
+            def initialize(cmd, out, err, status, file)
+                @cmd, @out, @err, @status, @file = cmd, out, err, status, file
             end
 
             def formatted()
                 title = "Execution of NuSMV exited with #{@status}"
 
-                body = "#{@out}\n#{@err}"
+                body  = "The exact command was\n#{@cmd.c_string}\n\n"
+                body += "#{@out}\n#{@err}"
                 
                 return title, body
             end
