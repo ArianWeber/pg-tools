@@ -72,7 +72,7 @@ module PgTools
                     this_state = transform_const(transition.src_state)
                     state_s = "v.#{cmp_varname} = #{this_state}"
 
-                    [ state_s, precon_s, guard_s ].compact.reject(&:empty?).join(' & ')
+                    [ state_s, precon_s, guard_s ].compact.reject(&:empty?).map{ |s| "( #{s} )" }.join(' & ')
                 }.compact.reject(&:empty?)
                 # Only take the tau transition when all other transitions do not match 
                 tau_transition << "!(\n\t#{other_transitions.join(" | \n\t")})\n\t" unless other_transitions.empty?
@@ -130,7 +130,7 @@ module PgTools
                 expression << action_s
                 expression << keep_vars_constant
 
-                return expression.compact.reject(&:empty?).join(' & ')
+                return expression.compact.reject(&:empty?).map{ |s| "( #{s} )" }.join(' & ')
             end
 
             def transform_assignment(assignment_expression, component, varset)
