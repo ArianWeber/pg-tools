@@ -114,20 +114,24 @@ module PgTools
             end
 
             desc "dcca", "Run the automatic DCCA for hazards of the model"
+            method_option :script, :type => :string
             def dcca()
-                script = Interpret::PgScript.new
-                model = script.interpret('program-graph.rb')
+                script_file = options[:script] || Settings.ruby_dsl.default_script_name
+                models = Interpret::PgScript.new.interpret(script_file)
 
-                runner = NuSMV::Runner.new()
-                
-                dcca = Model::DCCA.new(model, runner)
-                result = dcca.perform()
-
-                result.each { |hazard, crit_sets|
-                    puts hazard.text
-
-                    crit_sets.each { |set|
-                        puts "{ #{set.map(&:to_s).map(&:c_blue).join(', ')} }"
+                models.each { |model|
+                    dcca = Model::DCCA.new(model, NuSMV::Runner.new)
+                    result = Shell::LoadingPrompt.while_loading("Calculating DCCA for #{model.name.to_s.c_string}") {
+                        dcca.perform()
+                    }
+                    result.each { |hazard, crit_sets|
+                        s = crit_sets.length == 1 ? "" : "s"
+                        message = "Hazard #{hazard.text.to_s.c_string} (#{hazard.expression.to_s.c_blue}) "
+                        message += "has #{crit_sets.length.to_s.c_num} minimal critical cut set#{s}:"
+                        puts message
+                        crit_sets.each { |set|
+                            puts "\t{ #{set.map(&:to_s).map(&:c_blue).join(', ')} }"
+                        }
                     }
                 }
             end
@@ -136,6 +140,7 @@ module PgTools
             method_option :script, :type => :string
             method_option :steps, :type => :numeric, default: 10
             method_option :force, :type => :numeric, default: 10
+            method_option :random, :type => :boolean, default: false
             def simulate()
                 script_file = options[:script] || Settings.ruby_dsl.default_script_name
                 models = Interpret::PgScript.new.interpret(script_file)
@@ -143,8 +148,10 @@ module PgTools
 
                 models.each { |model|
                     trace = Shell::LoadingPrompt.while_loading("Simulating model #{model.name.to_s.c_string}") {
-                        runner.run_simulation(model, options[:steps])
+                        runner.run_simulation(model, options[:steps], random: options[:random])
                     }
+                    puts trace
+                    next
 
                     # Prepare output dir
                     out_dir = File.expand_path("simulate-" + model.name.to_s.gsub(/\W+/, '_').downcase, Settings.outdir)
@@ -153,7 +160,6 @@ module PgTools
                     # Generate images
                     Shell::LoadingPrompt.while_loading("Rendering states") { |printer|
                         trace.each_with_index { |variable_state, index|
-
                             printer.printl("Step #{index + 1}/#{trace.length}")
                             puml = Transform::PumlTransformation.new.transform_graph(model, variable_state: variable_state)
                             png = PlantumlBuilder::Formats::PNG.new(puml).load

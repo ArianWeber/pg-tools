@@ -53,6 +53,7 @@ module PgTools
 
             def parse_simulation_output(nusmv_output)
                 var_states, current_var_state = [], nil
+                puts nusmv_output
 
                 nusmv_output.split("\n").each { |line|
                     # Wait for heading of state

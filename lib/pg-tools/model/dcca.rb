@@ -41,9 +41,9 @@ module PgTools
                     other_errors = fault_set.reject { |err| set.include?(err) }
                     only_errors = other_errors.empty? \
                         ? "TRUE" \
-                        : other_errors.map { |err| "#{err} == no" }.join(" && ")
+                        : other_errors.map { |err| "#{err} == No" }.join(" && ")
                     formula = "!( (#{only_errors}) U (#{hazard.expression}) )"
-
+                    formula = ParsedExpression.new(formula, ParsedExpression::TYPE_TL)
                     Spec.new("Fault set {#{set.join(', ')}} is safe", formula, nil)
                 }
 

@@ -27,8 +27,8 @@ module PgTools
                     title = "Unknown token"
                     
                     body = []
-                    body << @expression.source_location.to_s.c_sidenote
-                    body << @expression.source_location.render_code_block()
+                    body << @expression.source_location.to_s.c_sidenote  unless @expression.source_location.blank?
+                    body << @expression.source_location.render_code_block() unless @expression.source_location.blank?
                     body << ""
                     body << "The expression '#{@expression.to_s.c_expression}' uses token #{@token.to_s.c_string}."
                     body << "This is neither a known variable, nor literal."
