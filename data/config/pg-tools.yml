@@ -31,6 +31,12 @@ use_animations: true
 print_loading_times: true
 allow_right_print: true
 
+trace:
+  # Colorize certain values while printing traces
+  colors:
+    Closed: green
+    Open: red
+
 # Colors theme for the TTY
 theme:
   state: ["deepskyblue", "bold"]

@@ -108,7 +108,11 @@ module PgTools
                         stat_string = result.success ? "PASSED".c_success : "FAILED".c_error
                         puts "[ #{stat_string} ] #{result.spec.text}"
                         puts "           #{result.spec.expression.to_s.c_blue}"
-                        puts result.trace.map(&:c_error).join("\n") unless result.success
+                        unless result.success
+                            puts "Here is the trace:".c_red
+                            trace_s = result.trace.to_s.indented(str: " >> ".c_red)
+                            puts trace_s + "\n"
+                        end
                     }
                 }
             end
@@ -141,6 +145,7 @@ module PgTools
             method_option :steps, :type => :numeric, default: 10
             method_option :force, :type => :numeric, default: 10
             method_option :random, :type => :boolean, default: false
+            method_option :png, :type => :boolean, default: false
             def simulate()
                 script_file = options[:script] || Settings.ruby_dsl.default_script_name
                 models = Interpret::PgScript.new.interpret(script_file)
@@ -150,8 +155,11 @@ module PgTools
                     trace = Shell::LoadingPrompt.while_loading("Simulating model #{model.name.to_s.c_string}") {
                         runner.run_simulation(model, options[:steps], random: options[:random])
                     }
-                    puts trace
-                    next
+
+                    # Print the trace
+                    puts trace.to_s
+
+                    next unless options[:png]
 
                     # Prepare output dir
                     out_dir = File.expand_path("simulate-" + model.name.to_s.gsub(/\W+/, '_').downcase, Settings.outdir)
@@ -159,15 +167,15 @@ module PgTools
 
                     # Generate images
                     Shell::LoadingPrompt.while_loading("Rendering states") { |printer|
-                        trace.each_with_index { |variable_state, index|
-                            printer.printl("Step #{index + 1}/#{trace.length}")
+                        trace.states.each_with_index { |variable_state, index|
+                            printer.printl("Step #{index + 1}/#{trace.states.length}")
                             puml = Transform::PumlTransformation.new.transform_graph(model, variable_state: variable_state)
                             png = PlantumlBuilder::Formats::PNG.new(puml).load
                             out_path = File.expand_path("step-#{index}.png", out_dir)
                             File.binwrite(out_path, png)
                         }
                     }
-                    puts "Wrote #{trace.length.to_s.c_num} files to #{out_dir.c_file}"
+                    puts "Wrote #{trace.states.length.to_s.c_num} files to #{out_dir.c_file}"
                 }
 
             end

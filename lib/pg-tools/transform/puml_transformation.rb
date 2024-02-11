@@ -41,16 +41,17 @@ module PgTools
             end
         
             def transform_initial(graph, component)
-                initial_state_name = "#{component.name}_initial"
-                str = "circle initial as #{initial_state_name} \n"
-                str += "#{initial_state_name} --> #{component.name}_#{component.initial_state}"
+                return "" # TODO: Find initial states
+                # initial_state_name = "#{component.name}_initial"
+                # str = "circle initial as #{initial_state_name} \n"
+                # str += "#{initial_state_name} --> #{component.name}_#{component.initial_state}"
         
-                vars = graph.variables.select_by_owner(component.name)
-                init_var_s = vars.map(&:init_expression).compact.join(' && ')
+                # vars = graph.variables.select_by_owner(component.name)
+                # init_var_s = vars.map(&:init_expression).compact.join(' && ')
         
-                str += ": #{init_var_s}" unless init_var_s.empty?
-                str += "\n"
-                return str
+                # str += ": #{init_var_s}" unless init_var_s.empty?
+                # str += "\n"
+                # return str
             end
         
             def transform_state(component, state)
@@ -59,7 +60,6 @@ module PgTools
         
             def transform_transition(component, transition)
                 label = [ transition.precon, transition.guard ].map(&:to_s).reject(&:empty?).join(" && ")
-                label += transition.guard.to_s
                 label += "/ " + transition.action.to_s unless transition.action.nil?
 
                 label = ": #{label}" unless label.strip.empty?

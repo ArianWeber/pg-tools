@@ -8,10 +8,10 @@ module PgTools
                 nusmv_s = Transform::NuSmvTransformation.new.transform_graph(program_graph)
                 output = eval_nusmv(nusmv_s)
                 specs = program_graph.specification.flatten()
-                return parse_spec_results(specs, output)
+                return parse_spec_results(program_graph, specs, output)
             end
 
-            def parse_spec_results(specs, nusmv_output)
+            def parse_spec_results(program_graph, specs, nusmv_output)
                 block = Struct.new(:success, :lines)
 
                 # Split the output into blocks which describe the 
@@ -30,6 +30,8 @@ module PgTools
 
                 return blocks.each_with_index.map { |block, index|
                     trace = block.success ? nil : block.lines.select { |l| l.start_with?(/\s+/) }
+                    trace = parse_trace(program_graph, trace.join("\n")) unless trace.nil?
+
                     Model::SpecResult.new(specs[index], block.success, trace)
                 }
             end
@@ -43,34 +45,48 @@ module PgTools
                 commands << "flatten_hierarchy"
                 commands << "encode_variables"
                 commands << "build_model"
-                commands << "pick_state"
+                commands << "pick_state #{random ? '-r' : ''}"
                 commands << "simulate -k #{steps.to_s.to_i} -v #{random ? '-r' : ''}"
                 commands << "quit"
                 nusmv_s = Transform::NuSmvTransformation.new.transform_graph(program_graph)
                 output = eval_nusmv(nusmv_s, commands: commands)
-                return parse_simulation_output(output)
+                return parse_trace(program_graph, output)
             end
 
-            def parse_simulation_output(nusmv_output)
+            def parse_trace(program_graph, nusmv_output)
                 var_states, current_var_state = [], nil
-                puts nusmv_output
+
+                loop_index = -1
 
                 nusmv_output.split("\n").each { |line|
-                    # Wait for heading of state
+                    # Wait for heading of new state
                     if line.match(/\s*-> State: .+ <-/)
-                        var_states << current_var_state unless current_var_state.nil?
+                        # Complete and store the old state if any
+                        unless current_var_state.nil?
+                            missing_keys = var_states.empty? ? [] :  var_states[-1].keys - current_var_state.keys
+                            missing_keys.each { |key|
+                                current_var_state[key] = var_states[-1][key]
+                            }  
+                            var_states << current_var_state
+                        end
+                        # Create a new state
                         current_var_state = {}
                         next
                     end
                     # Skip lines before the first state
                     next if current_var_state.nil?
 
+                    if line.include?("Loop starts here")
+                        loop_index == var_states.length - 1
+                        next
+                    end
+
                     key_val = line.split("=").map(&:strip)
                     key = key_val[0].gsub("v.V_", "").to_sym
                     val = key_val[1].gsub("L_", "")
                     current_var_state[key] = val
                 }
-                return var_states
+                return Model::Trace.new(program_graph, var_states)
             end
 
             def eval_nusmv(nusmv_string, commands: [])

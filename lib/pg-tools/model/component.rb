@@ -30,10 +30,6 @@ module PgTools
                 @init_expression =  args[:init_expression]
             end
 
-            def initial_state()
-                return states.first
-            end
-
             def represents_fault?()
                 return @represents_fault
             end

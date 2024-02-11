@@ -73,7 +73,7 @@ module PgTools
             warnings = []
 
             test_files = Dir[File.join(PgTools.root, "integration_tests", "ruby_dsl", "*.rb")].sort
-            warnings = test_files.map { |test_file|
+            warnings += test_files.map { |test_file|
                 model = Interpret::PgScript.new.interpret(test_file).first
                 PgTools::Model::Validation.validate!(model)
                 results = NuSMV::Runner.new().run_specs(model)
@@ -91,8 +91,35 @@ module PgTools
                    "You can use the following commands to debug this:\n" \
                    "  #{show_command}\n  #{test_command}"
                 )
-
             }.compact
+
+            warnings += test_files.map { |test_file|
+                model = Interpret::PgScript.new.interpret(test_file).first
+                next if model.hazards.empty?
+                require 'set'
+
+                dcca = Model::DCCA.new(model, NuSMV::Runner.new)
+                result = dcca.perform()
+
+                expected_cut_sets = File.read(test_file)
+                    .split("\n")
+                    .find { |l| l.include?("Expected Cut Sets") }
+                    .scan(/\{([^}]+)\}/).flatten
+                    .map { |string| string.split(",").map(&:strip).map(&:to_sym) }
+                    .map { |cut_set| Set.new(cut_set) }
+
+                actual_cut_sets = result.values.first.map { |cut_set| Set.new(cut_set) }
+                
+                next if Set.new(actual_cut_sets) == Set.new(expected_cut_sets)
+                
+                Warning.new("Failed DCCA for #{File.basename(test_file)}",
+                   "The DCCA for hazard #{result.keys.first.expression.to_s.c_blue} yielded unexpected cut sets:\n" \
+                   "Expected: #{expected_cut_sets}\n" \
+                   "Got     : #{actual_cut_sets}\n"
+                )
+            }.compact
+
+
             return warnings
         end
 

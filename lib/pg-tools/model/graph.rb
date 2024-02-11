@@ -32,7 +32,7 @@ module PgTools
             # and has a range consisting of the states of that component 
             def state_variables()
                 vars = @components.map { |cmp|
-                    Variable.new(cmp.name, cmp.states, cmp.name, cmp.source_location, init: "#{cmp.name} == #{cmp.initial_state}")
+                    Variable.new(cmp.name, cmp.states, cmp.name, cmp.source_location)
                 }
                 return VariableSet.new(*vars)
             end

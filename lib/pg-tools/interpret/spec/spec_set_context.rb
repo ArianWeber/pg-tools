@@ -38,6 +38,12 @@ module PgTools
                 children << subset
             end
 
+            def no_errors()
+                err_graphs = @parent_graph.components.select(&:represents_fault)
+                expression = err_graphs.map { |g| "#{g.name} == No" }.join(" && ")
+                return { "there are no errors" => "G ( #{expression} )" }
+            end
+
             def it(hash)
                 # TODO: Handle errors
                 text = hash.keys.first

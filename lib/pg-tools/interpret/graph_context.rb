@@ -47,6 +47,14 @@ module PgTools
                 return cmp
             end
 
+            def disable_error(name)
+                cmp = @components.find { |c| c.name == name.to_sym }
+                raise "No such component: #{name}" if cmp.nil?
+                raise "Not an error component: #{name}" unless cmp.represents_fault
+                cmp.transition_list = [ ]
+                cmp.init_expressions = [ "#{name} == No" ]
+            end
+
             def error(name)
                 return name
             end

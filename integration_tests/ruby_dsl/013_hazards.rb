@@ -14,6 +14,7 @@ model :Test do
 
     end
 
+    # Expected Cut Sets: { BreakFailure }
     hazard "The car crashes" => :"distance_to_wall == 0"
 
     specify "The car" do
