@@ -199,12 +199,12 @@ module PgTools
                 files.each { |f| 
                     target_file = File.join(target, f.sub(template_dir, ""))
                     target_file = target_file.gsub(".resource", "")
-                    FileUtils.mkdir_p(File.dirname(target))
-                    FileUtils.cp(f, target) unless File.basename(f) == ".keep"
+                    FileUtils.mkdir_p(File.dirname(target_file))
+                    FileUtils.cp(f, target_file) unless File.basename(f) == ".keep"
                 }
                 # Copy the actual default config into the project as that
                 # will contain all keys and should be commented
-                FileUtils.cp(File.join(PgTools.root, "data", "config", "pg-tools.yml"), File.join("template_dir", ".pg-tools.yml"))
+                FileUtils.cp(File.join(PgTools.root, "data", "config", "pg-tools.yml"), File.join(target, ".pg-tools.yml"))
 
                 # Initialize git project
                 Dir.chdir(target) { 
