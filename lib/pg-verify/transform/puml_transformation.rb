@@ -1,6 +1,6 @@
 
 
-module PgTools
+module PgVerify
     module Transform
 
         class PumlTransformation

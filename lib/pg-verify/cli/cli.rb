@@ -4,7 +4,7 @@ Dir[File.join(__dir__, '*.rb')].sort.each { |file| require file }
 require 'thor'
 require 'plantuml_builder'
 
-module PgTools
+module PgVerify
     module Cli
 
         class ShowCommand < Thor
@@ -180,7 +180,7 @@ module PgTools
 
             end
 
-            desc "init", "Initialize a new pg-tools project"
+            desc "init", "Initialize a new pg-verify project"
             method_option :directory, :type => :string
             def init()
 
@@ -194,7 +194,7 @@ module PgTools
                 FileUtils.mkdir_p(target)
 
                 # Copy files to target
-                template_dir = File.join(PgTools.root, "data", "project-template")
+                template_dir = File.join(PgVerify.root, "data", "project-template")
                 files = Dir.glob(File.join(template_dir, '**', '*'), File::FNM_DOTMATCH).select { |f| File.file?(f) }
                 files.each { |f| 
                     target_file = File.join(target, f.sub(template_dir, ""))
@@ -204,7 +204,7 @@ module PgTools
                 }
                 # Copy the actual default config into the project as that
                 # will contain all keys and should be commented
-                FileUtils.cp(File.join(PgTools.root, "data", "config", "pg-tools.yml"), File.join(target, ".pg-tools.yml"))
+                FileUtils.cp(File.join(PgVerify.root, "data", "config", "pg-verify.yml"), File.join(target, ".pg-verify.yml"))
 
                 # Initialize git project
                 Dir.chdir(target) { 
@@ -215,7 +215,7 @@ module PgTools
 
                 puts "Successfully initialized project at #{target.c_file}!"
                 puts "You can read the #{'README.md'.c_file} to get started."
-                puts "Run #{'pg-tools doctor'.c_blue} and follow the instructions to set up your environment!"
+                puts "Run #{'pg-verify doctor'.c_blue} and follow the instructions to set up your environment!"
             end
 
             desc "doctor", "Check for common problems"

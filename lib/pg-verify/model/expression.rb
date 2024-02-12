@@ -1,4 +1,4 @@
-module PgTools
+module PgVerify
     module Model
 
         # Class used to represent a mathematical expression

@@ -24,16 +24,16 @@ class String
     end
 
     def display_length()
-        str = PgTools::Colorizer.uncolorize(self)
+        str = PgVerify::Colorizer.uncolorize(self)
         str.length() + ( str.count("\t") * 4 )
     end
 
     def line_combine(other, separator: " ")
-        PgTools::StringUtil.line_combine(self, other, separator: separator)
+        PgVerify::StringUtil.line_combine(self, other, separator: separator)
     end
 
     def indented(num: 1, str: " " * 4)
-        PgTools::StringUtil.indented(self, num_indents: num, indent_string: str)
+        PgVerify::StringUtil.indented(self, num_indents: num, indent_string: str)
     end
 
     def remove_before(substring)

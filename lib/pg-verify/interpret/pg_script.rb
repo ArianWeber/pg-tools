@@ -1,5 +1,5 @@
 
-module PgTools
+module PgVerify
     module Interpret
 
         class PgScript
@@ -46,7 +46,7 @@ module PgTools
                 # Include the full backtrace in the message if enabled
                 if Settings.full_stack_trace
                     title = "Here is the full backtrace of the exception!".c_sidenote + "\n"
-                    title += "(You don't have to bother with this unless you are developing pg-tools)".c_sidenote
+                    title += "(You don't have to bother with this unless you are developing pg-verify)".c_sidenote
                     bt = ex.backtrace.map(&:c_sidenote).join("\n").indented(str: ">>  ".c_sidenote)
                 end
 

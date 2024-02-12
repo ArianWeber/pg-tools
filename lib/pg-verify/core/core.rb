@@ -1,4 +1,4 @@
-module PgTools
+module PgVerify
 
     module Core
 

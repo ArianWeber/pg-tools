@@ -1,10 +1,10 @@
 # Require all module files
 Dir[File.join(__dir__, "**", '*.rb')].sort.each { |file| require file }
 
-module PgTools
+module PgVerify
     module NuSMV
 
-        class RawNuSMVError < PgTools::Core::Error
+        class RawNuSMVError < PgVerify::Core::Error
             def initialize(cmd, out, err, status, file)
                 @cmd, @out, @err, @status, @file = cmd, out, err, status, file
             end

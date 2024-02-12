@@ -1,6 +1,6 @@
 require_relative 'loading_animation.rb'
 
-module PgTools
+module PgVerify
     module Shell
 
         class LineAnimation < LoadingAnimation

@@ -1,9 +1,9 @@
-module PgTools
+module PgVerify
     module Doctor
 
         Warning = Struct.new(:title, :text)
 
-        class DoctorError < PgTools::Core::Error
+        class DoctorError < PgVerify::Core::Error
             def initialize(warnings)
                 @warnings = warnings
             end
@@ -42,7 +42,7 @@ module PgTools
         end
 
         def self.check_01_Can_find_NuSMV()
-            return [] unless PgTools::NuSMV::Runner.new.find_nusmv_path.nil?
+            return [] unless PgVerify::NuSMV::Runner.new.find_nusmv_path.nil?
             return Warning.new("Unable to locate the NuSMV executable", 
                 "Make sure to install NuSMV by unpacking it and placing the entire folder into\n" \
                 "the #{'addon'.c_file} directory of your project. " \
@@ -52,11 +52,11 @@ module PgTools
         end
 
         def self.check_02_Can_run_NuSMV()
-            path = PgTools::NuSMV::Runner.new.find_nusmv_path
+            path = PgVerify::NuSMV::Runner.new.find_nusmv_path
             return :skip if path.nil?
 
             # Test by evaluating some example smv file
-            example_file = File.join(PgTools.root, "data", "nusmv.sample.smv")
+            example_file = File.join(PgVerify.root, "data", "nusmv.sample.smv")
             return [] if Core::CMDRunner.run_for_exit_code("#{path} #{example_file}") == 0
 
             return Warning.new("Unable to run the NuSMV executable", 
@@ -68,26 +68,26 @@ module PgTools
         end
 
         def self.check_03_Run_integration_tests()
-            return :skip if PgTools::NuSMV::Runner.new.find_nusmv_path.nil?
+            return :skip if PgVerify::NuSMV::Runner.new.find_nusmv_path.nil?
 
             warnings = []
 
-            test_files = Dir[File.join(PgTools.root, "integration_tests", "ruby_dsl", "*.rb")].sort
+            test_files = Dir[File.join(PgVerify.root, "integration_tests", "ruby_dsl", "*.rb")].sort
             warnings += test_files.map { |test_file|
                 model = Interpret::PgScript.new.interpret(test_file).first
-                PgTools::Model::Validation.validate!(model)
+                PgVerify::Model::Validation.validate!(model)
                 results = NuSMV::Runner.new().run_specs(model)
                 failures = results.reject(&:success)
                 next if failures.empty?
 
                 test_name = File.basename(test_file, '.*').gsub("_", "-")
                 failures_s = failures.map { |f| "#{f.spec.text} (#{f.spec.expression.to_s.c_blue})" }
-                show_command = "$ pg-tools show nusmv --script #{File.expand_path(test_file)}".c_cyan
-                test_command = "$ pg-tools test --script #{File.expand_path(test_file)}".c_cyan
+                show_command = "$ pg-verify show nusmv --script #{File.expand_path(test_file)}".c_cyan
+                test_command = "$ pg-verify test --script #{File.expand_path(test_file)}".c_cyan
                 Warning.new("Failed integration test in #{test_name}", 
                    "The test #{test_name.c_string} contains the following unsatisfied specifications:\n" \
                    "\t- #{failures_s.join("\n\t- ")}\n" \
-                   "These specifications should be valid if pg-tools works as expected.\n" \
+                   "These specifications should be valid if pg-verify works as expected.\n" \
                    "You can use the following commands to debug this:\n" \
                    "  #{show_command}\n  #{test_command}"
                 )
@@ -128,7 +128,7 @@ module PgTools
             script = Settings.ruby_dsl.default_script_name
 
             return Warning.new("Failed to find model definition at #{script}", 
-                "If you run PG tools without any arguments it expects a program graph definition\n" \
+                "If you run PG verify without any arguments it expects a program graph definition\n" \
                 "at your working directory, which should be named #{script.c_file} by default.\n" \
                 "Based on your current working directory this would be this full path:\n" \
                 "\t#{File.expand_path(script).c_file}"
@@ -148,18 +148,18 @@ module PgTools
         end
 
         # def self.check_03_Can_find_PlantUML()
-        #     return [] unless PgTools::Puml.find_path.nil?
+        #     return [] unless PgVerify::Puml.find_path.nil?
         #     return Warning.new("Unable to find the PlantUML executable", 
         #         "Make sure to install PlantUML by dropping the jar into\n" \
         #         "the #{'addon'.c_file} directory of your project. " \
         #         "(#{File.expand_path('addon').c_sidenote})\n" \
         #         "You can get it from here: #{"https://plantuml.com/download".c_string}\n" \
-        #         "PG-Tools will fall back to using the PlantUML web-server otherwise."
+        #         "pg-verify will fall back to using the PlantUML web-server otherwise."
         #     )
         # end
 
         # def self.check_04_Can_run_PlantUML()
-        #     path = PgTools::Puml.find_path
+        #     path = PgVerify::Puml.find_path
         #     return :skip if path.blank?
 
         #     return [] if Core::CMDRunner.run_for_exit_code("java -jar #{path} -help") == 0

@@ -1,16 +1,16 @@
 # frozen_string_literal: true
 
-require_relative "lib/pg-tools/version"
+require_relative "lib/pg-verify/version"
 
 Gem::Specification.new do |spec|
-  spec.name = "pg-tools"
-  spec.version = PgTools::VERSION
+  spec.name = "pg-verify"
+  spec.version = PgVerify::VERSION
   spec.authors = ["Arian Weber"]
   spec.email = ["weber.arian.dev@gmail.com"]
 
   spec.summary = "Tool for the declaration and transformation of program graphs"
   # spec.description = "TODO: Write a longer description or delete this line."
-  spec.homepage = "https://github.com/ArianWeber/pg-tools"
+  spec.homepage = "https://github.com/ArianWeber/pg-verify"
   spec.required_ruby_version = ">= 2.6.0"
 
   spec.metadata["homepage_uri"] = spec.homepage

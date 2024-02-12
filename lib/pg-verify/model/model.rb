@@ -1,10 +1,10 @@
 # Require all module files
 Dir[File.join(__dir__, "**", '*.rb')].sort.each { |file| require file }
 
-module PgTools
+module PgVerify
     module Model
         
-        # class ValidationError < PgTools::Core::Error; end
+        # class ValidationError < PgVerify::Core::Error; end
 
     end
 end

@@ -1,11 +1,11 @@
 # Require all module files
 Dir[File.join(__dir__, "**", '*.rb')].sort.each { |file| require file }
 
-module PgTools
+module PgVerify
 
     module Interpret
 
-        class InterpretError < PgTools::Core::Error
+        class InterpretError < PgVerify::Core::Error
             attr_accessor :script_file
             attr_accessor :line_number
             attr_accessor :cause
@@ -32,7 +32,7 @@ module PgTools
 
         end
 
-        class InvalidDSL_var <  PgTools::Core::Error
+        class InvalidDSL_var <  PgVerify::Core::Error
             def initialize(message)
                 @message = message
             end
@@ -47,7 +47,7 @@ module PgTools
             end
         end
 
-        class InvalidDSL_state <  PgTools::Core::Error
+        class InvalidDSL_state <  PgVerify::Core::Error
             def initialize(message)
                 @message = message
             end
@@ -60,7 +60,7 @@ module PgTools
             end
         end
 
-        class InvalidDSL_graph <  PgTools::Core::Error
+        class InvalidDSL_graph <  PgVerify::Core::Error
             def initialize(message)
                 @message = message
             end
@@ -71,7 +71,7 @@ module PgTools
             end
         end
 
-        class InvalidDSL_transition <  PgTools::Core::Error
+        class InvalidDSL_transition <  PgVerify::Core::Error
             def initialize(message)
                 @message = message
             end
@@ -84,7 +84,7 @@ module PgTools
             end
         end
 
-        class InvalidDSL_expression <  PgTools::Core::Error
+        class InvalidDSL_expression <  PgVerify::Core::Error
             def initialize(type, message)
                 @type, @message = type, message
             end
@@ -97,7 +97,7 @@ module PgTools
             end
         end
 
-        class InvalidDSL_model <  PgTools::Core::Error
+        class InvalidDSL_model <  PgVerify::Core::Error
             def initialize(type, message)
                 @type, @message = type, message
             end
@@ -110,7 +110,7 @@ module PgTools
             end
         end
         
-        class NoSuchStateError < PgTools::Core::Error
+        class NoSuchStateError < PgVerify::Core::Error
             def initialize(state, component)
                 @state, @component = state, component
             end 

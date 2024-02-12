@@ -1,5 +1,5 @@
 #!/bin/sh
 
-# Simple wrapper to run pg-tools during development.
+# Simple wrapper to run pg-verify during development.
 
-ruby -Ilib ./exe/pg-tools "$@"
+ruby -Ilib ./exe/pg-verify "$@"

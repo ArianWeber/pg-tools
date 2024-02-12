@@ -1,5 +1,5 @@
 
-module PgTools
+module PgVerify
     module NuSMV
 
         class Runner
@@ -90,7 +90,7 @@ module PgTools
             end
 
             def eval_nusmv(nusmv_string, commands: [])
-                tmp_file = PgTools.tmp_file("pg.smv")
+                tmp_file = PgVerify.tmp_file("pg.smv")
                 File.write(tmp_file, nusmv_string)
                 return eval_file(tmp_file, commands: commands)
             end
@@ -101,7 +101,7 @@ module PgTools
                 if commands.blank?
                     nusmv_cmd = "#{nusmv_path} #{file}"
                 else
-                    tmp_cmd_file = PgTools.tmp_file("nusmv_commands")
+                    tmp_cmd_file = PgVerify.tmp_file("nusmv_commands")
                     File.write(tmp_cmd_file, commands.join("\n"))
                     nusmv_cmd = "#{nusmv_path} -source '#{tmp_cmd_file}' #{file}"
                 end
@@ -115,7 +115,7 @@ module PgTools
                 return Settings.nusmv.path if !Settings.nusmv.path.blank? && File.file?(Settings.nusmv.path)
 
                 # Fall back to looking in the addon directory
-                candidates = Dir[File.join(PgTools.addon_dir, "*", "bin", "NuSMV*")]
+                candidates = Dir[File.join(PgVerify.addon_dir, "*", "bin", "NuSMV*")]
                 return candidates.sort.first unless candidates.empty?
             end
 

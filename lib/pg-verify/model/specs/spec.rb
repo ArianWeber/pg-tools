@@ -1,4 +1,4 @@
-module PgTools
+module PgVerify
     module Model
 
         # A single specification and a leave in the tree

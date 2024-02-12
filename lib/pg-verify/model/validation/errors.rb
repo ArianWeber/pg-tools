@@ -1,8 +1,8 @@
-module PgTools
+module PgVerify
     module Model
         module Validation
 
-            class ValidationError < PgTools::Core::Error
+            class ValidationError < PgVerify::Core::Error
                 def initialize(model, errors)
                     @model, @errors = model, errors
                 end
@@ -19,7 +19,7 @@ module PgTools
 
             end
 
-            class UnknownTokenError < PgTools::Core::Error
+            class UnknownTokenError < PgVerify::Core::Error
                 def initialize(token, expression, varset)
                     @token, @expression, @varset = token, expression, varset
                 end
@@ -39,7 +39,7 @@ module PgTools
                 end
             end
 
-            class UnknownVariableError <  PgTools::Core::Error
+            class UnknownVariableError <  PgVerify::Core::Error
                 def initialize(assigned_variable, assignment_expression, var_set)
                     @assigned_variable, @assignment_expression, @var_set = assigned_variable, assignment_expression, var_set
                 end
@@ -60,7 +60,7 @@ module PgTools
                 end
             end
 
-            class ForeignVariableAssignmentError <  PgTools::Core::Error
+            class ForeignVariableAssignmentError <  PgVerify::Core::Error
                 def initialize(variable, expression, varset, component)
                     @variable, @expression, @varset = variable, expression, varset
                     @component = component
@@ -82,7 +82,7 @@ module PgTools
                 end
             end
 
-            class AssignmentToStateVariableError < PgTools::Core::Error
+            class AssignmentToStateVariableError < PgVerify::Core::Error
                 def initialize(variable, expression, varset)
                     @variable, @expression, @varset = variable, expression, varset
                 end
@@ -102,7 +102,7 @@ module PgTools
                 end
             end
 
-            class EmptyStateSetError < PgTools::Core::Error
+            class EmptyStateSetError < PgVerify::Core::Error
                 def initialize(component)
                     @component = component
                 end

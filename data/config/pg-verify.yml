@@ -16,12 +16,12 @@ puml:
 
 # Configuration for the Ruby DSL
 ruby_dsl:
-  # Default model definition script file when pg-tools is invoked without arguments
+  # Default model definition script file when pg-verify is invoked without arguments
   default_script_name: "program-graph.rb"
 
 # Enable/Disable colored printing all together
 use_colors: true
-# Enable/Disable colored printing when the output of pg-tools
+# Enable/Disable colored printing when the output of pg-verify
 # is not piped into a TTY directly.
 use_colors_in_pipe: false
 # Print full stack traces on any error.

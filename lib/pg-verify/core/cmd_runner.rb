@@ -1,4 +1,4 @@
-module PgTools
+module PgVerify
 
     module Core
 
@@ -131,7 +131,7 @@ module PgTools
                 !run_or_return("command -v '#{command}'", nil).nil?
             end
 
-            class CMDRunnerError < PgTools::Core::Error
+            class CMDRunnerError < PgVerify::Core::Error
                 def initialize(cmd, output, err, delta_seconds)
                     @cmd, @output, @err, @delta_seconds = cmd, output, err, delta_seconds
                 end

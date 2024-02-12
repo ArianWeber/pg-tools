@@ -1,6 +1,6 @@
 require "rainbow"
 
-module PgTools
+module PgVerify
 
     # A Module for easy coloration of strings with theme support.
     # After #attach is called strings can be colored using one of any c_ or bg_ methods
@@ -128,7 +128,7 @@ module PgTools
             use_colors = Settings.use_colors
             use_colors &&= Settings.use_colors_in_pipe if !$stdout.isatty
             Rainbow.enabled = use_colors
-            String.class_eval { include PgTools::Colorizer }
+            String.class_eval { include PgVerify::Colorizer }
         end
 
     end

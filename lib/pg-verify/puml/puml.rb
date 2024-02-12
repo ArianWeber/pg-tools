@@ -2,7 +2,7 @@
 Dir[File.join(__dir__, "**", '*.rb')].sort.each { |file| require file }
 
 
-module PgTools
+module PgVerify
     module Puml
 
         def self.find_path
@@ -10,7 +10,7 @@ module PgTools
             return Settings.puml.path if !Settings.puml.path.blank? && File.file?(Settings.puml.path)
 
             # Fall back to looking in the addon directory
-            candidates = Dir[File.join(PgTools.addon_dir, "plantuml-*.jar")]
+            candidates = Dir[File.join(PgVerify.addon_dir, "plantuml-*.jar")]
             return candidates.sort.first unless candidates.empty?
         end
 

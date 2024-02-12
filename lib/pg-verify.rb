@@ -1,27 +1,27 @@
 # frozen_string_literal: true
 
-require_relative "pg-tools/version"
-require_relative "pg-tools/core/core.rb"
-require_relative "pg-tools/shell/shell.rb"
-require_relative "pg-tools/doctor/doctor.rb"
-require_relative "pg-tools/model/model.rb"
-require_relative "pg-tools/interpret/interpret.rb"
-require_relative "pg-tools/cli/cli.rb"
-require_relative "pg-tools/transform/transform.rb"
-require_relative "pg-tools/nusmv/nusmv.rb"
-require_relative "pg-tools/puml/puml.rb"
-require_relative "pg-tools/simulation/simulation.rb"
+require_relative "pg-verify/version"
+require_relative "pg-verify/core/core.rb"
+require_relative "pg-verify/shell/shell.rb"
+require_relative "pg-verify/doctor/doctor.rb"
+require_relative "pg-verify/model/model.rb"
+require_relative "pg-verify/interpret/interpret.rb"
+require_relative "pg-verify/cli/cli.rb"
+require_relative "pg-verify/transform/transform.rb"
+require_relative "pg-verify/nusmv/nusmv.rb"
+require_relative "pg-verify/puml/puml.rb"
+require_relative "pg-verify/simulation/simulation.rb"
 require 'config'
 require 'fileutils'
 require 'open3'
 
-module PgTools
+module PgVerify
 
     def self.init()
         config_paths = []
-        config_paths << File.expand_path('data/config/pg-tools.yml', self.root)
-        config_paths << File.expand_path('.pg-tools.yml', Dir.home)
-        config_paths << File.expand_path('.pg-tools.yml', Dir.pwd)
+        config_paths << File.expand_path('data/config/pg-verify.yml', self.root)
+        config_paths << File.expand_path('.pg-verify.yml', Dir.home)
+        config_paths << File.expand_path('.pg-verify.yml', Dir.pwd)
         config_paths.select! { |path| File.file?(path) }
         Config.load_and_set_settings(*config_paths)
 
@@ -44,4 +44,4 @@ module PgTools
 
 end
 
-PgTools.init()
+PgVerify.init()

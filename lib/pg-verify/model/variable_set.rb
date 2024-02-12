@@ -1,5 +1,5 @@
 
-module PgTools
+module PgVerify
     module Model
 
         class VariableSet

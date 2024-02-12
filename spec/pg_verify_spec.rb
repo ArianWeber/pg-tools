@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-RSpec.describe PgTools do
+RSpec.describe PgVerify do
   it "has a version number" do
-    expect(PgTools::VERSION).not_to be nil
+    expect(PgVerify::VERSION).not_to be nil
   end
 end

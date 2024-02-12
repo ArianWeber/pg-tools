@@ -1,13 +1,13 @@
 # Welcome to your project 🎉
 
-PG tools is a CLI application which allows you to develop program graph models
+PG verify is a CLI application which allows you to develop program graph models
 and verify characteristics of those models.
 
-To get started you can run `pg-tools doctor` to verify your installation and guide
+To get started you can run `pg-verify doctor` to verify your installation and guide
 you through the steps needed to install external addons like the NuSMV model checker.
 
-You can always run `pg-tools help` to get a list of available commands.
-For example try running `pg-tools show png` to render a PNG image of your program graph
+You can always run `pg-verify help` to get a list of available commands.
+For example try running `pg-verify show png` to render a PNG image of your program graph
 and save that to your working directory.
 
 ## Project files

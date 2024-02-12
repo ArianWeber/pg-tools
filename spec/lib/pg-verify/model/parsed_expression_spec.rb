@@ -1,5 +1,5 @@
 
-RSpec.describe PgTools::Model::ParsedExpression do
+RSpec.describe PgVerify::Model::ParsedExpression do
 
     describe "#tokenize" do
 
@@ -11,7 +11,7 @@ RSpec.describe PgTools::Model::ParsedExpression do
 
         examples.each { |string, tokens|
             it "tokenizes '#{string}'" do
-                expression = PgTools::Model::ParsedExpression.new(string, :guard)
+                expression = PgVerify::Model::ParsedExpression.new(string, :guard)
                 expect(expression.tokenize).to eq(tokens)
             end
         }

@@ -2,7 +2,7 @@
 Dir[File.join(__dir__, "**", '*.rb')].sort.each { |file| require file }
 require 'io/console'
 
-module PgTools
+module PgVerify
     module Shell
 
         def self.in_pipe?()

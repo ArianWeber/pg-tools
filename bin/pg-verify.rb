@@ -1,9 +1,9 @@
 require "bundler/setup"
-require 'pg-tools'
+require 'pg-verify'
 
-module PgTools
+module PgVerify
     
-    class PgToolsCLI
+    class PgVerifyCLI
 
         def run()
             begin

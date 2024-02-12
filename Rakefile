@@ -25,7 +25,7 @@ def test_ruby_version(version)
 
     # Generate docker file
     dockerfile_path = File.join(".pg-work", "Dockerfile")
-    image_name = "pg-tools-test"
+    image_name = "pg-verify-test"
     dockerfile = [ "FROM ruby:#{version}" ]
     File.write(dockerfile_path, dockerfile.join("\n"))
     sh "docker build --file #{dockerfile_path} --tag #{image_name} ."
@@ -40,13 +40,13 @@ def test_ruby_version(version)
     test_cmd << "bundle exec rspec"
     test_cmd << "bundle exec rake build"
     test_cmd << "gem install pkg/*"
-    test_cmd << "pg-tools --help"
-    test_cmd << "pg-tools doctor"
+    test_cmd << "pg-verify --help"
+    test_cmd << "pg-verify doctor"
     test_cmd = test_cmd.join(" && ")
 
     docker_run = [ "docker run" ]
     docker_run << "--rm"
-    docker_run << "--name pg-tools-container"
+    docker_run << "--name pg-verify-container"
     docker_run << "--mount type=bind,source='#{Dir.pwd}',target=/app"
     docker_run << "--workdir /app"
     docker_run << image_name

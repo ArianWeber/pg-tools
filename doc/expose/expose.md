@@ -1,6 +1,6 @@
-# PG-Tools
+# pg-verify
 
-PG-Tools ist ein textbasiertes CLI-Programm zur Entwicklung und Einbindung von
+pg-verify ist ein textbasiertes CLI-Programm zur Entwicklung und Einbindung von
 Programmgraphen im Kontext der formalen Sicherheitsanalyse.
 
 Ziel ist es, ein anwenderfreundliches, robustes und zukunftssicheres System zu entwickeln,
@@ -26,7 +26,7 @@ Das folgende Bild zeigt also nur ein Beispiel.
 
 Links im Bild sieht man die Definition eines Programmgraphen über die
 Ruby DSL. Rechts sieht man die generierte Grafik. Die Grafik wird aktualisiert sobald
-man `pg-tools show` ausführt, so wie unten abgebildet.
+man `pg-verify show` ausführt, so wie unten abgebildet.
 
 ### Das Weidezaun-Beispiel in der Ruby DSL
 
@@ -101,7 +101,7 @@ Und hier die generierte Grafik:
 ![alt text](./validity.png)
 
 Oben im Bild ist die Definition von Spezifikationen zur Validitätsprüfung dargestellt.
-Führt man `pg-tools test` aus, erhält man die unten dargestellte Ausgabe.
+Führt man `pg-verify test` aus, erhält man die unten dargestellte Ausgabe.
 (Das Feature ist noch nicht implementiert. Tatsächlich wären hier einige Tests fehlgeschlagen.)
 Die Syntax ist vom beliebten Test-Framework [Rspec](https://rspec.info/) inspiriert. 
 Im Fehlerfall würde der Ablauf ausgegeben, der die Formel verletzt.
@@ -137,7 +137,7 @@ specify "The train" do
     end
 end
 
-# Definition einer Gefährdung für die DCCA. Ausführbar mit: 'pg-tools dcca'
+# Definition einer Gefährdung für die DCCA. Ausführbar mit: 'pg-verify dcca'
 hazard "Train on unsecured railroad crossing" \
     => :"Barrier.angle > #{barrier_closed_angle} && Train.position >= #{train_pos_gep} && Train.position <= #{tain_pos_sp}"
 ```
@@ -259,7 +259,7 @@ Language Servers ermöglichen es, effizient Sprach-Features zu implementieren. D
 - Fehler-Überprüfung und -diagnose
 - Springen zur Definition einer Funktion
 
-Wir möchten versuchen, pg-tools in einen Language Server zu integrieren. Allerdings wissen wir mangels eigener Erfahrung nicht, ob das mit angemessenem Aufwand möglich ist und können deshalb nicht versprechen, dass dieses Fearture am Ende im Produkt enthalten sein wird.
+Wir möchten versuchen, pg-verify in einen Language Server zu integrieren. Allerdings wissen wir mangels eigener Erfahrung nicht, ob das mit angemessenem Aufwand möglich ist und können deshalb nicht versprechen, dass dieses Fearture am Ende im Produkt enthalten sein wird.
 
 Durch diese Integration möchten wir den Entwickler:innen ermöglichen:
 - Sich auf die Modellierung der Graphen zu konzentrieren, anstatt wieder und wieder die gleiche Variable auszuschreiben
@@ -290,8 +290,8 @@ Im Folgenden haben wir einige Ideen für Features aufgelistet:
 - Integriertes Test-Framework zur Validitätsprüfung
 - Deklarative Syntax zur Verwendung der "LTL-Pattern" aus der Vorlesung
 - Automatische DCCA
-- Installation über ein Kommando (`gem install pg-tools`)
-- Einfache Einarbeitung (mit Kommando `pg-tools init`)
+- Installation über ein Kommando (`gem install pg-verify`)
+- Einfache Einarbeitung (mit Kommando `pg-verify init`)
     - Hier wird ein Beispielprojekt angelegt um die Projektstruktur vorzugeben
 - Ansprechende Dokumentation
 - Konfigurationsmöglichkeiten  
@@ -349,7 +349,7 @@ auf verschiednen Systemen sichergestellt werden.
 CLI-Programme können einfach in Arbeitsabläufe eingebunden werden.
 Beispielsweise wäre es möglich, Tests für Modelle zu schreiben, die mittels "continuous integration"
 für jeden Pull Request auf GitHub ausgeführt werden.
-(Das `pg-tools init` Kommando könnte eine solche CI Pipeline automatisch definieren)
+(Das `pg-verify init` Kommando könnte eine solche CI Pipeline automatisch definieren)
 
 ## Zielgruppe
 
