@@ -205,6 +205,8 @@ module PgVerify
                 # Copy the actual default config into the project as that
                 # will contain all keys and should be commented
                 FileUtils.cp(File.join(PgVerify.root, "data", "config", "pg-verify.yml"), File.join(target, ".pg-verify.yml"))
+                prelude_pg_file = File.join(PgVerify.root, "integration_tests", "ruby_dsl", "016_pressure_tank.rb")
+                FileUtils.cp(prelude_pg_file, File.join(target, Settings.ruby_dsl.default_script_name))
 
                 # Initialize git project
                 Dir.chdir(target) { 
