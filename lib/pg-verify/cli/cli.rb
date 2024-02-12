@@ -93,6 +93,18 @@ module PgVerify
 
         class BaseCommand < Thor
 
+            desc "version", "Print version information"
+            def version()
+                banner = File.read(File.join(PgVerify.root, "data", "banner.txt"))
+                banner = banner.gsub("0.1.0", PgVerify::VERSION)
+                colors = [ "red", "orange", "yellow", "orange", "red" ]
+                banner = banner.split("\n").each_with_index.map { |l, i| l.send(:"c_#{colors[i]}") }.join("\n")
+                puts banner
+                puts 
+                puts "You are running #{'pg-verify'.c_string} version #{PgVerify::VERSION.to_s.c_num}"
+                puts "Installation root: #{PgVerify.root.to_s.c_file}"
+            end
+
             desc "test", "Test the model specifications"
             method_option :script, :type => :string
             def test()
