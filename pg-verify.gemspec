@@ -30,7 +30,6 @@ Gem::Specification.new do |spec|
 
   # Gem dependencies
   spec.add_dependency "thor", "~> 1.2.1"
-  spec.add_dependency "ebnf", "~> 2.3.4"
   spec.add_dependency "rainbow", "~> 3.0.0"
   spec.add_dependency "config", "~> 4.2.1"
   spec.add_dependency "plantuml_builder", "~> 0.3.0"
