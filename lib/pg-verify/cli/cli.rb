@@ -112,6 +112,10 @@ module PgVerify
                 models = Interpret::PgScript.new.interpret(script_file)
 
                 models.each { |model|
+                    Shell::LoadingPrompt.while_loading("Checking for deadlocks") {
+                        NuSMV::Runner.new().run_check!(model)
+                    }
+
                     results = Shell::LoadingPrompt.while_loading("Running specifications") {
                         NuSMV::Runner.new().run_specs(model)
                     }
@@ -136,6 +140,10 @@ module PgVerify
                 models = Interpret::PgScript.new.interpret(script_file)
 
                 models.each { |model|
+                    Shell::LoadingPrompt.while_loading("Checking for deadlocks") {
+                        NuSMV::Runner.new().run_check!(model)
+                    }
+
                     dcca = Model::DCCA.new(model, NuSMV::Runner.new)
                     result = Shell::LoadingPrompt.while_loading("Calculating DCCA for #{model.name.to_s.c_string}") {
                         dcca.perform()
@@ -164,6 +172,10 @@ module PgVerify
                 runner = NuSMV::Runner.new
 
                 models.each { |model|
+                    Shell::LoadingPrompt.while_loading("Checking for deadlocks") {
+                        NuSMV::Runner.new().run_check!(model)
+                    }
+
                     trace = Shell::LoadingPrompt.while_loading("Simulating model #{model.name.to_s.c_string}") {
                         runner.run_simulation(model, options[:steps], random: options[:random])
                     }

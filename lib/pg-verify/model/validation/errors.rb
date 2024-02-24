@@ -114,6 +114,23 @@ module PgVerify
                 end
             end
 
+            class DeadlockInFSMError < PgVerify::Core::Error
+                def initialize(program_graph, deadlock_state)
+                    @program_graph, @deadlock_state = program_graph, deadlock_state
+                end
+                def formatted()
+                    trace = Model::Trace.new(@program_graph, [@deadlock_state])
+
+                    title = "Deadlock in program graph #{@program_graph.name}"
+                    body = "The following state has no successor:\n\n"
+                    body += trace.to_s(include_steps: false).indented(str: ">>  ".c_error)
+
+                    hint = []
+                    hint << "This indicates a range violation!"
+                    return title, body, hint.join("\n")
+                end
+            end
+
         end
     end
 end

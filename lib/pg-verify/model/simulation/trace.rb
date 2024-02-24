@@ -10,7 +10,7 @@ module PgVerify
                 @model, @states = model, states
             end
 
-            def to_s()
+            def to_s(include_steps: true)
                 return "No states in trace" if @states.empty?
                 # Get all variables (TODO: Bring into sensible order)
                 vars = @states.first.keys
@@ -21,6 +21,7 @@ module PgVerify
                     var_string + "\n" + @states.each_with_index.map{ |state, index| value_str(var, state[var], index) }.join("\n") 
                 }
                 str = "Step".c_num.c_bold + "\n" + (0...@states.length).map { |i| "#{i + 1}" } .join("\n")
+                str = "" unless include_steps
                 parts.each { |part| str = str.line_combine(part, separator: "  ") }
                 
                 return str

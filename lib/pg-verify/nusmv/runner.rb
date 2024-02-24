@@ -53,6 +53,34 @@ module PgVerify
                 return parse_trace(program_graph, output)
             end
 
+            def run_check!(program_graph)
+                deadlock_state = run_check(program_graph)
+                return if deadlock_state.nil?
+                raise Model::Validation::DeadlockInFSMError.new(program_graph, deadlock_state)
+            end
+
+            def run_check(program_graph)
+                commands = [ "go", "check_fsm", "quit" ]
+                nusmv_s = Transform::NuSmvTransformation.new.transform_graph(program_graph)
+                output = eval_nusmv(nusmv_s, commands: commands)
+
+                # Return "ok" if the FSM has no deadlocks
+                return nil if output.include?("The transition relation is total: No deadlock state exists")
+                
+                # Otherwise compute and return the deadlock state
+                lines = output.split("\n").drop_while { |str| !str.start_with?("A deadlock state is:") }
+                lines = lines[1, lines.length - 1]
+
+                var_state = {}
+                lines.each { |line|
+                    key, val = parse_var_assignment_in_trace(line)
+                    next if key.nil? || val.nil?
+                    var_state[key] = val
+                }
+
+                return var_state
+            end
+
             def parse_trace(program_graph, nusmv_output)
                 var_states, current_var_state = [], nil
 
@@ -81,12 +109,20 @@ module PgVerify
                         next
                     end
 
-                    key_val = line.split("=").map(&:strip)
-                    key = key_val[0].gsub("v.V_", "").to_sym
-                    val = key_val[1].gsub("L_", "")
+                    # Parse the variable state
+                    key, val = parse_var_assignment_in_trace(line)
+                    next if key.nil? || val.nil?
                     current_var_state[key] = val
                 }
                 return Model::Trace.new(program_graph, var_states)
+            end
+
+            def parse_var_assignment_in_trace(line)
+                return nil, nil unless line.include?("=")
+                key_val = line.split("=").map(&:strip)
+                key = key_val[0].gsub("v.V_", "").to_sym
+                val = key_val[1].gsub("L_", "")
+                return key, val
             end
 
             def eval_nusmv(nusmv_string, commands: [])

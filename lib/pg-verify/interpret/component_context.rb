@@ -44,7 +44,7 @@ module PgVerify
                 range = hash[name]
                 raise "Variable name must be different to the component that owns it" if name.to_sym == @name
                 raise InvalidDSL_var.new("Name '#{name}' is not a symbol") unless name.is_a?(Symbol)
-                raise InvalidDSL_var.new("Range '#{range}' is not a range or array") unless range.is_a?(Range) && range.first.is_a?(Integer)
+                raise InvalidDSL_var.new("Range '#{range}' is not a range or array") unless (range.is_a?(Range) || range.is_a?(Array)) && range.first.is_a?(Integer)
                 sloc = @parent_graph.parent_script.find_source_location()
                 variable = Model::Variable.new(name, range, @name, sloc)
 
