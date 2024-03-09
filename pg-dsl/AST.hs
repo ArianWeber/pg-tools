@@ -12,7 +12,6 @@ module AST
   , Expression(..)
   , Term(..)
   , Formula(..)
-  , Proposition
   , RelOp(..)
   , PError(..)
   ) where
@@ -65,6 +64,18 @@ data Expression
   | Single String -- single variables cannot be categorized w/o context
   deriving (Show, Eq)
 
+data Formula
+  = FVar String
+  | FTrue
+  | FFalse
+  | Proposition RelOp Term Term
+  | Not Formula
+  | And Formula Formula
+  | Or Formula Formula
+  | Implies Formula Formula
+  | Equiv Formula Formula
+  deriving (Show, Eq)
+
 data Term
   = TermVar String
   | Const Int
@@ -75,26 +86,13 @@ data Term
   | Divide Term Term
   deriving (Show, Eq)
 
-data Formula
-  = FTrue
-  | FFalse
-  | Prop Proposition
-  | Not Formula
-  | And Formula Formula
-  | Or Formula Formula
-  | Implies Formula Formula
-  | Equiv Formula Formula
-  deriving (Show, Eq)
-
-type Proposition = (RelOp, Term, Term)
-
 data RelOp
   = Equal
-  | NotEqual
-  | Lower
-  | LowerEqual
+  | NotEq
+  | Less
+  | LessEq
   | Greater
-  | GreaterEqual
+  | GreaterEq
   deriving (Show, Eq)
 
 data PError = PError

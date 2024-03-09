@@ -20,7 +20,7 @@ data Token
   | TSquareL
   | TSquareR
   | TComma
-  | TSemicolon
+  | TSemic
   | TDots
   | TArrow
   | TWalrus
@@ -29,11 +29,11 @@ data Token
   | TMinus
   | TStar
   | TSlash
-  | TEqual
-  | TNotEqual
-  | TLowerEq
-  | TLower
-  | TGreaterEq
+  | TEq
+  | TNEq
+  | TLEq
+  | TLess
+  | TGEq
   | TGreater
   | TNot
   | TOr
@@ -54,58 +54,59 @@ data Token
   | TTrue
   | TFalse
   | TNumber Int
-  | TNameLower String
-  | TNameUpper String
+  | TLower String
+  | TUpper String
+  deriving (Eq)
 
 instance Show Token where
   show :: Token -> String
-  show TEoF           = "end of file"
-  show TSpace         = "' '"
-  show (TComment c)   = "'" ++ c ++ "'"
-  show TNewline       = "'end of line'"
-  show TBRacketL      = "'('"
-  show TBracketR      = "')'"
-  show TCurlyL        = "'{'"
-  show TCurlyR        = "'}'"
-  show TSquareL       = "'['"
-  show TSquareR       = "']'"
-  show TComma         = "','"
-  show TSemicolon     = "';'"
-  show TDots          = "'..'"
-  show TArrow         = "'->'"
-  show TWalrus        = "':='"
-  show TColon         = "':'"
-  show TPlus          = "'+'"
-  show TMinus         = "'-'"
-  show TStar          = "'*'"
-  show TSlash         = "'/'"
-  show TEqual         = "'='"
-  show TNotEqual      = "'!='"
-  show TLowerEq       = "'<='"
-  show TLower         = "'<'"
-  show TGreaterEq     = "'>='"
-  show TGreater       = "'>'"
-  show TNot           = "'!'"
-  show TOr            = "'|'"
-  show TAnd           = "'&'"
-  show TImplies       = "'=>'"
-  show TEquiv         = "'<=>'"
-  show TGraph         = "'graph'"
-  show TVars          = "'variables'"
-  show TStates        = "'states'"
-  show TInit          = "'init'"
-  show TTransitions   = "'transitions'"
-  show TGuard         = "'guard'"
-  show TAction        = "'action'"
-  show TBool          = "'bool'"
-  show TInt           = "'int'"
-  show TEnum          = "'enum'"
-  show TState         = "'state'"
-  show TTrue          = "'true'"
-  show TFalse         = "'false'"
-  show (TNumber n)    = show n
-  show (TNameLower s) = "'" ++ s ++ "'"
-  show (TNameUpper s) = "'" ++ s ++ "'"
+  show TEoF         = "end of file"
+  show TSpace       = "' '"
+  show (TComment c) = "'" ++ c ++ "'"
+  show TNewline     = "newline"
+  show TBRacketL    = "'('"
+  show TBracketR    = "')'"
+  show TCurlyL      = "'{'"
+  show TCurlyR      = "'}'"
+  show TSquareL     = "'['"
+  show TSquareR     = "']'"
+  show TComma       = "','"
+  show TSemic       = "';'"
+  show TDots        = "'..'"
+  show TArrow       = "'->'"
+  show TWalrus      = "':='"
+  show TColon       = "':'"
+  show TPlus        = "'+'"
+  show TMinus       = "'-'"
+  show TStar        = "'*'"
+  show TSlash       = "'/'"
+  show TEq          = "'='"
+  show TNEq         = "'!='"
+  show TLEq         = "'<='"
+  show TLess        = "'<'"
+  show TGEq         = "'>='"
+  show TGreater     = "'>'"
+  show TNot         = "'!'"
+  show TOr          = "'|'"
+  show TAnd         = "'&'"
+  show TImplies     = "'=>'"
+  show TEquiv       = "'<=>'"
+  show TGraph       = "'graph'"
+  show TVars        = "'variables'"
+  show TStates      = "'states'"
+  show TInit        = "'init'"
+  show TTransitions = "'transitions'"
+  show TGuard       = "'guard'"
+  show TAction      = "'action'"
+  show TBool        = "'bool'"
+  show TInt         = "'int'"
+  show TEnum        = "'enum'"
+  show TState       = "'state'"
+  show TTrue        = "'true'"
+  show TFalse       = "'false'"
+  show (TNumber n)  = "'" ++ show n ++ "'"
+  show (TLower s)   = "'" ++ s ++ "'"
+  show (TUpper s)   = "'" ++ s ++ "'"
 
 data DToken = DToken
   { token  :: Token

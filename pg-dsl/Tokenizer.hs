@@ -27,7 +27,7 @@ tok acc l c ('}':p) = tok (dec TCurlyR l c : acc) l (c + 1) p
 tok acc l c ('[':p) = tok (dec TSquareL l c : acc) l (c + 1) p
 tok acc l c (']':p) = tok (dec TSquareR l c : acc) l (c + 1) p
 tok acc l c (',':p) = tok (dec TComma l c : acc) l (c + 1) p
-tok acc l c (';':p) = tok (dec TSemicolon l c : acc) l (c + 1) p
+tok acc l c (';':p) = tok (dec TSemic l c : acc) l (c + 1) p
 tok acc l c ('.':'.':p) = tok (dec TDots l c : acc) l (c + 2) p
 tok acc l c ('-':'>':p) = tok (dec TArrow l c : acc) l (c + 2) p
 tok acc l c (':':'=':p) = tok (dec TWalrus l c : acc) l (c + 2) p
@@ -38,11 +38,11 @@ tok acc l c ('*':p) = tok (dec TStar l c : acc) l (c + 1) p
 tok acc l c ('/':p) = tok (dec TSlash l c : acc) l (c + 1) p
 tok acc l c ('=':'>':p) = tok (dec TImplies l c : acc) l (c + 2) p
 tok acc l c ('<':'=':'>':p) = tok (dec TImplies l c : acc) l (c + 3) p
-tok acc l c ('=':p) = tok (dec TEqual l c : acc) l (c + 1) p
-tok acc l c ('!':'=':p) = tok (dec TNotEqual l c : acc) l (c + 2) p
-tok acc l c ('<':'=':p) = tok (dec TLowerEq l c : acc) l (c + 2) p
-tok acc l c ('<':p) = tok (dec TLower l c : acc) l (c + 1) p
-tok acc l c ('>':'=':p) = tok (dec TGreaterEq l c : acc) l (c + 2) p
+tok acc l c ('=':p) = tok (dec TEq l c : acc) l (c + 1) p
+tok acc l c ('!':'=':p) = tok (dec TNEq l c : acc) l (c + 2) p
+tok acc l c ('<':'=':p) = tok (dec TLEq l c : acc) l (c + 2) p
+tok acc l c ('<':p) = tok (dec TLess l c : acc) l (c + 1) p
+tok acc l c ('>':'=':p) = tok (dec TGEq l c : acc) l (c + 2) p
 tok acc l c ('>':p) = tok (dec TGreater l c : acc) l (c + 1) p
 tok acc l c ('!':p) = tok (dec TNot l c : acc) l (c + 1) p
 tok acc l c ('|':p) = tok (dec TOr l c : acc) l (c + 1) p
@@ -92,7 +92,7 @@ tok acc l c p@(x:_)
      in tok (dec (TNumber n) l c : acc) l c' p'
   | isAsciiUpper x =
     let (c', p', s) = readName c p
-     in tok (dec (TNameUpper s) l c : acc) l c' p'
+     in tok (dec (TUpper s) l c : acc) l c' p'
   | isAsciiLower x = tokLower acc l c p
   | otherwise =
     Left $ TError {tMsg = "Invalid char: " ++ show x, tLine = l, tCol = c}
@@ -100,7 +100,7 @@ tok acc l c p@(x:_)
 tokLower :: [DToken] -> Int -> Int -> String -> TokenList
 tokLower acc l c p =
   let (c', p', s) = readName c p
-   in tok (dec (TNameLower s) l c : acc) l c' p'
+   in tok (dec (TLower s) l c : acc) l c' p'
 
 spaces :: Int -> String -> (Int, String)
 spaces i (' ':s) = spaces (i + 1) s

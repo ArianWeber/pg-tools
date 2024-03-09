@@ -23,8 +23,8 @@ pGraph (h:t) =
   where
     pg1 (h:t) =
       case token h of
-        TNameUpper s -> pg2 s t
-        _            -> raise h
+        TUpper s -> pg2 s t
+        _        -> raise h
     pg2 n p =
       case pVars p of
         Left e        -> Left e
@@ -90,14 +90,14 @@ pVars (h:t) =
 pBool :: [DToken] -> Either PError (VarDef, [DToken])
 pBool (h:t) =
   case token h of
-    TNameLower s -> Right ((s, RBool), t)
-    _            -> raise h
+    TLower s -> Right ((s, RBool), t)
+    _        -> raise h
 
 pInt :: [DToken] -> Either PError (VarDef, [DToken])
 pInt (h:t) =
   case token h of
-    TNameLower s -> pi1 s t
-    _            -> raise h
+    TLower s -> pi1 s t
+    _        -> raise h
   where
     pi1 s (h:t) =
       case token h of
@@ -119,8 +119,8 @@ pInt (h:t) =
 pEnum :: [DToken] -> Either PError (VarDef, [DToken])
 pEnum (h:t) =
   case token h of
-    TNameLower s -> pe1 s t
-    _            -> raise h
+    TLower s -> pe1 s t
+    _        -> raise h
   where
     pe1 s (h:t) =
       case token h of
@@ -128,8 +128,8 @@ pEnum (h:t) =
         _       -> raise h
     pe2 vs s (h:t) =
       case token h of
-        TNameLower v -> pe3 (v : vs) s t
-        _            -> raise h
+        TLower v -> pe3 (v : vs) s t
+        _        -> raise h
     pe3 vs s (h:t) =
       case token h of
         TComma  -> pe2 vs s t
@@ -139,8 +139,8 @@ pEnum (h:t) =
 pState :: [DToken] -> Either PError (VarDef, [DToken])
 pState (h:t) =
   case token h of
-    TNameUpper s -> Right ((s, RState), t)
-    _            -> raise h
+    TUpper s -> Right ((s, RState), t)
+    _        -> raise h
 
 pStates :: [DToken] -> Either PError ([State], [DToken])
 pStates (h:t) =
@@ -154,8 +154,8 @@ pStates (h:t) =
         _       -> raise h
     ps2 ss (h:t) =
       case token h of
-        TNameUpper s -> ps3 (s : ss) t
-        _            -> raise h
+        TUpper s -> ps3 (s : ss) t
+        _        -> raise h
     ps3 ss (h:t) =
       case token h of
         TComma  -> ps2 ss t
@@ -174,8 +174,8 @@ pInit (h:t) =
         _      -> raise h
     pi2 (h:t) =
       case token h of
-        TNameUpper s -> pi3 s t
-        _            -> raise h
+        TUpper s -> pi3 s t
+        _        -> raise h
     pi3 s (h:t) =
       case token h of
         TCurlyL -> pi4 s t
@@ -197,9 +197,9 @@ pTransitions (h:t) =
         _       -> raise h
     pt2 ts p@(h:t) =
       case token h of
-        TNameUpper _ -> pt3 ts p
-        TCurlyR      -> Right (ts, t)
-        _            -> raise h
+        TUpper _ -> pt3 ts p
+        TCurlyR  -> Right (ts, t)
+        _        -> raise h
     pt3 ts p =
       case pTrans p of
         Right (t, p') -> pt2 (t : ts) p'
@@ -208,8 +208,8 @@ pTransitions (h:t) =
 pTrans :: [DToken] -> Either PError (Trans, [DToken])
 pTrans (h:t) =
   case token h of
-    TNameUpper s -> pt1 s t
-    _            -> raise h
+    TUpper s -> pt1 s t
+    _        -> raise h
   where
     pt1 s (h:t) =
       case token h of
@@ -217,8 +217,8 @@ pTrans (h:t) =
         _      -> raise h
     pt2 s (h:t) =
       case token h of
-        TNameUpper s' -> pt3 s' s t
-        _             -> raise h
+        TUpper s' -> pt3 s' s t
+        _         -> raise h
     pt3 s' s (h:t) =
       case token h of
         TCurlyL -> pt4 s' s t
@@ -267,9 +267,9 @@ pAction (h:t) =
         _       -> raise h
     pa2 acc (h:t) =
       case token h of
-        TNameLower s -> pa3 s acc t
-        TCurlyR      -> Right (acc, t)
-        _            -> raise h
+        TLower s -> pa3 s acc t
+        TCurlyR  -> Right (acc, t)
+        _        -> raise h
     pa3 v acc (h:t) =
       case token h of
         TWalrus -> pa4 v acc (h : t)
@@ -280,9 +280,9 @@ pAction (h:t) =
         Left e        -> Left e
     pa5 acc (h:t) =
       case token h of
-        TCurlyR    -> Right (acc, t)
-        TSemicolon -> pa2 acc t
-        _          -> raise h
+        TCurlyR -> Right (acc, t)
+        TSemic  -> pa2 acc t
+        _       -> raise h
 
 pExpression :: [DToken] -> Either PError (Expression, [DToken])
 pExpression p =
@@ -299,15 +299,86 @@ pExpression p =
 pSingle :: [DToken] -> Either PError (String, [DToken])
 pSingle (h:t) =
   case token h of
-    TNameLower s -> ps1 s t
-    _            -> raise h
+    TLower s -> ps1 s t
+    _        -> raise h
   where
-    ps1 :: String -> [DToken] -> Either PError (String, [DToken])
     ps1 s p@(h:_) =
       case token h of
-        TCurlyR    -> Right (s, p)
-        TSemicolon -> Right (s, p)
-        _          -> raise h
+        TCurlyR -> Right (s, p)
+        TSemic  -> Right (s, p)
+        _       -> raise h
+
+pFormula :: [DToken] -> Either PError (Formula, [DToken])
+pFormula p@(h:t) =
+  case token h of
+    TBRacketL -> pf1 [] [] True t
+    _         -> pf1 [] [] False t
+  where
+    pf1 fs ops b p@(h:t) =
+      case token h of
+        TBRacketL ->
+          case pf1 fs ops b t of
+            Right (form, p') -> pf3 (form : fs) ops True t
+            Left e           -> Left e
+        TTrue -> pf3 (FTrue : fs) ops b t
+        TFalse -> pf3 (FFalse : fs) ops b t
+        TLower s ->
+          case pProposition p of
+            Right (f, p') -> pf3 (f : fs) ops b p'
+            Left _        -> pf3 (FVar s : fs) ops b t
+        TNot -> pf2 fs ops b t
+        _ -> raise h
+    pf2 fs ops b (h:t) =
+      case token h of
+        TBRacketL ->
+          case pf1 fs ops b t of
+            Right (form, p') -> pf3 (Not form : fs) ops True t
+            Left e           -> Left e
+        TTrue -> pf3 (Not FTrue : fs) ops b t
+        TFalse -> pf3 (Not FFalse : fs) ops b t
+        TLower s ->
+          case pProposition p of
+            Right (f, p') -> pf3 (Not f : fs) ops b p'
+            Left _        -> pf3 (Not (FVar s) : fs) ops b t
+        _ -> raise h
+    pf3 fs ops b p@(h:t) =
+      case token h of
+        TAnd -> pf1 fs (TAnd : ops) b t
+        TOr -> pf1 fs (TOr : ops) b t
+        TImplies -> pf1 fs (TImplies : ops) b t
+        TEquiv -> pf1 fs (TEquiv : ops) b t
+        TBracketR ->
+          if b
+            then Right (mergeFormula fs ops, t)
+            else raise h
+        TCurlyR ->
+          if b
+            then raise h
+            else Right (mergeFormula fs ops, p)
+        TSemic ->
+          if b
+            then raise h
+            else Right (mergeFormula fs ops, p)
+        _ -> raise h
+
+pProposition :: [DToken] -> Either PError (Formula, [DToken])
+pProposition p =
+  case pTerm p of
+    Right (t, p') -> pp1 t p'
+    Left e        -> Left e
+  where
+    pp1 t1 (h:t) =
+      case token h of
+        TEq      -> pp2 Equal t1 t
+        TNEq     -> pp2 NotEq t1 t
+        TLess    -> pp2 Less t1 t
+        TLEq     -> pp2 LessEq t1 t
+        TGreater -> pp2 Greater t1 t
+        TGEq     -> pp2 GreaterEq t1 t
+    pp2 op t1 p =
+      case pTerm p of
+        Right (t2, p') -> Right (Proposition op t1 t2, p')
+        Left e         -> Left e
 
 pTerm :: [DToken] -> Either PError (Term, [DToken])
 pTerm p@(h:t) =
@@ -315,14 +386,14 @@ pTerm p@(h:t) =
     TBRacketL -> pt1 [] [] True t
     _         -> pt1 [] [] False p
   where
-    pt1 terms ops b p@(h:t) =
+    pt1 terms ops b (h:t) =
       case token h of
         TBRacketL ->
           case pt1 terms ops b t of
             Right (term, p') -> pt3 (term : terms) ops True t
             Left e           -> Left e
         TNumber n -> pt3 (Const n : terms) ops b t
-        TNameLower s -> pt3 (TermVar s : terms) ops b t
+        TLower s -> pt3 (TermVar s : terms) ops b t
         TMinus -> pt2 terms ops b t
         _ -> raise h
     pt2 terms ops b (h:t) =
@@ -332,7 +403,7 @@ pTerm p@(h:t) =
             Right (term, p') -> pt3 (Negative term : terms) ops True t
             Left e           -> Left e
         TNumber n -> pt3 (Negative (Const n) : terms) ops b t
-        TNameLower s -> pt3 (Negative (TermVar s) : terms) ops b t
+        TLower s -> pt3 (Negative (TermVar s) : terms) ops b t
         _ -> raise h
     pt3 terms ops b p@(h:t) =
       case token h of
@@ -342,35 +413,26 @@ pTerm p@(h:t) =
         TSlash -> pt1 terms (TSlash : ops) b t
         TBracketR ->
           if b
+            then Right (mergeTerm terms ops, t)
+            else raise h
+        tok ->
+          if not b &&
+             tok `elem`
+             [ TCurlyR
+             , TSemic
+             , TEq
+             , TNEq
+             , TLess
+             , TLEq
+             , TGreater
+             , TGEq
+             , TAnd
+             , TOr
+             , TImplies
+             , TEquiv
+             ]
             then Right (mergeTerm terms ops, p)
             else raise h
-        TCurlyR ->
-          if b
-            then raise h
-            else Right (mergeTerm terms ops, p)
-        TSemicolon ->
-          if b
-            then raise h
-            else Right (mergeTerm terms ops, p)
-        _ -> raise h
-
-pFormula :: [DToken] -> Either PError (Formula, [DToken])
-pFormula = undefined
-
-mergeTerm :: [Term] -> [Token] -> Term
-mergeTerm = mt1 [] []
-  where
-    mt1 ta oacc [t] [] = mt2 (reverse $ t : ta) (reverse oacc)
-    mt1 ta oacc (t1:t2:ts) (o:ops) =
-      case o of
-        TStar  -> mt1 ta oacc (Multiply t1 t2 : ts) ops
-        TSlash -> mt1 ta oacc (Divide t1 t2 : ts) ops
-        _      -> mt1 (t1 : ta) (o : ops) (t2 : ts) ops
-    mt2 [t] [] = t
-    mt2 (t1:t2:ts) (o:ops) =
-      case o of
-        TPlus  -> mt2 (Add t1 t2 : ts) ops
-        TMinus -> mt2 (Subtract t1 t2 : ts) ops
 
 mergeFormula :: [Formula] -> [Token] -> Formula
 mergeFormula = mf1 [] []
@@ -386,6 +448,21 @@ mergeFormula = mf1 [] []
     mf3 fa oa (f:fs) (o:ops)            = mf3 (f : fa) (o : oa) fs ops
     mf4 [f] []             = f
     mf4 (f1:f2:fs) (o:ops) = mf4 (Equiv f1 f2 : fs) ops
+
+mergeTerm :: [Term] -> [Token] -> Term
+mergeTerm = mt1 [] []
+  where
+    mt1 ta oacc [t] [] = mt2 (reverse $ t : ta) (reverse oacc)
+    mt1 ta oacc (t1:t2:ts) (o:ops) =
+      case o of
+        TStar  -> mt1 ta oacc (Multiply t1 t2 : ts) ops
+        TSlash -> mt1 ta oacc (Divide t1 t2 : ts) ops
+        _      -> mt1 (t1 : ta) (o : ops) (t2 : ts) ops
+    mt2 [t] [] = t
+    mt2 (t1:t2:ts) (o:ops) =
+      case o of
+        TPlus  -> mt2 (Add t1 t2 : ts) ops
+        TMinus -> mt2 (Subtract t1 t2 : ts) ops
 
 mkTrans :: State -> Formula -> Action -> State -> Trans
 mkTrans s f a s' = Trans {preState = s, guard = f, action = a, postState = s'}
