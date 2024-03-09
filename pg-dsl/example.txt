@@ -1,0 +1,48 @@
+graph Robot {
+    Vars {
+        int num [0..7]
+        state LightBarrier
+    }
+    
+    states { Idle, Busy, Inactive }
+
+    init: Idle { num = 0 }
+
+    transitions {
+        Idle -> Busy {
+            guard { LightBarrier = Signal }
+            action { num := num + 1 }
+        }
+
+        Busy -> Idle {
+            guard { num < 3 }
+        }
+
+        Busy -> Busy {}
+
+        Busy -> Inactive {
+            guard { num = 3 }
+        }
+    }
+}
+
+graph LightBarrier {
+    states { Idle, Signal }
+
+    init: Idle {}
+
+    transitions {
+        Idle -> Idle {}
+
+        Idle -> Signal {}
+
+        Signal -> Idle {}
+
+        Signal -> Signal {}
+    }
+}
+
+main {
+    Robot,
+    LightBarrier
+}

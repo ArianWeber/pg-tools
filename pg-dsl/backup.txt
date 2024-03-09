@@ -1,0 +1,21 @@
+pg2 name (h:t) =
+      case token h of
+        TCurlyL ->
+          let (vars, p1) = pVars t
+              (sts, p2) = pStates p1
+              ((initS, initF), p3) = pInit p2
+              (trs, p4) = pTrans p3
+           in case token (head p4) of
+                TCurlyR ->
+                  Right
+                    ( PG
+                        { name = name
+                        , variables = vars
+                        , states = sts
+                        , transitions = trs
+                        , initialState = initS
+                        , initialFormula = initF
+                        }
+                    , tail p4)
+                _ -> Left $ raise TCurlyR $ head p4
+        _ -> Left $ raise TCurlyL h
