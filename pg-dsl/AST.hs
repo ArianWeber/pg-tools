@@ -77,7 +77,8 @@ data Formula
   deriving (Show, Eq)
 
 data Term
-  = TermVar String
+  = TermLower String
+  | TermUpper String
   | Const Int
   | Negative Term
   | Add Term Term

@@ -50,9 +50,9 @@ tok acc l c ('&':p) = tok (dec TAnd l c : acc) l (c + 1) p
 tok acc l c p@('g':'r':'a':'p':'h':t)
   | nextAlphaNum t = tokLower acc l c p
   | otherwise = tok (dec TGraph l c : acc) l (c + 5) t
-tok acc l c p@('v':'a':'r':'i':'a':'b':'l':'e':'s':t)
+tok acc l c p@('v':'a':'r':'s':t)
   | nextAlphaNum t = tokLower acc l c p
-  | otherwise = tok (dec TVars l c : acc) l (c + 9) t
+  | otherwise = tok (dec TVars l c : acc) l (c + 4) t
 tok acc l c p@('s':'t':'a':'t':'e':'s':t)
   | nextAlphaNum t = tokLower acc l c p
   | otherwise = tok (dec TStates l c : acc) l (c + 6) t
