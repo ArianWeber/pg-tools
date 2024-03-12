@@ -28,6 +28,7 @@ data PG = PG
   , transitions    :: [Trans]
   , initialState   :: State
   , initialFormula :: Formula
+  , isFault        :: Bool
   } deriving (Show, Eq)
 
 type State = String

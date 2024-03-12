@@ -1,5 +1,6 @@
 module Parser
   ( parse
+  , parseMain
   ) where
 
 import           AST   (Action, Expression (..), Formula (..), PError (..),
@@ -7,15 +8,54 @@ import           AST   (Action, Expression (..), Formula (..), PError (..),
                         Term (..), Trans (..), VarDef)
 import           Token (DToken (..), TError (..), Token (..), TokenList)
 
+parseMain :: TokenList -> Either PError [PG]
+parseMain (Left e) =
+  Left $ PError {pMsg = tMsg e, pLine = tLine e, pCol = tCol e}
+parseMain (Right t) =
+  case pErrors (filter (not . ignoreToken) t) of
+    Left e -> Left e
+    Right (pg, h:_) ->
+      case token h of
+        TEoF -> Right pg
+        _    -> raise h
+
 parse :: TokenList -> ProgramGraph
 parse (Left e) = Left $ PError {pMsg = tMsg e, pLine = tLine e, pCol = tCol e}
 parse (Right t) =
   case pGraph (filter (not . ignoreToken) t) of
     Left e -> Left e
-    Right (pg, h:t) ->
+    Right (pg, h:_) ->
       case token h of
         TEoF -> Right pg
         _    -> raise h
+
+pErrors :: [DToken] -> Either PError ([PG], [DToken])
+pErrors p@(h:t) =
+  case token h of
+    TEoF    -> Right ([], p)
+    TErrors -> pe1 t
+    _       -> raise h
+  where
+    pe1 :: [DToken] -> Either PError ([PG], [DToken])
+    pe1 (h:t) =
+      case token h of
+        TCurlyL -> pe2 [] t
+        _       -> raise h
+    pe2 :: [PG] -> [DToken] -> Either PError ([PG], [DToken])
+    pe2 acc (h:t) =
+      case token h of
+        TCurlyR     -> Right (acc, t)
+        TTransient  -> pe3 False acc t
+        TPersistent -> pe3 True acc t
+        _           -> raise h
+    pe3 :: Bool -> [PG] -> [DToken] -> Either PError ([PG], [DToken])
+    pe3 persistent acc (h:t) =
+      case token h of
+        TUpper s ->
+          if persistent
+            then pe2 (mkPersistent s : acc) t
+            else pe2 (mkTransient s : acc) t
+        _ -> raise h
 
 pGraph :: [DToken] -> Either PError (PG, [DToken])
 pGraph (h:t) =
@@ -58,6 +98,7 @@ pGraph (h:t) =
                 , transitions = tr
                 , initialState = iS
                 , initialFormula = iF
+                , isFault = False
                 }
             , t)
         _ -> raise h
@@ -457,6 +498,39 @@ pTerm p@(h:t) =
              ]
             then Right (mergeTerm (reverse terms) (reverse ops), p)
             else raise h
+
+mkTransient :: String -> PG
+mkTransient s =
+  PG
+    { name = s
+    , variables = []
+    , states = ["No", "Yes"]
+    , transitions =
+        [ Trans {preState = "No", guard = FTrue, action = [], postState = "No"}
+        , Trans {preState = "No", guard = FTrue, action = [], postState = "Yes"}
+        , Trans {preState = "Yes", guard = FTrue, action = [], postState = "No"}
+        , Trans
+            {preState = "Yes", guard = FTrue, action = [], postState = "Yes"}
+        ]
+    , initialState = "Yes"
+    , initialFormula = FTrue
+    , isFault = True
+    }
+
+mkPersistent :: String -> PG
+mkPersistent s =
+  PG
+    { name = s
+    , variables = []
+    , states = ["No", "Yes"]
+    , transitions =
+        [ Trans {preState = "No", guard = FTrue, action = [], postState = "No"}
+        , Trans {preState = "No", guard = FTrue, action = [], postState = "Yes"}
+        ]
+    , initialState = "Yes"
+    , initialFormula = FTrue
+    , isFault = True
+    }
 
 mergeFormula :: [Formula] -> [Token] -> Formula
 mergeFormula = mf1 [] []

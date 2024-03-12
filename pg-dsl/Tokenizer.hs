@@ -85,7 +85,16 @@ tok acc l c p@('t':'r':'u':'e':t)
   | otherwise = tok (dec TTrue l c : acc) l (c + 4) t
 tok acc l c p@('f':'a':'l':'s':'e':t)
   | nextAlphaNum t = tokLower acc l c p
-  | otherwise = tok (dec TFalse l c : acc) l (c + 1) t
+  | otherwise = tok (dec TFalse l c : acc) l (c + 5) t
+tok acc l c p@('e':'r':'r':'o':'r':'s':t)
+  | nextAlphaNum t = tokLower acc l c p
+  | otherwise = tok (dec TErrors l c : acc) l (c + 6) t
+tok acc l c p@('t':'r':'a':'n':'s':'i':'e':'n':'t':t)
+  | nextAlphaNum t = tokLower acc l c p
+  | otherwise = tok (dec TTransient l c : acc) l (c + 9) t
+tok acc l c p@('p':'e':'r':'s':'i':'s':'t':'e':'n':'t':t)
+  | nextAlphaNum t = tokLower acc l c p
+  | otherwise = tok (dec TPersistent l c : acc) l (c + 10) t
 tok acc l c p@(x:_)
   | isNumber x =
     let (c', p', n) = readNumber c p

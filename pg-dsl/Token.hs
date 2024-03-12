@@ -53,6 +53,9 @@ data Token
   | TState
   | TTrue
   | TFalse
+  | TErrors
+  | TTransient
+  | TPersistent
   | TNumber Int
   | TLower String
   | TUpper String
@@ -104,6 +107,9 @@ instance Show Token where
   show TState       = "'state'"
   show TTrue        = "'true'"
   show TFalse       = "'false'"
+  show TErrors      = "'errors'"
+  show TTransient   = "'transient'"
+  show TPersistent  = "'persistent'"
   show (TNumber n)  = "'" ++ show n ++ "'"
   show (TLower s)   = "'" ++ s ++ "'"
   show (TUpper s)   = "'" ++ s ++ "'"
