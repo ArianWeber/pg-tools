@@ -1,25 +1,31 @@
 module AST
   ( AST
+  , Model(..)
   , ProgramGraph
   , PG(..)
   , State
-  , VarDef
+  , VarDef(..)
   , Var
   , Range(..)
   , Value(..)
   , Trans(..)
-  , Action
+  , Action(..)
   , Assign
   , Expression(..)
   , Term(..)
   , Formula(..)
   , RelOp(..)
-  , PError(..)
+  , ParserError(..)
   ) where
 
-type AST = [ProgramGraph]
+type AST = Either ParserError Model
 
-type ProgramGraph = Either PError PG
+data Model = Model
+  { modelName :: String
+  , graphs    :: [PG]
+  } deriving (Show, Eq)
+
+type ProgramGraph = Either ParserError PG
 
 data PG = PG
   { name           :: String
@@ -33,7 +39,9 @@ data PG = PG
 
 type State = String
 
-type VarDef = (String, Range)
+data VarDef =
+  VarDef String Range
+  deriving (Show, Eq)
 
 type Var = String
 
@@ -41,7 +49,6 @@ data Range
   = RBool
   | RInt Int Int -- lower and upper bound
   | REnum [String]
-  | RState
   deriving (Show, Eq)
 
 data Value
@@ -58,7 +65,18 @@ data Trans = Trans
   , postState :: State
   } deriving (Show, Eq)
 
-type Action = [Assign]
+newtype Action =
+  Action [Assign]
+  deriving (Eq)
+
+instance Show Action where
+  show :: Action -> String
+  show (Action a) = sa1 a
+    where
+      sa1 []     = ""
+      sa1 [x]    = sa2 x
+      sa1 (x:xs) = sa2 x ++ "; " ++ sa1 xs
+      sa2 (v, e) = v ++ " := " ++ show e
 
 type Assign = (Var, Expression)
 
@@ -66,7 +84,13 @@ data Expression
   = Arithmetic Term
   | Boolean Formula
   | Single String -- single variables cannot be categorized w/o context
-  deriving (Show, Eq)
+  deriving (Eq)
+
+instance Show Expression where
+  show :: Expression -> String
+  show (Arithmetic t) = show t
+  show (Boolean f)    = show f
+  show (Single s)     = s
 
 data Formula
   = FVar String
@@ -78,7 +102,22 @@ data Formula
   | Or Formula Formula
   | Implies Formula Formula
   | Equiv Formula Formula
-  deriving (Show, Eq)
+  deriving (Eq)
+
+instance Show Formula where
+  show :: Formula -> String
+  show (FVar s) = s
+  show FTrue = "true"
+  show FFalse = "false"
+  show (Proposition r a b) = show a ++ " " ++ show r ++ " " ++ show b
+  show (Not a) =
+    case a of
+      (Not _) -> "!(" ++ show a ++ ")"
+      _       -> "!" ++ show a
+  show (And a b) = "(" ++ show a ++ " && " ++ show b ++ ")"
+  show (Or a b) = "(" ++ show a ++ " || " ++ show b ++ ")"
+  show (Implies a b) = "(" ++ show a ++ " => " ++ show b ++ ")"
+  show (Equiv a b) = "(" ++ show a ++ " <=> " ++ show b ++ ")"
 
 data Term
   = TermLower String
@@ -89,7 +128,25 @@ data Term
   | Subtract Term Term
   | Multiply Term Term
   | Divide Term Term
-  deriving (Show, Eq)
+  deriving (Eq)
+
+instance Show Term where
+  show :: Term -> String
+  show (TermLower s) = s
+  show (TermUpper s) = s
+  show (Const i) = show i
+  show (Negative a) =
+    case a of
+      (Negative _) -> "-(" ++ show a ++ ")"
+      (Const i) ->
+        if i < 0
+          then "-(" ++ show a ++ ")"
+          else "-" ++ show a
+      _ -> "-" ++ show a
+  show (Add a b) = "(" ++ show a ++ " + " ++ show b ++ ")"
+  show (Subtract a b) = "(" ++ show a ++ " - " ++ show b ++ ")"
+  show (Multiply a b) = "(" ++ show a ++ " * " ++ show b ++ ")"
+  show (Divide a b) = "(" ++ show a ++ " / " ++ show b ++ ")"
 
 data RelOp
   = Equal
@@ -98,15 +155,24 @@ data RelOp
   | LessEq
   | Greater
   | GreaterEq
-  deriving (Show, Eq)
+  deriving (Eq)
 
-data PError = PError
+instance Show RelOp where
+  show :: RelOp -> String
+  show Equal     = "=="
+  show NotEq     = "!="
+  show Less      = "<"
+  show LessEq    = "<="
+  show Greater   = ">"
+  show GreaterEq = ">="
+
+data ParserError = ParserError
   { pMsg  :: String
   , pLine :: Int
   , pCol  :: Int
   }
 
-instance Show PError where
-  show :: PError -> String
+instance Show ParserError where
+  show :: ParserError -> String
   show e =
     pMsg e ++ " at line " ++ show (pLine e) ++ ", column " ++ show (pCol e)

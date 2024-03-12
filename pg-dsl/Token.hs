@@ -50,9 +50,9 @@ data Token
   | TBool
   | TInt
   | TEnum
-  | TState
   | TTrue
   | TFalse
+  | TModel
   | TErrors
   | TTransient
   | TPersistent
@@ -104,9 +104,9 @@ instance Show Token where
   show TBool        = "'bool'"
   show TInt         = "'int'"
   show TEnum        = "'enum'"
-  show TState       = "'state'"
   show TTrue        = "'true'"
   show TFalse       = "'false'"
+  show TModel       = "'model'"
   show TErrors      = "'errors'"
   show TTransient   = "'transient'"
   show TPersistent  = "'persistent'"

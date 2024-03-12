@@ -1,7 +1,6 @@
 graph Robot {
     vars {
         int num [0..7]
-        state LightBarrier
     }
     
     states { Idle, Busy, Inactive }

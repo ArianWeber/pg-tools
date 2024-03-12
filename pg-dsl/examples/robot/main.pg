@@ -1,4 +1,6 @@
-errors {
-    transient TransientError
-    persistent PersistentError
+model Robot {
+    errors {
+        transient TransientError
+        persistent PersistentError
+    }
 }

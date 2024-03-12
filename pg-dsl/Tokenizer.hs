@@ -77,15 +77,15 @@ tok acc l c p@('i':'n':'t':t)
 tok acc l c p@('e':'n':'u':'m':t)
   | nextAlphaNum t = tokLower acc l c p
   | otherwise = tok (dec TEnum l c : acc) l (c + 4) t
-tok acc l c p@('s':'t':'a':'t':'e':t)
-  | nextAlphaNum t = tokLower acc l c p
-  | otherwise = tok (dec TState l c : acc) l (c + 5) t
 tok acc l c p@('t':'r':'u':'e':t)
   | nextAlphaNum t = tokLower acc l c p
   | otherwise = tok (dec TTrue l c : acc) l (c + 4) t
 tok acc l c p@('f':'a':'l':'s':'e':t)
   | nextAlphaNum t = tokLower acc l c p
   | otherwise = tok (dec TFalse l c : acc) l (c + 5) t
+tok acc l c p@('m':'o':'d':'e':'l':t)
+  | nextAlphaNum t = tokLower acc l c p
+  | otherwise = tok (dec TModel l c : acc) l (c + 5) t
 tok acc l c p@('e':'r':'r':'o':'r':'s':t)
   | nextAlphaNum t = tokLower acc l c p
   | otherwise = tok (dec TErrors l c : acc) l (c + 6) t

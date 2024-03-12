@@ -3,16 +3,16 @@ module Parser
   , parseMain
   ) where
 
-import           AST   (Action, Expression (..), Formula (..), PError (..),
-                        PG (..), ProgramGraph, Range (..), RelOp (..), State,
-                        Term (..), Trans (..), VarDef)
+import           AST   (Action (..), Expression (..), Formula (..), Model (..),
+                        PG (..), ParserError (..), ProgramGraph, Range (..),
+                        RelOp (..), State, Term (..), Trans (..), VarDef (..))
 import           Token (DToken (..), TError (..), Token (..), TokenList)
 
-parseMain :: TokenList -> Either PError [PG]
+parseMain :: TokenList -> Either ParserError Model
 parseMain (Left e) =
-  Left $ PError {pMsg = tMsg e, pLine = tLine e, pCol = tCol e}
+  Left $ ParserError {pMsg = tMsg e, pLine = tLine e, pCol = tCol e}
 parseMain (Right t) =
-  case pErrors (filter (not . ignoreToken) t) of
+  case pMain (filter (not . ignoreToken) t) of
     Left e -> Left e
     Right (pg, h:_) ->
       case token h of
@@ -20,7 +20,8 @@ parseMain (Right t) =
         _    -> raise h
 
 parse :: TokenList -> ProgramGraph
-parse (Left e) = Left $ PError {pMsg = tMsg e, pLine = tLine e, pCol = tCol e}
+parse (Left e) =
+  Left $ ParserError {pMsg = tMsg e, pLine = tLine e, pCol = tCol e}
 parse (Right t) =
   case pGraph (filter (not . ignoreToken) t) of
     Left e -> Left e
@@ -29,26 +30,46 @@ parse (Right t) =
         TEoF -> Right pg
         _    -> raise h
 
-pErrors :: [DToken] -> Either PError ([PG], [DToken])
+pMain :: [DToken] -> Either ParserError (Model, [DToken])
+pMain (h:t) =
+  case token h of
+    TModel -> pm1 t
+    _      -> raise h
+  where
+    pm1 (h:t) =
+      case token h of
+        TUpper s -> pm2 s t
+        _        -> raise h
+    pm2 s (h:t) =
+      case token h of
+        TCurlyL -> pm3 s t
+        _       -> raise h
+    pm3 s p =
+      case pErrors p of
+        Right (g, p') -> pm4 g s p'
+        Left e        -> Left e
+    pm4 g s (h:t) =
+      case token h of
+        TCurlyR -> Right (Model {modelName = s, graphs = g}, t)
+        _       -> raise h
+
+pErrors :: [DToken] -> Either ParserError ([PG], [DToken])
 pErrors p@(h:t) =
   case token h of
     TEoF    -> Right ([], p)
     TErrors -> pe1 t
     _       -> raise h
   where
-    pe1 :: [DToken] -> Either PError ([PG], [DToken])
     pe1 (h:t) =
       case token h of
         TCurlyL -> pe2 [] t
         _       -> raise h
-    pe2 :: [PG] -> [DToken] -> Either PError ([PG], [DToken])
     pe2 acc (h:t) =
       case token h of
         TCurlyR     -> Right (acc, t)
         TTransient  -> pe3 False acc t
         TPersistent -> pe3 True acc t
         _           -> raise h
-    pe3 :: Bool -> [PG] -> [DToken] -> Either PError ([PG], [DToken])
     pe3 persistent acc (h:t) =
       case token h of
         TUpper s ->
@@ -57,7 +78,7 @@ pErrors p@(h:t) =
             else pe2 (mkTransient s : acc) t
         _ -> raise h
 
-pGraph :: [DToken] -> Either PError (PG, [DToken])
+pGraph :: [DToken] -> Either ParserError (PG, [DToken])
 pGraph (h:t) =
   case token h of
     TGraph -> pg1 t
@@ -103,7 +124,7 @@ pGraph (h:t) =
             , t)
         _ -> raise h
 
-pVars :: [DToken] -> Either PError ([VarDef], [DToken])
+pVars :: [DToken] -> Either ParserError ([VarDef], [DToken])
 pVars p@(h:t) =
   case token h of
     TVars   -> pv1 t
@@ -128,20 +149,16 @@ pVars p@(h:t) =
           case pEnum t of
             Right (v, p) -> pv2 (v : vs) p
             Left e       -> Left e
-        TState ->
-          case pState t of
-            Right (v, p) -> pv2 (v : vs) p
-            Left e       -> Left e
         TCurlyR -> Right (vs, t)
         _ -> raise h
 
-pBool :: [DToken] -> Either PError (VarDef, [DToken])
+pBool :: [DToken] -> Either ParserError (VarDef, [DToken])
 pBool (h:t) =
   case token h of
-    TLower s -> Right ((s, RBool), t)
+    TLower s -> Right (VarDef s RBool, t)
     _        -> raise h
 
-pInt :: [DToken] -> Either PError (VarDef, [DToken])
+pInt :: [DToken] -> Either ParserError (VarDef, [DToken])
 pInt (h:t) =
   case token h of
     TLower s -> pi1 s t
@@ -165,10 +182,10 @@ pInt (h:t) =
         _         -> raise h
     pi5 i j s (h:t) =
       case token h of
-        TSquareR -> Right ((s, RInt i j), t)
+        TSquareR -> Right (VarDef s (RInt i j), t)
         _        -> raise h
 
-pEnum :: [DToken] -> Either PError (VarDef, [DToken])
+pEnum :: [DToken] -> Either ParserError (VarDef, [DToken])
 pEnum (h:t) =
   case token h of
     TLower s -> pe1 s t
@@ -185,16 +202,10 @@ pEnum (h:t) =
     pe3 vs s (h:t) =
       case token h of
         TComma  -> pe2 vs s t
-        TCurlyR -> Right ((s, REnum vs), t)
+        TCurlyR -> Right (VarDef s (REnum vs), t)
         _       -> raise h
 
-pState :: [DToken] -> Either PError (VarDef, [DToken])
-pState (h:t) =
-  case token h of
-    TUpper s -> Right ((s, RState), t)
-    _        -> raise h
-
-pStates :: [DToken] -> Either PError ([State], [DToken])
+pStates :: [DToken] -> Either ParserError ([State], [DToken])
 pStates (h:t) =
   case token h of
     TStates -> ps1 t
@@ -214,7 +225,7 @@ pStates (h:t) =
         TCurlyR -> Right (ss, t)
         _       -> raise h
 
-pInit :: [DToken] -> Either PError ((State, Formula), [DToken])
+pInit :: [DToken] -> Either ParserError ((State, Formula), [DToken])
 pInit (h:t) =
   case token h of
     TInit -> pi1 t
@@ -245,7 +256,7 @@ pInit (h:t) =
         TCurlyR -> Right ((s, f), t)
         _       -> raise h
 
-pTransitions :: [DToken] -> Either PError ([Trans], [DToken])
+pTransitions :: [DToken] -> Either ParserError ([Trans], [DToken])
 pTransitions (h:t) =
   case token h of
     TTransitions -> pt1 t
@@ -265,7 +276,7 @@ pTransitions (h:t) =
         Right (t, p') -> pt2 (t : ts) p'
         Left e        -> Left e
 
-pTrans :: [DToken] -> Either PError (Trans, [DToken])
+pTrans :: [DToken] -> Either ParserError (Trans, [DToken])
 pTrans (h:t) =
   case token h of
     TUpper s -> pt1 s t
@@ -287,7 +298,7 @@ pTrans (h:t) =
       case token h of
         TGuard  -> pt5 s' s t
         TAction -> pt8 FTrue s' s p
-        TCurlyR -> Right (mkTrans s FTrue [] s', t)
+        TCurlyR -> Right (mkTrans s FTrue (Action []) s', t)
         _       -> raise h
     pt5 s' s (h:t) =
       case token h of
@@ -310,11 +321,11 @@ pTrans (h:t) =
         TCurlyR -> Right (mkTrans s f a s', t)
         _       -> raise h
 
-pAction :: [DToken] -> Either PError (Action, [DToken])
+pAction :: [DToken] -> Either ParserError (Action, [DToken])
 pAction p@(h:t) =
   case token h of
     TAction -> pa1 t
-    TCurlyR -> Right ([], p)
+    TCurlyR -> Right (Action [], p)
     _       -> raise h
   where
     pa1 (h:t) =
@@ -324,7 +335,7 @@ pAction p@(h:t) =
     pa2 acc (h:t) =
       case token h of
         TLower s -> pa3 s acc t
-        TCurlyR  -> Right (acc, t)
+        TCurlyR  -> Right (Action acc, t)
         _        -> raise h
     pa3 v acc (h:t) =
       case token h of
@@ -336,11 +347,11 @@ pAction p@(h:t) =
         Left e        -> Left e
     pa5 acc (h:t) =
       case token h of
-        TCurlyR -> Right (acc, t)
+        TCurlyR -> Right (Action acc, t)
         TSemic  -> pa2 acc t
         _       -> raise h
 
-pExpression :: [DToken] -> Either PError (Expression, [DToken])
+pExpression :: [DToken] -> Either ParserError (Expression, [DToken])
 pExpression p =
   case pSingle p of
     Right (e, p') -> Right (Single e, p')
@@ -352,7 +363,7 @@ pExpression p =
             Right (e, p') -> Right (Boolean e, p')
             Left e        -> Left e
 
-pSingle :: [DToken] -> Either PError (String, [DToken])
+pSingle :: [DToken] -> Either ParserError (String, [DToken])
 pSingle (h:t) =
   case token h of
     TLower s -> ps1 s t
@@ -364,7 +375,7 @@ pSingle (h:t) =
         TSemic  -> Right (s, p)
         _       -> raise h
 
-pFormula :: [DToken] -> Either PError (Formula, [DToken])
+pFormula :: [DToken] -> Either ParserError (Formula, [DToken])
 pFormula p@(h:t) =
   case token h of
     TBRacketL -> pf1 [] [] True t
@@ -425,7 +436,7 @@ pFormula p@(h:t) =
             else Right (mergeFormula fs ops, p)
         _ -> raise h
 
-pProposition :: [DToken] -> Either PError (Formula, [DToken])
+pProposition :: [DToken] -> Either ParserError (Formula, [DToken])
 pProposition p =
   case pTerm p of
     Right (t, p') -> pp1 t p'
@@ -444,7 +455,7 @@ pProposition p =
         Right (t2, p') -> Right (Proposition op t1 t2, p')
         Left e         -> Left e
 
-pTerm :: [DToken] -> Either PError (Term, [DToken])
+pTerm :: [DToken] -> Either ParserError (Term, [DToken])
 pTerm p@(h:t) =
   case token h of
     TUpper s  -> Right (TermUpper s, t)
@@ -506,11 +517,10 @@ mkTransient s =
     , variables = []
     , states = ["No", "Yes"]
     , transitions =
-        [ Trans {preState = "No", guard = FTrue, action = [], postState = "No"}
-        , Trans {preState = "No", guard = FTrue, action = [], postState = "Yes"}
-        , Trans {preState = "Yes", guard = FTrue, action = [], postState = "No"}
-        , Trans
-            {preState = "Yes", guard = FTrue, action = [], postState = "Yes"}
+        [ mkTrans "No" FTrue (Action []) "No"
+        , mkTrans "No" FTrue (Action []) "Yes"
+        , mkTrans "Yes" FTrue (Action []) "No"
+        , mkTrans "Yes" FTrue (Action []) "Yes"
         ]
     , initialState = "Yes"
     , initialFormula = FTrue
@@ -524,8 +534,8 @@ mkPersistent s =
     , variables = []
     , states = ["No", "Yes"]
     , transitions =
-        [ Trans {preState = "No", guard = FTrue, action = [], postState = "No"}
-        , Trans {preState = "No", guard = FTrue, action = [], postState = "Yes"}
+        [ mkTrans "No" FTrue (Action []) "No"
+        , mkTrans "No" FTrue (Action []) "Yes"
         ]
     , initialState = "Yes"
     , initialFormula = FTrue
@@ -573,10 +583,10 @@ ignoreToken t =
     TNewline   -> True
     _          -> False
 
-raise :: DToken -> Either PError a
+raise :: DToken -> Either ParserError a
 raise dt =
   Left
-    PError
+    ParserError
       { pMsg = "Unexpected token: " ++ show (token dt)
       , pLine = line dt
       , pCol = column dt
