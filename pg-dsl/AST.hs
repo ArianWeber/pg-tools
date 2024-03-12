@@ -1,5 +1,6 @@
 module AST
   ( AST
+  , ProgramGraph
   , PG(..)
   , State
   , VarDef
@@ -16,7 +17,9 @@ module AST
   , PError(..)
   ) where
 
-type AST = Either PError PG
+type AST = [ProgramGraph]
+
+type ProgramGraph = Either PError PG
 
 data PG = PG
   { name           :: String

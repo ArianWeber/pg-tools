@@ -4,7 +4,6 @@ graph Robot {
         state LightBarrier
     }
     
-    # Here, we define the states
     states { Idle, Busy, Inactive }
 
     init: Idle { num = 0 }
@@ -16,7 +15,7 @@ graph Robot {
         }
 
         Busy -> Idle {
-            guard { num < 3 } # cause why not
+            guard { num < 3 }
         }
 
         Busy -> Busy {}

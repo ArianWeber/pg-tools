@@ -2,10 +2,12 @@ module Parser
   ( parse
   ) where
 
-import           AST
+import           AST   (Action, Expression (..), Formula (..), PError (..),
+                        PG (..), ProgramGraph, Range (..), RelOp (..), State,
+                        Term (..), Trans (..), VarDef)
 import           Token (DToken (..), TError (..), Token (..), TokenList)
 
-parse :: TokenList -> AST
+parse :: TokenList -> ProgramGraph
 parse (Left e) = Left $ PError {pMsg = tMsg e, pLine = tLine e, pCol = tCol e}
 parse (Right t) =
   case pGraph (filter (not . ignoreToken) t) of
@@ -61,10 +63,11 @@ pGraph (h:t) =
         _ -> raise h
 
 pVars :: [DToken] -> Either PError ([VarDef], [DToken])
-pVars (h:t) =
+pVars p@(h:t) =
   case token h of
-    TVars -> pv1 t
-    _     -> raise h
+    TVars   -> pv1 t
+    TStates -> Right ([], p)
+    _       -> raise h
   where
     pv1 (h:t) =
       case token h of
@@ -188,11 +191,15 @@ pInit (h:t) =
       case token h of
         TCurlyL -> pi4 s t
         _       -> raise h
-    pi4 s p =
+    pi4 s p@(h:t) =
+      case token h of
+        TCurlyR -> Right ((s, FTrue), t)
+        _       -> pi5 s p
+    pi5 s p =
       case pFormula p of
-        Right (f, p') -> pi5 f s p'
+        Right (f, p') -> pi6 f s p'
         Left e        -> Left e
-    pi5 f s (h:t) =
+    pi6 f s (h:t) =
       case token h of
         TCurlyR -> Right ((s, f), t)
         _       -> raise h
