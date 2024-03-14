@@ -13,12 +13,14 @@ module PgVerify
             method_option :only, :type => :array, repeatable: true
             method_option :hide, :type => :array, repeatable: true
             method_option :script, :type => :string
+            method_option :"hide-labels", :type => :boolean, default: false
             def puml()
+                hide_labels = options[:"hide-labels"]
                 script_file = options[:script] || Settings.ruby_dsl.default_script_name
                 models = Interpret::PgScript.new.interpret(script_file)
                 models.each { |model|
                     components = self.class.select_components(options[:only], options[:hide], model)
-                    puml = Transform::PumlTransformation.new.transform_graph(model, only: components)
+                    puml = Transform::PumlTransformation.new(render_labels: !hide_labels).transform_graph(model, only: components)
                     puts puml
                 }
             end
@@ -27,13 +29,15 @@ module PgVerify
             method_option :only, :type => :array, repeatable: true
             method_option :hide, :type => :array, repeatable: true
             method_option :script, :type => :string
+            method_option :"hide-labels", :type => :boolean, default: false
             def png()
+                hide_labels = options[:"hide-labels"]
                 script_file = options[:script] || Settings.ruby_dsl.default_script_name
                 models = Interpret::PgScript.new.interpret(script_file)
 
                 models.each { |model|
                     components = self.class.select_components(options[:only], options[:hide], model)
-                    puml = Transform::PumlTransformation.new.transform_graph(model, only: components)
+                    puml = Transform::PumlTransformation.new(render_labels: !hide_labels).transform_graph(model, only: components)
                     png = PlantumlBuilder::Formats::PNG.new(puml).load
                     out_name = File.basename(script_file, '.*')
                     out_name += "-" + model.name.to_s.gsub(/\W+/, '_').downcase + ".png"
