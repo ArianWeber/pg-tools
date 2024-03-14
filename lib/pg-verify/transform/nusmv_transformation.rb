@@ -3,7 +3,7 @@ module PgVerify
 
         class NuSmvTransformation
 
-            def transform_graph(program_graph)
+            def transform_graph(program_graph, include_specs: true)
                 variables  = program_graph.all_variables
                 components = program_graph.components
 
@@ -11,7 +11,7 @@ module PgVerify
                 cmp_s  = transform_components(components, variables)
                 main_s = transform_main_module(components)
 
-                specs = transform_specification(program_graph.specification, variables)
+                specs = transform_specification(program_graph.specification, variables) if include_specs
 
                 return "#{var_s}\n\n#{cmp_s}\n\n#{main_s}\n\n#{specs}\n"
             end
@@ -251,7 +251,8 @@ module PgVerify
             def transform_spec(spec, varset)
                 expression_s  = "-- #{spec.text}\n"
                 expression_s += "-- Defined in: #{spec.source_location.to_s}\n"
-                expression_s += "LTLSPEC " + transform_expression(spec.expression, varset)
+                keyword = {  ltl: "LTLSPEC", ctl: "CTLSPEC" }[spec.expression.predict_type]
+                expression_s += keyword + " " + transform_expression(spec.expression, varset)
                 return expression_s
             end
 
