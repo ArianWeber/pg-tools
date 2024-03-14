@@ -3,6 +3,7 @@ Dir[File.join(__dir__, '*.rb')].sort.each { |file| require file }
 
 require 'thor'
 require 'plantuml_builder'
+require 'json'
 
 module PgVerify
     module Cli
