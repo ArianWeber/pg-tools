@@ -30,6 +30,7 @@ module PgVerify
                 return { component.name.to_s => {
                     "states" => component.states.map(&:to_s),
                     "variables" => variables.map { |v| transform_variable(v) },
+                    "init" => transform_expression(component.init_expression),
                     "transitions" => component.transitions.map { |t| transform_transition(t) },
                     "represents_fault" => component.represents_fault
                 }}
@@ -39,13 +40,14 @@ module PgVerify
                 name = hash.keys.first
                 states = hash[name]["states"].map(&:to_sym)
                 variables = hash[name]["variables"].map { |v| parse_variable(name, v) }
+                init_expression = parse_expression(hash[name]["init"])
                 transitions = hash[name]["transitions"].map { |t| parse_transition(t) }
                 represents_fault = hash[name]["represents_fault"]
 
                 graph.variables += variables
 
                 return Model::Component.new(name: name.to_sym, states: states, 
-                    transitions: transitions, represents_fault: represents_fault)
+                    transitions: transitions, represents_fault: represents_fault, init_expression: init_expression)
             end
 
             def transform_variable(variable)
