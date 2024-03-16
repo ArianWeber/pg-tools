@@ -704,7 +704,7 @@ mkPersistent s =
     }
 
 mergeFormula :: [Formula] -> [Token] -> Formula
-mergeFormula = mf1 [] []
+mergeFormula fs ops = mf1 [] [] (reverse fs) (reverse ops)
   where
     mf1 fa oa [f] []                = mf2 [] [] (reverse $ f : fa) (reverse oa)
     mf1 fa oa (f1:f2:fs) (TAnd:ops) = mf1 fa oa (And f1 f2 : fs) ops
@@ -719,14 +719,12 @@ mergeFormula = mf1 [] []
     mf4 (f1:f2:fs) = mf4 (Equiv f1 f2 : fs)
 
 mergeLTL :: [LTL] -> [Token] -> LTL
-mergeLTL fs ts
-  | trace (show fs ++ ", " ++ show ts) False = undefined
-  | otherwise = ml1 [] [] fs ts
+mergeLTL fs ops = ml1 [] [] (reverse fs) (reverse ops)
   where
-    ml1 fa oa [f] []              = ml2 [] [] (reverse $ f : fa) (reverse oa)
+    ml1 fa oa [f] []              = ml2 [] [] (f : fa) oa
     ml1 fa oa (f1:f2:fs) (TU:ops) = ml1 fa oa (LTLU f1 f2 : fs) ops
     ml1 fa oa (f:fs) (o:ops)      = ml1 (f : fa) (o : oa) fs ops
-    ml2 fa oa [f] []                = ml3 [] [] (reverse $ f : fa) (reverse oa)
+    ml2 fa oa [f] []                = ml3 [] [] (f : fa) oa
     ml2 fa oa (f1:f2:fs) (TAnd:ops) = ml2 fa oa (LTLAnd f1 f2 : fs) ops
     ml2 fa oa (f:fs) (o:ops)        = ml2 (f : fa) (o : oa) fs ops
     ml3 fa oa [f] []               = ml4 [] [] (f : fa) oa
@@ -739,7 +737,7 @@ mergeLTL fs ts
     ml5 (f1:f2:fs) = ml5 (LTLEquiv f1 f2 : fs)
 
 mergeCTL :: [CTL] -> [Token] -> CTL
-mergeCTL = mc1 [] []
+mergeCTL fs ops = mc1 [] [] (reverse fs) (reverse ops)
   where
     mc1 :: [CTL] -> [Token] -> [CTL] -> [Token] -> CTL
     mc1 fa oa [f] []               = mc2 [] [] (reverse $ f : fa) (reverse oa)

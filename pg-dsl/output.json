@@ -171,7 +171,7 @@
         "hazards": [
             {
                 "label": "Hazard 2",
-                "expression": "(EF PersistentError == Yes && AF TransientError == Yes)"
+                "expression": "(AF TransientError == Yes && EF PersistentError == Yes)"
             },
             {
                 "label": "Hazard 1",
@@ -189,7 +189,7 @@
             {
                 "label": "Specification 1",
                 "expression": {
-                    "string": "(F Robot == Busy || X Robot == Idle)",
+                    "string": "(X Robot == Idle || F Robot == Busy)",
                     "type": "pl"
                 }
             }
