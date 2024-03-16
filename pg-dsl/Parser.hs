@@ -3,9 +3,10 @@ module Parser
   , parseMain
   ) where
 
-import           AST   (Action (..), Expression (..), Formula (..), Model (..),
-                        PG (..), ParserError (..), ProgramGraph, Range (..),
-                        RelOp (..), State, Term (..), Trans (..), VarDef (..))
+import           AST   (Action (..), CTL (..), Expression (..), Formula (..),
+                        LTL (..), Model (..), PG (..), ParserError (..),
+                        ProgramGraph, Range (..), RelOp (..), State, Term (..),
+                        Trans (..), VarDef (..))
 import           Token (DToken (..), TError (..), Token (..), TokenList)
 
 parseMain :: TokenList -> Either ParserError Model
@@ -376,71 +377,147 @@ pSingle (h:t) =
         _       -> raise h
 
 pFormula :: [DToken] -> Either ParserError (Formula, [DToken])
-pFormula p@(h:t) =
-  case token h of
-    TBRacketL -> pf1 [] [] True t
-    _         -> pf1 [] [] False p
+pFormula = pf1 [] []
   where
-    pf1 fs ops b p@(h:t) =
+    pf1 fs ops p@(h:t) =
+      case pProposition p of
+        Right (f, p') -> pf2 (uncurry3 Proposition f : fs) ops p'
+        Left _ ->
+          case token h of
+            TBracketL ->
+              case pFormula t of
+                Right (f, h':t') ->
+                  case token h' of
+                    TBracketR -> pf2 (f : fs) ops t'
+                    _         -> raise h'
+                Left e -> Left e
+            _ ->
+              case pfNext p of
+                Right (f, p') -> pf2 (f : fs) ops p'
+                Left e        -> Left e
+    pf2 fs ops p@(h:t) =
       case token h of
-        TBRacketL ->
-          case pf1 fs ops b t of
-            Right (form, p') -> pf3 (form : fs) ops True t
-            Left e           -> Left e
-        TTrue -> pf3 (FTrue : fs) ops b t
-        TFalse -> pf3 (FFalse : fs) ops b t
-        TLower s ->
-          case pProposition p of
-            Right (f, p') -> pf3 (f : fs) ops b p'
-            Left _        -> pf3 (FVar s : fs) ops b t
-        TUpper s ->
-          case pProposition p of
-            Right (f, p') -> pf3 (f : fs) ops b p'
+        TAnd      -> pf1 fs (TAnd : ops) t
+        TOr       -> pf1 fs (TOr : ops) t
+        TImplies  -> pf1 fs (TImplies : ops) t
+        TEquiv    -> pf1 fs (TEquiv : ops) t
+        TBracketR -> Right (mergeFormula fs ops, p)
+        TCurlyR   -> Right (mergeFormula fs ops, p)
+        TSemic    -> Right (mergeFormula fs ops, p)
+        _         -> raise h
+    pfNext (h:t) =
+      case token h of
+        TTrue -> Right (FTrue, t)
+        TFalse -> Right (FFalse, t)
+        TLower s -> Right (FVar s, t)
+        TNot ->
+          case pFormula t of
+            Right (f, p') -> Right (Not f, p')
             Left e        -> Left e
-        TNot -> pf2 fs ops b t
-        _ -> raise h
-    pf2 fs ops b (h:t) =
-      case token h of
-        TBRacketL ->
-          case pf1 fs ops b t of
-            Right (form, p') -> pf3 (Not form : fs) ops True t
-            Left e           -> Left e
-        TTrue -> pf3 (Not FTrue : fs) ops b t
-        TFalse -> pf3 (Not FFalse : fs) ops b t
-        TLower s ->
-          case pProposition p of
-            Right (f, p') -> pf3 (Not f : fs) ops b p'
-            Left _        -> pf3 (Not (FVar s) : fs) ops b t
-        TUpper s ->
-          case pProposition p of
-            Right (f, p') -> pf3 (Not f : fs) ops b p'
-            Left e        -> Left e
-        _ -> raise h
-    pf3 fs ops b p@(h:t) =
-      case token h of
-        TAnd -> pf1 fs (TAnd : ops) b t
-        TOr -> pf1 fs (TOr : ops) b t
-        TImplies -> pf1 fs (TImplies : ops) b t
-        TEquiv -> pf1 fs (TEquiv : ops) b t
-        TBracketR ->
-          if b
-            then Right (mergeFormula fs ops, t)
-            else raise h
-        TCurlyR ->
-          if b
-            then raise h
-            else Right (mergeFormula fs ops, p)
-        TSemic ->
-          if b
-            then raise h
-            else Right (mergeFormula fs ops, p)
         _ -> raise h
 
-pProposition :: [DToken] -> Either ParserError (Formula, [DToken])
-pProposition p =
-  case pTerm p of
-    Right (t, p') -> pp1 t p'
-    Left e        -> Left e
+pLTL :: [DToken] -> Either ParserError (LTL, [DToken])
+pLTL = pl1 [] []
+  where
+    pl1 fs ops p@(h:t) =
+      case pProposition p of
+        Right (f, p') -> pl2 (uncurry3 LTLProp f : fs) ops p'
+        Left _ ->
+          case token h of
+            TBracketL ->
+              case pLTL t of
+                Right (f, h':t') ->
+                  case token h' of
+                    TBracketR -> pl2 (f : fs) ops t'
+                    _         -> raise h'
+                Left e -> Left e
+            _ ->
+              case plNext p of
+                Right (f, p') -> pl2 (f : fs) ops p'
+                Left e        -> Left e
+    pl2 fs ops p@(h:t) =
+      case token h of
+        TAnd     -> pl1 fs (TAnd : ops) t
+        TOr      -> pl1 fs (TOr : ops) t
+        TImplies -> pl1 fs (TImplies : ops) t
+        TEquiv   -> pl1 fs (TEquiv : ops) t
+        TU       -> pl1 fs (TU : ops) t
+        _        -> Right (mergeLTL fs ops, p)
+    plNext (h:t) =
+      case token h of
+        TTrue    -> Right (LTLTrue, t)
+        TFalse   -> Right (LTLFalse, t)
+        TLower s -> Right (LTLVar s, t)
+        TNot     -> pl3 LTLNot t
+        TX       -> pl3 LTLX t
+        TF       -> pl3 LTLF t
+        TG       -> pl3 LTLG t
+        _        -> raise h
+    pl3 c p =
+      case pLTL p of
+        Right (f, p') -> Right (c f, p')
+        Left e        -> Left e
+
+pCTL :: [DToken] -> Either ParserError (CTL, [DToken])
+pCTL = pc1 [] []
+  where
+    pc1 fs ops p@(h:t) =
+      case pProposition p of
+        Right (f, p') -> pc2 (uncurry3 CTLProp f : fs) ops p'
+        Left _ ->
+          case token h of
+            TBracketL ->
+              case pCTL t of
+                Right (f, h':t') ->
+                  case token h' of
+                    TBracketR -> pc2 (f : fs) ops t'
+                    _         -> raise h'
+                Left e -> Left e
+            _ ->
+              case pcNext p of
+                Right (f, p') -> pc2 (f : fs) ops p'
+                Left e        -> Left e
+    pc2 fs ops p@(h:t) =
+      case token h of
+        TAnd     -> pc1 fs (TAnd : ops) t
+        TOr      -> pc1 fs (TOr : ops) t
+        TImplies -> pc1 fs (TImplies : ops) t
+        TEquiv   -> pc1 fs (TEquiv : ops) t
+        TEU      -> pc1 fs (TEU : ops) t
+        TAU      -> pc1 fs (TAU : ops) t
+        _        -> Right (mergeCTL fs ops, p)
+    pcNext (h:t) =
+      case token h of
+        TTrue    -> Right (CTLTrue, t)
+        TFalse   -> Right (CTLFalse, t)
+        TLower s -> Right (CTLVar s, t)
+        TNot     -> pc3 CTLNot t
+        TEX      -> pc3 CTLEX t
+        TEF      -> pc3 CTLEF t
+        TEG      -> pc3 CTLEG t
+        TAX      -> pc3 CTLAX t
+        TAF      -> pc3 CTLAF t
+        TAG      -> pc3 CTLAG t
+        _        -> raise h
+    pc3 c p =
+      case pCTL p of
+        Right (f, p') -> Right (c f, p')
+        Left e        -> Left e
+
+pProposition :: [DToken] -> Either ParserError ((RelOp, Term, Term), [DToken])
+pProposition p@(h:t) =
+  case token h of
+    TBracketL ->
+      case pProposition t of
+        Right (pr, h':t') ->
+          case token h' of
+            TBracketR -> Right (pr, t')
+            _         -> raise h'
+        Left e -> Left e
+    _ ->
+      case pTerm p of
+        Right (t1, p') -> pp1 t1 p'
+        Left e         -> Left e
   where
     pp1 t1 (h:t) =
       case token h of
@@ -452,63 +529,42 @@ pProposition p =
         TGEq     -> pp2 GreaterEq t1 t
     pp2 op t1 p =
       case pTerm p of
-        Right (t2, p') -> Right (Proposition op t1 t2, p')
+        Right (t2, p') -> Right ((op, t1, t2), p')
         Left e         -> Left e
 
 pTerm :: [DToken] -> Either ParserError (Term, [DToken])
-pTerm p@(h:t) =
-  case token h of
-    TUpper s  -> Right (TermUpper s, t)
-    TBRacketL -> pt1 [] [] True t
-    _         -> pt1 [] [] False p
+pTerm = pt1 [] []
   where
-    pt1 terms ops b (h:t) =
+    pt1 terms ops p@(h:t) =
       case token h of
-        TBRacketL ->
-          case pt1 terms ops b t of
-            Right (term, p') -> pt3 (term : terms) ops True t
+        TBracketL ->
+          case pTerm p of
+            Right (te, h':t') ->
+              case token h' of
+                TBracketR -> pt2 (te : terms) ops t'
+                _         -> raise h'
+            Left e -> Left e
+        _ ->
+          case ptNext p of
+            Right (te, p') -> pt2 (te : terms) ops p'
+            Left e         -> Left e
+    pt2 terms ops p@(h:t) =
+      case token h of
+        TPlus  -> pt1 terms (TPlus : ops) t
+        TMinus -> pt1 terms (TMinus : ops) t
+        TStar  -> pt1 terms (TStar : ops) t
+        TSlash -> pt1 terms (TSlash : ops) t
+        _      -> Right (mergeTerm terms ops, p)
+    ptNext (h:t) =
+      case token h of
+        TNumber n -> Right (Const n, t)
+        TLower s -> Right (TermLower s, t)
+        TUpper s -> Right (TermUpper s, t)
+        TMinus ->
+          case pTerm t of
+            Right (term, p') -> Right (Negative term, p')
             Left e           -> Left e
-        TNumber n -> pt3 (Const n : terms) ops b t
-        TLower s -> pt3 (TermLower s : terms) ops b t
-        TMinus -> pt2 terms ops b t
         _ -> raise h
-    pt2 terms ops b (h:t) =
-      case token h of
-        TBRacketL ->
-          case pt1 terms ops b t of
-            Right (term, p') -> pt3 (Negative term : terms) ops True t
-            Left e           -> Left e
-        TNumber n -> pt3 (Negative (Const n) : terms) ops b t
-        TLower s -> pt3 (Negative (TermLower s) : terms) ops b t
-        _ -> raise h
-    pt3 terms ops b p@(h:t) =
-      case token h of
-        TPlus -> pt1 terms (TPlus : ops) b t
-        TMinus -> pt1 terms (TMinus : ops) b t
-        TStar -> pt1 terms (TStar : ops) b t
-        TSlash -> pt1 terms (TSlash : ops) b t
-        TBracketR ->
-          if b
-            then Right (mergeTerm (reverse terms) (reverse ops), t)
-            else raise h
-        tok ->
-          if not b &&
-             tok `elem`
-             [ TCurlyR
-             , TSemic
-             , TEq
-             , TNEq
-             , TLess
-             , TLEq
-             , TGreater
-             , TGEq
-             , TAnd
-             , TOr
-             , TImplies
-             , TEquiv
-             ]
-            then Right (mergeTerm (reverse terms) (reverse ops), p)
-            else raise h
 
 mkTransient :: String -> PG
 mkTransient s =
@@ -522,7 +578,7 @@ mkTransient s =
         , mkTrans "Yes" FTrue (Action []) "No"
         , mkTrans "Yes" FTrue (Action []) "Yes"
         ]
-    , initialState = "Yes"
+    , initialState = "No"
     , initialFormula = FTrue
     , isFault = True
     }
@@ -537,7 +593,7 @@ mkPersistent s =
         [ mkTrans "No" FTrue (Action []) "No"
         , mkTrans "No" FTrue (Action []) "Yes"
         ]
-    , initialState = "Yes"
+    , initialState = "No"
     , initialFormula = FTrue
     , isFault = True
     }
@@ -551,11 +607,49 @@ mergeFormula = mf1 [] []
     mf2 fa oa [f] []               = mf3 [] [] (f : fa) oa
     mf2 fa oa (f1:f2:fs) (TOr:ops) = mf2 fa oa (Or f1 f2 : fs) ops
     mf2 fa oa (f:fs) (o:ops)       = mf2 (f : fa) (o : oa) fs ops
-    mf3 fa oa [f] []                    = mf4 (f : fa) oa
+    mf3 fa oa [f] []                    = mf4 (f : fa)
     mf3 fa oa (f1:f2:fs) (TImplies:ops) = mf3 fa oa (Implies f2 f1 : fs) ops
     mf3 fa oa (f:fs) (o:ops)            = mf3 (f : fa) (o : oa) fs ops
-    mf4 [f] []             = f
-    mf4 (f1:f2:fs) (o:ops) = mf4 (Equiv f1 f2 : fs) ops
+    mf4 [f]        = f
+    mf4 (f1:f2:fs) = mf4 (Equiv f1 f2 : fs)
+
+mergeLTL :: [LTL] -> [Token] -> LTL
+mergeLTL = ml1 [] []
+  where
+    ml1 fa oa [f] []              = ml2 [] [] (reverse $ f : fa) (reverse oa)
+    ml1 fa oa (f1:f2:fs) (TU:ops) = ml1 fa oa (LTLU f1 f2 : fs) ops
+    ml1 fa oa (f:fs) (o:ops)      = ml1 (f : fa) (o : oa) fs ops
+    ml2 fa oa [f] []                = ml3 [] [] (reverse $ f : fa) (reverse oa)
+    ml2 fa oa (f1:f2:fs) (TAnd:ops) = ml2 fa oa (LTLAnd f1 f2 : fs) ops
+    ml2 fa oa (f:fs) (o:ops)        = ml2 (f : fa) (o : oa) fs ops
+    ml3 fa oa [f] []               = ml4 [] [] (f : fa) oa
+    ml3 fa oa (f1:f2:fs) (TOr:ops) = ml3 fa oa (LTLOr f1 f2 : fs) ops
+    ml3 fa oa (f:fs) (o:ops)       = ml3 (f : fa) (o : oa) fs ops
+    ml4 fa oa [f] []                    = ml5 (f : fa)
+    ml4 fa oa (f1:f2:fs) (TImplies:ops) = ml4 fa oa (LTLImplies f2 f1 : fs) ops
+    ml4 fa oa (f:fs) (o:ops)            = ml4 (f : fa) (o : oa) fs ops
+    ml5 [f]        = f
+    ml5 (f1:f2:fs) = ml5 (LTLEquiv f1 f2 : fs)
+
+mergeCTL :: [CTL] -> [Token] -> CTL
+mergeCTL = mc1 [] []
+  where
+    mc1 :: [CTL] -> [Token] -> [CTL] -> [Token] -> CTL
+    mc1 fa oa [f] []               = mc2 [] [] (reverse $ f : fa) (reverse oa)
+    mc1 fa oa (f1:f2:fs) (TEU:ops) = mc1 fa oa (CTLEU f1 f2 : fs) ops
+    mc1 fa oa (f1:f2:fs) (TAU:ops) = mc1 fa oa (CTLAU f1 f2 : fs) ops
+    mc1 fa oa (f:fs) (o:ops)       = mc1 (f : fa) (o : oa) fs ops
+    mc2 fa oa [f] []                = mc3 [] [] (reverse $ f : fa) (reverse oa)
+    mc2 fa oa (f1:f2:fs) (TAnd:ops) = mc2 fa oa (CTLAnd f1 f2 : fs) ops
+    mc2 fa oa (f:fs) (o:ops)        = mc2 (f : fa) (o : oa) fs ops
+    mc3 fa oa [f] []               = mc4 [] [] (f : fa) oa
+    mc3 fa oa (f1:f2:fs) (TOr:ops) = mc3 fa oa (CTLOr f1 f2 : fs) ops
+    mc3 fa oa (f:fs) (o:ops)       = mc3 (f : fa) (o : oa) fs ops
+    mc4 fa oa [f] []                    = mc5 (f : fa)
+    mc4 fa oa (f1:f2:fs) (TImplies:ops) = mc4 fa oa (CTLImplies f2 f1 : fs) ops
+    mc4 fa oa (f:fs) (o:ops)            = mc4 (f : fa) (o : oa) fs ops
+    mc5 [f]        = f
+    mc5 (f1:f2:fs) = mc5 (CTLEquiv f1 f2 : fs)
 
 mergeTerm :: [Term] -> [Token] -> Term
 mergeTerm = mt1 [] []
@@ -591,3 +685,6 @@ raise dt =
       , pLine = line dt
       , pCol = column dt
       }
+
+uncurry3 :: (a -> b -> c -> d) -> (a, b, c) -> d
+uncurry3 f (a, b, c) = f a b c

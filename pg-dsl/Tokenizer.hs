@@ -20,7 +20,7 @@ tok acc l c ('\r':p) = tok (dec TNewline l c : acc) (l + 1) 1 p
 tok acc l c p@('#':_) =
   let (c', p', s) = comment c p
    in tok (dec (TComment s) l c : acc) l c' p'
-tok acc l c ('(':p) = tok (dec TBRacketL l c : acc) l (c + 1) p
+tok acc l c ('(':p) = tok (dec TBracketL l c : acc) l (c + 1) p
 tok acc l c (')':p) = tok (dec TBracketR l c : acc) l (c + 1) p
 tok acc l c ('{':p) = tok (dec TCurlyL l c : acc) l (c + 1) p
 tok acc l c ('}':p) = tok (dec TCurlyR l c : acc) l (c + 1) p
@@ -47,6 +47,42 @@ tok acc l c ('>':p) = tok (dec TGreater l c : acc) l (c + 1) p
 tok acc l c ('!':p) = tok (dec TNot l c : acc) l (c + 1) p
 tok acc l c ('|':p) = tok (dec TOr l c : acc) l (c + 1) p
 tok acc l c ('&':p) = tok (dec TAnd l c : acc) l (c + 1) p
+tok acc l c p@('X':t)
+  | nextAlphaNum t = tokUpper acc l c p
+  | otherwise = tok (dec TX l c : acc) l (c + 1) t
+tok acc l c p@('F':t)
+  | nextAlphaNum t = tokUpper acc l c p
+  | otherwise = tok (dec TF l c : acc) l (c + 1) t
+tok acc l c p@('G':t)
+  | nextAlphaNum t = tokUpper acc l c p
+  | otherwise = tok (dec TG l c : acc) l (c + 1) t
+tok acc l c p@('U':t)
+  | nextAlphaNum t = tokUpper acc l c p
+  | otherwise = tok (dec TU l c : acc) l (c + 1) t
+tok acc l c p@('E':'X':t)
+  | nextAlphaNum t = tokUpper acc l c p
+  | otherwise = tok (dec TEX l c : acc) l (c + 1) t
+tok acc l c p@('E':'F':t)
+  | nextAlphaNum t = tokUpper acc l c p
+  | otherwise = tok (dec TEF l c : acc) l (c + 1) t
+tok acc l c p@('E':'G':t)
+  | nextAlphaNum t = tokUpper acc l c p
+  | otherwise = tok (dec TEG l c : acc) l (c + 1) t
+tok acc l c p@('E':'U':t)
+  | nextAlphaNum t = tokUpper acc l c p
+  | otherwise = tok (dec TEU l c : acc) l (c + 1) t
+tok acc l c p@('A':'X':t)
+  | nextAlphaNum t = tokUpper acc l c p
+  | otherwise = tok (dec TAX l c : acc) l (c + 1) t
+tok acc l c p@('A':'F':t)
+  | nextAlphaNum t = tokUpper acc l c p
+  | otherwise = tok (dec TAF l c : acc) l (c + 1) t
+tok acc l c p@('A':'G':t)
+  | nextAlphaNum t = tokUpper acc l c p
+  | otherwise = tok (dec TAG l c : acc) l (c + 1) t
+tok acc l c p@('A':'U':t)
+  | nextAlphaNum t = tokUpper acc l c p
+  | otherwise = tok (dec TAU l c : acc) l (c + 1) t
 tok acc l c p@('g':'r':'a':'p':'h':t)
   | nextAlphaNum t = tokLower acc l c p
   | otherwise = tok (dec TGraph l c : acc) l (c + 5) t
@@ -110,6 +146,11 @@ tokLower :: [DToken] -> Int -> Int -> String -> TokenList
 tokLower acc l c p =
   let (c', p', s) = readName c p
    in tok (dec (TLower s) l c : acc) l c' p'
+
+tokUpper :: [DToken] -> Int -> Int -> String -> TokenList
+tokUpper acc l c p =
+  let (c', p', s) = readName c p
+   in tok (dec (TUpper s) l c : acc) l c' p'
 
 spaces :: Int -> String -> (Int, String)
 spaces i (' ':s) = spaces (i + 1) s

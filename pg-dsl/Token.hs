@@ -13,7 +13,7 @@ data Token
   | TSpace
   | TComment String
   | TNewline
-  | TBRacketL
+  | TBracketL
   | TBracketR
   | TCurlyL
   | TCurlyR
@@ -40,6 +40,18 @@ data Token
   | TAnd
   | TImplies
   | TEquiv
+  | TX
+  | TF
+  | TG
+  | TU
+  | TEX
+  | TEF
+  | TEG
+  | TEU
+  | TAX
+  | TAF
+  | TAG
+  | TAU
   | TGraph
   | TVars
   | TStates
@@ -67,7 +79,7 @@ instance Show Token where
   show TSpace       = "' '"
   show (TComment c) = "'" ++ c ++ "'"
   show TNewline     = "newline"
-  show TBRacketL    = "'('"
+  show TBracketL    = "'('"
   show TBracketR    = "')'"
   show TCurlyL      = "'{'"
   show TCurlyR      = "'}'"
@@ -94,6 +106,18 @@ instance Show Token where
   show TAnd         = "'&'"
   show TImplies     = "'=>'"
   show TEquiv       = "'<=>'"
+  show TX           = "'N'"
+  show TF           = "'F'"
+  show TG           = "'G'"
+  show TU           = "'U'"
+  show TEX          = "'EN'"
+  show TEF          = "'EF'"
+  show TEG          = "'EG'"
+  show TEU          = "'EU'"
+  show TAX          = "'AX'"
+  show TAF          = "'AF'"
+  show TAG          = "'AG'"
+  show TAU          = "'AU'"
   show TGraph       = "'graph'"
   show TVars        = "'variables'"
   show TStates      = "'states'"
