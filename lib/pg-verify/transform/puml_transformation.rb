@@ -79,7 +79,7 @@ module PgVerify
             def transform_variables(component, variables, variable_state)
                 return nil if variables.empty?
                 body =  variables.map { |var| 
-                    value = variable_state.nil? ? transform_range(v.range) : variable_state[var.name]
+                    value = variable_state.nil? ? transform_range(var.range) : variable_state[var.name]
                     "#{var.name} => #{value}"
                 }.join("\n")
                 return "map #{component.name}Variables {\n#{body}\n}"
