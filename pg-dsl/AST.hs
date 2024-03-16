@@ -4,6 +4,7 @@ module AST
   , ProgramGraph
   , PG(..)
   , Hazard(..)
+  , Spec(..)
   , State
   , VarDef(..)
   , Var
@@ -28,6 +29,7 @@ data Model = Model
   { modelName :: String
   , graphs    :: [PG]
   , hazards   :: [Hazard]
+  , specs     :: [Spec]
   } deriving (Show, Eq)
 
 type ProgramGraph = Either ParserError PG
@@ -50,6 +52,15 @@ instance Show Hazard where
   show :: Hazard -> String
   show (Hazard s (Left ltl))  = s ++ ": " ++ show ltl
   show (Hazard s (Right ctl)) = s ++ ": " ++ show ctl
+
+data Spec =
+  Spec String (Either LTL CTL)
+  deriving (Eq)
+
+instance Show Spec where
+  show :: Spec -> String
+  show (Spec s (Left ltl))  = s ++ ": " ++ show ltl
+  show (Spec s (Right ctl)) = s ++ ": " ++ show ctl
 
 type State = String
 

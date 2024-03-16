@@ -6,7 +6,7 @@ module Parser
 import           AST   (Action (..), CTL (..), Expression (..), Formula (..),
                         Hazard (..), LTL (..), Model (..), PG (..),
                         ParserError (..), ProgramGraph, Range (..), RelOp (..),
-                        State, Term (..), Trans (..), VarDef (..))
+                        Spec (..), State, Term (..), Trans (..), VarDef (..))
 import           Token (DToken (..), TError (..), Token (..), TokenList)
 
 parseMain :: TokenList -> Either ParserError Model
@@ -53,10 +53,16 @@ pMain (h:t) =
       case pHazards p of
         Right (haz, p') -> pm5 haz g s p'
         Left e          -> Left e
-    pm5 haz g s (h:t) =
+    pm5 haz g s p =
+      case pSpecs p of
+        Right (sp, p') -> pm6 sp haz g s p'
+        Left e         -> Left e
+    pm6 sp haz g s (h:t) =
       case token h of
-        TCurlyR -> Right (Model {modelName = s, graphs = g, hazards = haz}, t)
-        _       -> raise h
+        TCurlyR ->
+          Right
+            (Model {modelName = s, graphs = g, hazards = haz, specs = sp}, t)
+        _ -> raise h
 
 pErrors :: [DToken] -> Either ParserError ([PG], [DToken])
 pErrors p@(h:t) =
@@ -107,6 +113,37 @@ pHazards p@(h:t) =
         Left _ ->
           case pCTL p of
             Right (ctl, p') -> ph5 (Hazard s (Right ctl) : acc) p'
+            Left e          -> Left e
+    ph5 acc (h:t) =
+      case token h of
+        TCurlyR -> ph2 acc t
+        _       -> raise h
+
+pSpecs :: [DToken] -> Either ParserError ([Spec], [DToken])
+pSpecs p@(h:t) =
+  case token h of
+    TSpecify -> ph1 t
+    _        -> Right ([], p)
+  where
+    ph1 (h:t) =
+      case token h of
+        TCurlyL -> ph2 [] t
+        _       -> raise h
+    ph2 acc (h:t) =
+      case token h of
+        TCurlyR   -> Right (acc, t)
+        TString s -> ph3 s acc t
+        _         -> raise h
+    ph3 s acc (h:t) =
+      case token h of
+        TCurlyL -> ph4 s acc t
+        _       -> raise h
+    ph4 s acc p =
+      case pLTL p of
+        Right (ltl, p') -> ph5 (Spec s (Left ltl) : acc) p'
+        Left _ ->
+          case pCTL p of
+            Right (ctl, p') -> ph5 (Spec s (Right ctl) : acc) p'
             Left e          -> Left e
     ph5 acc (h:t) =
       case token h of

@@ -50,4 +50,9 @@ mergeGraphs (Left e) _ = Left e
 mergeGraphs _ (Left e) = Left e
 mergeGraphs (Right m) (Right g) =
   Right $
-  Model {modelName = modelName m, graphs = graphs m ++ g, hazards = hazards m}
+  Model
+    { modelName = modelName m
+    , graphs = graphs m ++ g
+    , hazards = hazards m
+    , specs = specs m
+    }

@@ -25,6 +25,7 @@ instance Jsonable Model where
         JsonObject
           [ "components" .= JsonArray (map toJson $ graphs m)
           , "hazards" .= JsonArray (map toJson $ hazards m)
+          , "specification" .= JsonArray (map toJson $ specs m)
           ]
       ]
 
@@ -48,6 +49,19 @@ instance Jsonable Hazard where
             Left ltl  -> show ltl
             Right ctl -> show ctl
      in JsonObject ["label" .= JsonString s, "expression" .= JsonString f]
+
+instance Jsonable Spec where
+  toJson :: Spec -> Json
+  toJson (Spec s h) =
+    let f =
+          case h of
+            Left ltl  -> show ltl
+            Right ctl -> show ctl
+     in JsonObject
+          [ "label" .= JsonString s
+          , "expression" .=
+            JsonObject ["string" .= JsonString f, "type" .= JsonString "pl"]
+          ]
 
 instance Jsonable VarDef where
   toJson :: VarDef -> Json

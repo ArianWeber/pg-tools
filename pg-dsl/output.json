@@ -161,6 +161,22 @@
                 "label": "Hazard 1",
                 "expression": "F Robot == Inactive"
             }
+        ],
+        "specification": [
+            {
+                "label": "Specification 2",
+                "expression": {
+                    "string": "G TransientError == No",
+                    "type": "pl"
+                }
+            },
+            {
+                "label": "Specification 1",
+                "expression": {
+                    "string": "X (F Robot == Busy || Robot == Idle)",
+                    "type": "pl"
+                }
+            }
         ]
     }
 }

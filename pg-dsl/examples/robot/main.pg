@@ -13,4 +13,14 @@ model Robot {
             AF TransientError = Yes & EF PersistentError = Yes
         }
     }
+
+    # More stuff that makes no sense
+    specify {
+        "Specification 1" {
+            X Robot = Idle | F Robot = Busy
+        }
+        "Specification 2" {
+            G TransientError = No
+        }
+    }
 }

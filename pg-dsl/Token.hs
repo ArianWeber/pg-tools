@@ -69,6 +69,7 @@ data Token
   | TTransient
   | TPersistent
   | THazards
+  | TSpecify
   | TString String
   | TNumber Int
   | TLower String
@@ -137,6 +138,7 @@ instance Show Token where
   show TTransient   = "'transient'"
   show TPersistent  = "'persistent'"
   show THazards     = "'hazards'"
+  show TSpecify     = "'specify'"
   show (TString s)  = show s
   show (TNumber n)  = "'" ++ show n ++ "'"
   show (TLower s)   = "'" ++ s ++ "'"

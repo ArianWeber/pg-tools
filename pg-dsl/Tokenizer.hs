@@ -134,6 +134,9 @@ tok acc l c p@('p':'e':'r':'s':'i':'s':'t':'e':'n':'t':t)
 tok acc l c p@('h':'a':'z':'a':'r':'d':'s':t)
   | nextAlphaNum t = tokLower acc l c p
   | otherwise = tok (dec THazards l c : acc) l (c + 7) t
+tok acc l c p@('s':'p':'e':'c':'i':'f':'y':t)
+  | nextAlphaNum t = tokLower acc l c p
+  | otherwise = tok (dec TSpecify l c : acc) l (c + 7) t
 tok acc l c ('"':t) =
   case readString l (c + 1) t of
     Right (c', p', s) -> tok (dec (TString s) l c : acc) l c' p'
