@@ -20,6 +20,8 @@ module PgVerify
             TYPE_CTL = :ctl
 
             TYPES = [ TYPE_GUARD, TYPE_ACTION, TYPE_TERM, TYPE_PL, TYPE_TL, TYPE_LTL, TYPE_CTL ]
+            LTL_KEYWORDS = "GFXRU".chars
+            CTL_KEYWORDS = [ "A", "E" ].product([ "G", "F", "X", "U" ]).map { |a, e| "#{a}#{e}" }
 
             attr_accessor :expression_string
             attr_accessor :source_location
@@ -36,9 +38,16 @@ module PgVerify
 
             def word_tokens()
                 words = expression_string.scan(/[a-zA-Z_][a-zA-Z0-9_]*/).flatten.compact
-                words = words.reject { |w| w.match(/\A[GFXRU]+\z/) }
+                words = words.reject { |w| LTL_KEYWORDS.include?(w) }
+                words = words.reject { |w| CTL_KEYWORDS.include?(w) }
                 words = words.reject { |w| w == "TRUE" || w == "FALSE" }
                 return words.map(&:to_sym)
+            end
+
+            def predict_type()
+                return @type unless @type == :tl
+                tokens = self.tokenize()
+                return CTL_KEYWORDS.any? { |kw| tokens.include?(kw) } ? :ctl : :ltl
             end
 
             # Splits the expression string into an array of tokens. e.g:
@@ -54,10 +63,6 @@ module PgVerify
                 }.flatten.map { |t|
                     t.start_with?("(") ? [ "(" , t.slice(1..-1)] : t
                 }.flatten.reject(&:blank?)
-            end
-
-            def used_variables()
-                return expression_string.scan(/[a-zA-Z_][a-zA-Z0-9_]*/).flatten.compact.map(&:to_sym)
             end
 
             def to_s()

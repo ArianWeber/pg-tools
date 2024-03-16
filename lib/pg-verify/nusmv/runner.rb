@@ -5,9 +5,17 @@ module PgVerify
         class Runner
 
             def run_specs(program_graph)
-                nusmv_s = Transform::NuSmvTransformation.new.transform_graph(program_graph)
-                output = eval_nusmv(nusmv_s)
+                transformer = Transform::NuSmvTransformation.new
+                nusmv_s = transformer.transform_graph(program_graph, include_specs: false)
+                commands = [ "go" ]
                 specs = program_graph.specification.flatten()
+                transform_map = specs.each { |spec|
+                    transformed_spec_expr = transformer.transform_expression(spec.expression, program_graph.all_variables)
+                    cmd = {  ltl: "check_ltlspec", ctl: "check_ctlspec" }[spec.expression.predict_type]
+                    commands << "#{cmd} -p \"#{transformed_spec_expr}\""
+                }
+                output = eval_nusmv(nusmv_s, commands: commands)
+
                 return parse_spec_results(program_graph, specs, output)
             end
 
@@ -20,8 +28,8 @@ module PgVerify
                 nusmv_output.split("\n").each { |line|
                     result = line[/-- specification .* is (true|false)/, 1]
                     if !result.nil?
-                        blocks << current_block unless current_block.nil?
-                        current_block = block.new(result == "true", [])
+                        blocks << current_block unless current_block.nil? # Complete the last block
+                        current_block = block.new(result == "true", [])   # Start a new block
                         next
                     end
                     current_block.lines << line unless current_block.nil?
@@ -41,10 +49,7 @@ module PgVerify
             # variable to the value of that variable in that state
             def run_simulation(program_graph, steps, random: false)
                 commands = []
-                commands << "read_model"
-                commands << "flatten_hierarchy"
-                commands << "encode_variables"
-                commands << "build_model"
+                commands << "go"
                 commands << "pick_state #{random ? '-r' : ''}"
                 commands << "simulate -k #{steps.to_s.to_i} -v #{random ? '-r' : ''}"
                 commands << "quit"
@@ -114,6 +119,15 @@ module PgVerify
                     next if key.nil? || val.nil?
                     current_var_state[key] = val
                 }
+                # Finish up
+                unless current_var_state.nil?
+                    missing_keys = var_states.empty? ? [] :  var_states[-1].keys - current_var_state.keys
+                    missing_keys.each { |key|
+                        current_var_state[key] = var_states[-1][key]
+                    }  
+                    var_states << current_var_state
+                end
+
                 return Model::Trace.new(program_graph, var_states)
             end
 

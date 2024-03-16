@@ -117,7 +117,7 @@ module PgVerify
             def formatted()
                 title = "No such state #{@state} in component #{@component.name}"
                 body = "The component #{@component.name.to_s.c_cmp} does not contain a state called #{@state.to_s.c_state}.\n"
-                body += "Available states are: #{@component.states.map(&:to_s).map(&:c_state).join(', ')}"
+                body += "Available states are: #{@component.states&.map(&:to_s)&.map(&:c_state)&.join(', ')}"
                 hint = "Make sure to define states before defining transitions."
                 return title, body, hint
             end

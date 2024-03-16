@@ -5,6 +5,7 @@ model :TestTransitions do
     end
     specify "The state" do
         it "starts in one" => :"Test == one"
-        it "transitions to two" => :"X Test == two"
+        it "transitions to two (LTL)" => :"X Test == two"
+        it "transitions to two (CTL)" => :"AX Test == two"
     end
 end

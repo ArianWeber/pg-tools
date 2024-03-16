@@ -5,13 +5,19 @@ module PgVerify
 
         class PumlTransformation
 
+            attr_accessor :render_labels
+
+            def initialize(render_labels: true)
+                @render_labels = render_labels
+            end
+
             def transform_graph(graph, variable_state: nil, only: nil)
 
                 components = graph.components
                 components = components.select { |c| only.map(&:to_s).include?(c.name.to_s) } unless only.nil?
 
                 parts = []
-                parts << components.map { |c| transform_component(graph, c) }.join("\n\n")
+                parts << components.map { |c| transform_component(graph, c, variable_state) }.join("\n\n")
                 parts << transform_variable_state(graph, variable_state) unless variable_state.nil?
                 parts = parts.compact.join("\n\n")
                 return "@startuml Programmgraph\n#{parts}\n@enduml\n"
@@ -25,14 +31,14 @@ module PgVerify
                 }.join("\n")
             end
         
-            def transform_component(graph, component)
+            def transform_component(graph, component, variable_state)
                 # Transform component states
                 states_s  = component.states.map { |s| transform_state(component, s) }.join("\n")
                 # Transform component transitions
                 trans_s   = component.transitions.map { |t| transform_transition(component, t) }.join("\n")
                 # Transform component variables
                 vars = graph.variables.select_by_owner(component.name)
-                vars_s    = transform_variables(component, vars)
+                vars_s    = transform_variables(component, vars, variable_state)
                 # Transform the initial state 
                 initial_s = transform_initial(graph, component)
 
@@ -60,9 +66,9 @@ module PgVerify
         
             def transform_transition(component, transition)
                 label = [ transition.precon, transition.guard ].map(&:to_s).reject(&:empty?).join(" && ")
-                label += "/ " + transition.action.to_s unless transition.action.nil?
-
+                label += " / " + transition.action.to_s unless transition.action.nil?
                 label = ": #{label}" unless label.strip.empty?
+                label = "" unless @render_labels
                 return "#{component.name}_#{transition.src_state} --> #{component.name}_#{transition.tgt_state} #{label}"
             end
         
@@ -70,9 +76,12 @@ module PgVerify
                 str.split("\n").map { |s| "\t#{s}" }.join("\n")
             end
         
-            def transform_variables(component, variables)
-                return nil if variables.empty? 
-                body =  variables.map { |v| "#{v.name} => #{transform_range(v.range)}" }.join("\n")
+            def transform_variables(component, variables, variable_state)
+                return nil if variables.empty?
+                body =  variables.map { |var| 
+                    value = variable_state.nil? ? transform_range(v.range) : variable_state[var.name]
+                    "#{var.name} => #{value}"
+                }.join("\n")
                 return "map #{component.name}Variables {\n#{body}\n}"
             end
         

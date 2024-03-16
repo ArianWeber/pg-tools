@@ -27,8 +27,8 @@ module PgVerify
                     title = "Unknown token"
                     
                     body = []
-                    body << @expression.source_location.to_s.c_sidenote  unless @expression.source_location.blank?
-                    body << @expression.source_location.render_code_block() unless @expression.source_location.blank?
+                    body << @expression.source_location.to_s.c_sidenote  unless @expression.source_location.nil?
+                    body << @expression.source_location.render_code_block() unless @expression.source_location.nil?
                     body << ""
                     body << "The expression '#{@expression.to_s.c_expression}' uses token #{@token.to_s.c_string}."
                     body << "This is neither a known variable, nor literal."
@@ -126,7 +126,9 @@ module PgVerify
                     body += trace.to_s(include_steps: false).indented(str: ">>  ".c_error)
 
                     hint = []
-                    hint << "This indicates a range violation!"
+                    hint << "This indicates a range violation:"
+                    hint << "Once your graph is in the mentioned state (which is reachable),"
+                    hint << "all outgoing transitions are blocked due to variable range violations."
                     return title, body, hint.join("\n")
                 end
             end

@@ -3,6 +3,7 @@ Dir[File.join(__dir__, '*.rb')].sort.each { |file| require file }
 
 require 'thor'
 require 'plantuml_builder'
+require 'json'
 
 module PgVerify
     module Cli
@@ -13,12 +14,14 @@ module PgVerify
             method_option :only, :type => :array, repeatable: true
             method_option :hide, :type => :array, repeatable: true
             method_option :script, :type => :string
+            method_option :"hide-labels", :type => :boolean, default: false
             def puml()
+                hide_labels = options[:"hide-labels"]
                 script_file = options[:script] || Settings.ruby_dsl.default_script_name
                 models = Interpret::PgScript.new.interpret(script_file)
                 models.each { |model|
                     components = self.class.select_components(options[:only], options[:hide], model)
-                    puml = Transform::PumlTransformation.new.transform_graph(model, only: components)
+                    puml = Transform::PumlTransformation.new(render_labels: !hide_labels).transform_graph(model, only: components)
                     puts puml
                 }
             end
@@ -27,13 +30,15 @@ module PgVerify
             method_option :only, :type => :array, repeatable: true
             method_option :hide, :type => :array, repeatable: true
             method_option :script, :type => :string
+            method_option :"hide-labels", :type => :boolean, default: false
             def png()
+                hide_labels = options[:"hide-labels"]
                 script_file = options[:script] || Settings.ruby_dsl.default_script_name
                 models = Interpret::PgScript.new.interpret(script_file)
 
                 models.each { |model|
                     components = self.class.select_components(options[:only], options[:hide], model)
-                    puml = Transform::PumlTransformation.new.transform_graph(model, only: components)
+                    puml = Transform::PumlTransformation.new(render_labels: !hide_labels).transform_graph(model, only: components)
                     png = PlantumlBuilder::Formats::PNG.new(puml).load
                     out_name = File.basename(script_file, '.*')
                     out_name += "-" + model.name.to_s.gsub(/\W+/, '_').downcase + ".png"
@@ -113,7 +118,7 @@ module PgVerify
 
                 models.each { |model|
                     Shell::LoadingPrompt.while_loading("Checking for deadlocks") {
-                        NuSMV::Runner.new().run_check!(model)
+                        NuSMV::Runner.new().run_check!(model); "ok"
                     }
 
                     results = Shell::LoadingPrompt.while_loading("Running specifications") {
@@ -125,8 +130,8 @@ module PgVerify
                         puts "[ #{stat_string} ] #{result.spec.text}"
                         puts "           #{result.spec.expression.to_s.c_blue}"
                         unless result.success
-                            puts "Here is the trace:".c_red
-                            trace_s = result.trace.to_s.indented(str: " >> ".c_red)
+                            puts "           Here is an counter example:".c_red
+                            trace_s = result.trace.to_s.indented(str: "           >>  ".c_red)
                             puts trace_s + "\n"
                         end
                     }
@@ -141,7 +146,7 @@ module PgVerify
 
                 models.each { |model|
                     Shell::LoadingPrompt.while_loading("Checking for deadlocks") {
-                        NuSMV::Runner.new().run_check!(model)
+                        NuSMV::Runner.new().run_check!(model); "ok"
                     }
 
                     dcca = Model::DCCA.new(model, NuSMV::Runner.new)
@@ -151,7 +156,8 @@ module PgVerify
                     result.each { |hazard, crit_sets|
                         s = crit_sets.length == 1 ? "" : "s"
                         message = "Hazard #{hazard.text.to_s.c_string} (#{hazard.expression.to_s.c_blue}) "
-                        message += "has #{crit_sets.length.to_s.c_num} minimal critical cut set#{s}:"
+                        message += "has #{crit_sets.length.to_s.c_num} minimal critical fault set#{s}:" if crit_sets.length > 0
+                        message += "has no minimal critical fault sets, meaning it is safe!".c_success if crit_sets.length == 0
                         puts message
                         crit_sets.each { |set|
                             puts "\t{ #{set.map(&:to_s).map(&:c_blue).join(', ')} }"
@@ -173,7 +179,7 @@ module PgVerify
 
                 models.each { |model|
                     Shell::LoadingPrompt.while_loading("Checking for deadlocks") {
-                        NuSMV::Runner.new().run_check!(model)
+                        NuSMV::Runner.new().run_check!(model); "ok"
                     }
 
                     trace = Shell::LoadingPrompt.while_loading("Simulating model #{model.name.to_s.c_string}") {

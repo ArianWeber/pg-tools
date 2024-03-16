@@ -4,16 +4,24 @@ module PgVerify
         class HashTransformation
 
             def transform_graph(graph)
-                return { graph.name.to_s => 
-                    graph.components.map { |c| transform_component(graph, c) }
-                }
+                components = graph.components.map { |c| transform_component(graph, c) }
+                hazards    = graph.hazards.map { |h| transform_hazard(h) }
+                sub_hash = {}
+                sub_hash["components"] = components
+                sub_hash["hazards"] = hazards unless hazards.empty?
+                sub_hash["specification"] = transform_specification(graph.specification)
+                return { graph.name.to_s => sub_hash }
             end
 
             def parse_graph(hash)
                 name = hash.keys.first.to_sym
                 graph = Model::Graph.new(name)
-                components = hash[hash.keys.first].map { |c| parse_component(graph, c) }
+                components = hash[hash.keys.first]["components"].map { |c| parse_component(graph, c) }
+                hazards = hash[hash.keys.first]["hazards"]&.map { |h| parse_hazard(h) } || []
+                specification = parse_specification(hash[hash.keys.first]["specification"])
                 graph.components = components
+                graph.hazards = hazards
+                graph.specification = specification
                 return graph
             end
 
@@ -22,6 +30,7 @@ module PgVerify
                 return { component.name.to_s => {
                     "states" => component.states.map(&:to_s),
                     "variables" => variables.map { |v| transform_variable(v) },
+                    "init" => transform_expression(component.init_expression),
                     "transitions" => component.transitions.map { |t| transform_transition(t) },
                     "represents_fault" => component.represents_fault
                 }}
@@ -31,13 +40,14 @@ module PgVerify
                 name = hash.keys.first
                 states = hash[name]["states"].map(&:to_sym)
                 variables = hash[name]["variables"].map { |v| parse_variable(name, v) }
+                init_expression = parse_expression(hash[name]["init"])
                 transitions = hash[name]["transitions"].map { |t| parse_transition(t) }
                 represents_fault = hash[name]["represents_fault"]
 
                 graph.variables += variables
 
                 return Model::Component.new(name: name.to_sym, states: states, 
-                    transitions: transitions, represents_fault: represents_fault)
+                    transitions: transitions, represents_fault: represents_fault, init_expression: init_expression)
             end
 
             def transform_variable(variable)
@@ -97,6 +107,27 @@ module PgVerify
                 guard  = hash.values.first["guard"] 
                 action = hash.values.first["action"]
                 return Model::Transition.new(src_state, tgt_state, precon: precon, guard: guard, action: action)
+            end
+
+            def transform_hazard(hazard)
+                return { "label" => hazard.text, "expression" => hazard.expression }
+            end
+
+            def parse_hazard(hash)
+                return Model::Hazard.new(hash["label"], hash["expression"])
+            end
+
+            def transform_specification(specification)
+                return specification.flatten().map { |spec|
+                    { "label" => spec.text.strip, "expression" => transform_expression(spec.expression) }
+                }
+            end
+
+            def parse_specification(array)
+                specs = array.map { |hash|
+                    Model::Spec.new(hash["label"], parse_expression(hash["expression"]), nil)
+                }
+                return  Model::Specification.new([Model::SpecSet.wrap(specs)])
             end
 
         end
