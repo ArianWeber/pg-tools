@@ -4,7 +4,6 @@ module Parser
   ) where
 
 import           AST
-import           Debug.Trace
 import           Token
 
 parseMain :: TokenList -> Either ParserError Model
@@ -632,6 +631,7 @@ pProposition p@(h:t) =
         TLEq     -> pp2 LessEq t1 t
         TGreater -> pp2 Greater t1 t
         TGEq     -> pp2 GreaterEq t1 t
+        _        -> raise h
     pp2 op t1 p =
       case pTerm p of
         Right (t2, p') -> Right ((op, t1, t2), p')
@@ -757,14 +757,14 @@ mergeCTL fs ops = mc1 [] [] (reverse fs) (reverse ops)
     mc5 (f1:f2:fs) = mc5 (CTLEquiv f1 f2 : fs)
 
 mergeTerm :: [Term] -> [Token] -> Term
-mergeTerm = mt1 [] []
+mergeTerm ts ops = mt1 [] [] (reverse ts) (reverse ops)
   where
-    mt1 ta oacc [t] [] = mt2 (reverse $ t : ta) (reverse oacc)
-    mt1 ta oacc (t1:t2:ts) (o:ops) =
+    mt1 ta oa [t] [] = mt2 (reverse $ t : ta) (reverse oa)
+    mt1 ta oa (t1:t2:ts) (o:ops) =
       case o of
-        TStar  -> mt1 ta oacc (Multiply t1 t2 : ts) ops
-        TSlash -> mt1 ta oacc (Divide t1 t2 : ts) ops
-        _      -> mt1 (t1 : ta) (o : ops) (t2 : ts) ops
+        TStar  -> mt1 ta oa (Multiply t1 t2 : ts) ops
+        TSlash -> mt1 ta oa (Divide t1 t2 : ts) ops
+        _      -> mt1 (t1 : ta) (o : oa) (t2 : ts) ops
     mt2 [t] [] = t
     mt2 (t1:t2:ts) (o:ops) =
       case o of

@@ -37,7 +37,7 @@ tok acc l c ('-':p) = tok (dec TMinus l c : acc) l (c + 1) p
 tok acc l c ('*':p) = tok (dec TStar l c : acc) l (c + 1) p
 tok acc l c ('/':p) = tok (dec TSlash l c : acc) l (c + 1) p
 tok acc l c ('=':'>':p) = tok (dec TImplies l c : acc) l (c + 2) p
-tok acc l c ('<':'=':'>':p) = tok (dec TImplies l c : acc) l (c + 3) p
+tok acc l c ('<':'=':'>':p) = tok (dec TEquiv l c : acc) l (c + 3) p
 tok acc l c ('=':p) = tok (dec TEq l c : acc) l (c + 1) p
 tok acc l c ('!':'=':p) = tok (dec TNEq l c : acc) l (c + 2) p
 tok acc l c ('<':'=':p) = tok (dec TLEq l c : acc) l (c + 2) p
