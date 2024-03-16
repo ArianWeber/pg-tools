@@ -37,6 +37,9 @@ instance Jsonable PG where
         JsonObject
           [ "states" .= JsonArray (map toJson (states g))
           , "variables" .= JsonArray (map toJson (variables g))
+          , "init" .=
+            JsonObject
+              ["string" .= JsonString (jsonInit g), "type" .= JsonString "pl"]
           , "transitions" .= JsonArray (map toJson (transitions g))
           ]
       ]
@@ -111,3 +114,11 @@ instance Jsonable CTL where
   toJson CTLTrue  = JsonNull
   toJson CTLFalse = JsonBool False
   toJson f        = JsonString $ show f
+
+jsonInit :: PG -> String
+jsonInit pg
+  | initialFormula pg == FTrue = show initState
+  | otherwise = show $ And initState $ initialFormula pg
+  where
+    initState =
+      Proposition Equal (TermUpper $ name pg) (TermUpper $ initialState pg)

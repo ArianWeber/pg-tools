@@ -8,6 +8,10 @@
                         "Yes"
                     ],
                     "variables": [],
+                    "init": {
+                        "string": "PersistentError == No",
+                        "type": "pl"
+                    },
                     "transitions": [
                         {
                             "No -> No": {
@@ -33,6 +37,10 @@
                         "Yes"
                     ],
                     "variables": [],
+                    "init": {
+                        "string": "TransientError == No",
+                        "type": "pl"
+                    },
                     "transitions": [
                         {
                             "No -> No": {
@@ -72,6 +80,10 @@
                         "Idle"
                     ],
                     "variables": [],
+                    "init": {
+                        "string": "LightBarrier == Idle",
+                        "type": "pl"
+                    },
                     "transitions": [
                         {
                             "Signal -> Signal": {
@@ -119,6 +131,10 @@
                             }
                         }
                     ],
+                    "init": {
+                        "string": "(Robot == Idle && num == 0)",
+                        "type": "pl"
+                    },
                     "transitions": [
                         {
                             "Busy -> Inactive": {

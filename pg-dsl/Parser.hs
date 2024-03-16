@@ -3,11 +3,8 @@ module Parser
   , parseMain
   ) where
 
-import           AST   (Action (..), CTL (..), Expression (..), Formula (..),
-                        Hazard (..), LTL (..), Model (..), PG (..),
-                        ParserError (..), ProgramGraph, Range (..), RelOp (..),
-                        Spec (..), State, Term (..), Trans (..), VarDef (..))
-import           Token (DToken (..), TError (..), Token (..), TokenList)
+import           AST
+import           Token
 
 parseMain :: TokenList -> Either ParserError Model
 parseMain (Left e) =
