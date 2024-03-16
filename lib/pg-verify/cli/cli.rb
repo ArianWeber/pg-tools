@@ -14,11 +14,12 @@ module PgVerify
             method_option :only, :type => :array, repeatable: true
             method_option :hide, :type => :array, repeatable: true
             method_option :script, :type => :string
+            method_option :"json-file", :type => :string
+            method_option :"yaml-file", :type => :string
             method_option :"hide-labels", :type => :boolean, default: false
             def puml()
                 hide_labels = options[:"hide-labels"]
-                script_file = options[:script] || Settings.ruby_dsl.default_script_name
-                models = Interpret::PgScript.new.interpret(script_file)
+                models = CliUtils.load_models(options)
                 models.each { |model|
                     components = self.class.select_components(options[:only], options[:hide], model)
                     puml = Transform::PumlTransformation.new(render_labels: !hide_labels).transform_graph(model, only: components)
@@ -30,11 +31,12 @@ module PgVerify
             method_option :only, :type => :array, repeatable: true
             method_option :hide, :type => :array, repeatable: true
             method_option :script, :type => :string
+            method_option :"json-file", :type => :string
+            method_option :"yaml-file", :type => :string
             method_option :"hide-labels", :type => :boolean, default: false
             def png()
                 hide_labels = options[:"hide-labels"]
-                script_file = options[:script] || Settings.ruby_dsl.default_script_name
-                models = Interpret::PgScript.new.interpret(script_file)
+                models = CliUtils.load_models(options)
 
                 models.each { |model|
                     components = self.class.select_components(options[:only], options[:hide], model)
@@ -51,9 +53,10 @@ module PgVerify
 
             desc "yaml", "Shows the model in YAML format"
             method_option :script, :type => :string
+            method_option :"json-file", :type => :string
+            method_option :"yaml-file", :type => :string
             def yaml()
-                script_file = options[:script] || Settings.ruby_dsl.default_script_name
-                models = Interpret::PgScript.new.interpret(script_file)
+                models = CliUtils.load_models(options)
 
                 models.each { |model| 
                     hash = Transform::HashTransformation.new.transform_graph(model)
@@ -63,9 +66,10 @@ module PgVerify
 
             desc "json", "Shows the model in Json format"
             method_option :script, :type => :string
+            method_option :"json-file", :type => :string
+            method_option :"yaml-file", :type => :string
             def json()
-                script_file = options[:script] || Settings.ruby_dsl.default_script_name
-                models = Interpret::PgScript.new.interpret(script_file)
+                models = CliUtils.load_models(options)
 
                 models.each { |model| 
                     hash = Transform::HashTransformation.new.transform_graph(model)
@@ -75,9 +79,10 @@ module PgVerify
 
             desc "nusmv", "Shows the model in NuSMV format"
             method_option :script, :type => :string
+            method_option :"json-file", :type => :string
+            method_option :"yaml-file", :type => :string
             def nusmv()
-                script_file = options[:script] || Settings.ruby_dsl.default_script_name
-                models = Interpret::PgScript.new.interpret(script_file)
+                models = CliUtils.load_models(options)
 
                 models.each { |model|
                     nusmv = Transform::NuSmvTransformation.new.transform_graph(model)
@@ -112,9 +117,10 @@ module PgVerify
 
             desc "test", "Test the model specifications"
             method_option :script, :type => :string
+            method_option :"json-file", :type => :string
+            method_option :"yaml-file", :type => :string
             def test()
-                script_file = options[:script] || Settings.ruby_dsl.default_script_name
-                models = Interpret::PgScript.new.interpret(script_file)
+                models = CliUtils.load_models(options)
 
                 models.each { |model|
                     Shell::LoadingPrompt.while_loading("Checking for deadlocks") {
@@ -140,9 +146,10 @@ module PgVerify
 
             desc "dcca", "Run the automatic DCCA for hazards of the model"
             method_option :script, :type => :string
+            method_option :"json-file", :type => :string
+            method_option :"yaml-file", :type => :string
             def dcca()
-                script_file = options[:script] || Settings.ruby_dsl.default_script_name
-                models = Interpret::PgScript.new.interpret(script_file)
+                models = CliUtils.load_models(options)
 
                 models.each { |model|
                     Shell::LoadingPrompt.while_loading("Checking for deadlocks") {
@@ -168,13 +175,14 @@ module PgVerify
 
             desc "simulate", "Simulate the model and save each step as an image"
             method_option :script, :type => :string
+            method_option :"json-file", :type => :string
+            method_option :"yaml-file", :type => :string
             method_option :steps, :type => :numeric, default: 10
             method_option :force, :type => :numeric, default: 10
             method_option :random, :type => :boolean, default: false
             method_option :png, :type => :boolean, default: false
             def simulate()
-                script_file = options[:script] || Settings.ruby_dsl.default_script_name
-                models = Interpret::PgScript.new.interpret(script_file)
+                models = CliUtils.load_models(options)
                 runner = NuSMV::Runner.new
 
                 models.each { |model|

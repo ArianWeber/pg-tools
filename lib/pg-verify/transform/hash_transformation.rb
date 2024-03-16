@@ -59,7 +59,7 @@ module PgVerify
 
             def parse_variable(owner_name, hash)
                 name = hash.keys.first
-                range = hash[name]["range"]
+                range = parse_variable_range(hash[name]["range"])
                 init_expression = parse_expression(hash[name]["init"])
                 return Model::Variable.new(name.to_sym, range, owner_name.to_sym, nil, init: init_expression)
             end
@@ -70,9 +70,10 @@ module PgVerify
             end
 
             def parse_variable_range(range)
-                if range.is_a?(String) && range.match(/\A\d+\.\.\d+\z/)
+                # Matches ranges like 1..12 or -1..23
+                if range.is_a?(String) && range.match(/\A\-?\d+\.\.\-?\d+\z/)
                     first, last = range.split("..")[0], range.split("..")[-1]
-                    return Range.new(first, last)
+                    return Range.new(first.to_i, last.to_i)
                 end
                 return range
             end
@@ -95,17 +96,17 @@ module PgVerify
             def transform_transition(transition)
                 name = "#{transition.src_state} -> #{transition.tgt_state}"
                 return { name => {
-                    "precon" => transition.precon&.to_s,
-                    "guard" => transition.guard&.to_s,
-                    "action" => transition.action&.to_s,
+                    "precon" => transform_expression(transition.precon),
+                    "guard" => transform_expression(transition.guard),
+                    "action" => transform_expression(transition.action),
                 }}
             end
 
             def parse_transition(hash)
                 src_state, tgt_state = hash.keys.first.split("->").map(&:strip).map(&:to_sym)
-                precon = hash.values.first["precon"]
-                guard  = hash.values.first["guard"] 
-                action = hash.values.first["action"]
+                precon = parse_expression(hash.values.first["precon"])
+                guard  = parse_expression(hash.values.first["guard"] )
+                action = parse_expression(hash.values.first["action"])
                 return Model::Transition.new(src_state, tgt_state, precon: precon, guard: guard, action: action)
             end
 

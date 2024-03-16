@@ -15,6 +15,7 @@ module PgVerify
         end
 
         def self.convert_file(in_path, out_path)
+            # CALL WITH java -Djava.awt.headless=true -jar addon/plantuml-1.2023.13.jar --help
             # TODO: The PlantUML jar switches focus to the desktop is if it would
             # attempt to open a window each time it is invoked.
         end

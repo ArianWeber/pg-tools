@@ -1,5 +1,5 @@
 
-default task :gen_examples do
+task :gen_examples do
     files = Dir["integration_tests/ruby_dsl/*.rb"].select(&:file?)
 
     target_dir = "examples"
@@ -18,5 +18,47 @@ default task :gen_examples do
     }
     FileUtils.rm_rf(target_dir)
 
-    "Generated examples.tar.gz"
+    done "Generated examples.tar.gz"
+end
+
+task :integration_test do
+
+    work_dir = ".pg-work"
+    FileUtils.rm_rf(work_dir); FileUtils.mkdir(work_dir)
+
+    test_files = Dir["integration_tests/ruby_dsl/*.rb"].sort.select(&:file?)
+
+
+    # Create json files for all tests
+    test_files.each { |source|
+        log "JSON #{File.basename(source)}"
+        target = File.join(work_dir, File.basename(source, '.rb') + ".json")
+        content = x "./devpg show json --script #{source}", verbose: false
+        File.write(target, content)
+    }
+
+    # Create json files for all tests
+    test_files.each { |source|
+        log "YAML #{File.basename(source)}"
+        target = File.join(work_dir, File.basename(source, '.rb') + ".yaml")
+        content = x "./devpg show yaml --script #{source}", verbose: false
+        File.write(target, content)
+    }
+
+    # Run tests for all files
+    test_files.each { |source|
+        args = {
+            "script" => source,
+            "json-file" => File.join(work_dir, File.basename(source, '.rb') + ".json"),
+        }
+        commands = [ "show puml", "test", "dcca" ]
+        args.each { |argument, file|
+            commands.each { |command|
+                log "pgv #{command} #{argument} | #{File.basename(file)}"
+                x "./devpg #{command} --#{argument} #{file}", verbose: false
+            }
+        }
+    }
+
+    done "Great success!"
 end
