@@ -23,7 +23,6 @@ main = do
   let modelRaw = inspectMain mainFile $ (parseMain . tokenize) mainContent
       model = mergeGraphs modelRaw graphs
   LBS.writeFile "./output.json" $ renderJson $ toJson model
-  print $ tokenize mainContent
   print model
 
 isGraphFile :: String -> Bool

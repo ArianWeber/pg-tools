@@ -4,6 +4,7 @@ module Parser
   ) where
 
 import           AST
+import           Debug.Trace
 import           Token
 
 parseMain :: TokenList -> Either ParserError Model
@@ -465,24 +466,34 @@ pFormula = pf1 [] []
                 Left e        -> Left e
     pf2 fs ops p@(h:t) =
       case token h of
-        TAnd      -> pf1 fs (TAnd : ops) t
-        TOr       -> pf1 fs (TOr : ops) t
-        TImplies  -> pf1 fs (TImplies : ops) t
-        TEquiv    -> pf1 fs (TEquiv : ops) t
-        TBracketR -> Right (mergeFormula fs ops, p)
-        TCurlyR   -> Right (mergeFormula fs ops, p)
-        TSemic    -> Right (mergeFormula fs ops, p)
-        _         -> raise h
+        TAnd     -> pf1 fs (TAnd : ops) t
+        TOr      -> pf1 fs (TOr : ops) t
+        TImplies -> pf1 fs (TImplies : ops) t
+        TEquiv   -> pf1 fs (TEquiv : ops) t
+        _        -> Right (mergeFormula fs ops, p)
     pfNext (h:t) =
       case token h of
         TTrue -> Right (FTrue, t)
         TFalse -> Right (FFalse, t)
         TLower s -> Right (FVar s, t)
         TNot ->
-          case pFormula t of
+          case pf3 t of
             Right (f, p') -> Right (Not f, p')
             Left e        -> Left e
         _ -> raise h
+    pf3 p@(h:t) =
+      case pProposition p of
+        Right (f, p') -> Right (uncurry3 Proposition f, p')
+        Left _ ->
+          case token h of
+            TBracketL ->
+              case pFormula p of
+                Right (f, p') -> Right (f, p')
+                Left e        -> Left e
+            _ ->
+              case pfNext p of
+                Right (f, p') -> Right (f, p')
+                Left e        -> Left e
 
 pLTL :: [DToken] -> Either ParserError (LTL, [DToken])
 pLTL = pl1 [] []
@@ -522,9 +533,22 @@ pLTL = pl1 [] []
         TG       -> pl3 LTLG t
         _        -> raise h
     pl3 c p =
-      case pLTL p of
+      case pl4 p of
         Right (f, p') -> Right (c f, p')
         Left e        -> Left e
+    pl4 p@(h:t) =
+      case pProposition p of
+        Right (f, p') -> Right (uncurry3 LTLProp f, p')
+        Left _ ->
+          case token h of
+            TBracketL ->
+              case pLTL p of
+                Right (f, p') -> Right (f, p')
+                Left e        -> Left e
+            _ ->
+              case plNext p of
+                Right (f, p') -> Right (f, p')
+                Left e        -> Left e
 
 pCTL :: [DToken] -> Either ParserError (CTL, [DToken])
 pCTL = pc1 [] []
@@ -568,9 +592,22 @@ pCTL = pc1 [] []
         TAG      -> pc3 CTLAG t
         _        -> raise h
     pc3 c p =
-      case pCTL p of
+      case pc4 p of
         Right (f, p') -> Right (c f, p')
         Left e        -> Left e
+    pc4 p@(h:t) =
+      case pProposition p of
+        Right (f, p') -> Right (uncurry3 CTLProp f, p')
+        Left _ ->
+          case token h of
+            TBracketL ->
+              case pCTL p of
+                Right (f, p') -> Right (f, p')
+                Left e        -> Left e
+            _ ->
+              case pcNext p of
+                Right (f, p') -> Right (f, p')
+                Left e        -> Left e
 
 pProposition :: [DToken] -> Either ParserError ((RelOp, Term, Term), [DToken])
 pProposition p@(h:t) =
@@ -682,7 +719,9 @@ mergeFormula = mf1 [] []
     mf4 (f1:f2:fs) = mf4 (Equiv f1 f2 : fs)
 
 mergeLTL :: [LTL] -> [Token] -> LTL
-mergeLTL = ml1 [] []
+mergeLTL fs ts
+  | trace (show fs ++ ", " ++ show ts) False = undefined
+  | otherwise = ml1 [] [] fs ts
   where
     ml1 fa oa [f] []              = ml2 [] [] (reverse $ f : fa) (reverse oa)
     ml1 fa oa (f1:f2:fs) (TU:ops) = ml1 fa oa (LTLU f1 f2 : fs) ops
