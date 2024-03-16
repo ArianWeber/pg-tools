@@ -119,6 +119,15 @@ module PgVerify
                     next if key.nil? || val.nil?
                     current_var_state[key] = val
                 }
+                # Finish up
+                unless current_var_state.nil?
+                    missing_keys = var_states.empty? ? [] :  var_states[-1].keys - current_var_state.keys
+                    missing_keys.each { |key|
+                        current_var_state[key] = var_states[-1][key]
+                    }  
+                    var_states << current_var_state
+                end
+
                 return Model::Trace.new(program_graph, var_states)
             end
 

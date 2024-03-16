@@ -118,7 +118,7 @@ module PgVerify
 
                 models.each { |model|
                     Shell::LoadingPrompt.while_loading("Checking for deadlocks") {
-                        NuSMV::Runner.new().run_check!(model)
+                        NuSMV::Runner.new().run_check!(model); "ok"
                     }
 
                     results = Shell::LoadingPrompt.while_loading("Running specifications") {
@@ -130,8 +130,8 @@ module PgVerify
                         puts "[ #{stat_string} ] #{result.spec.text}"
                         puts "           #{result.spec.expression.to_s.c_blue}"
                         unless result.success
-                            puts "Here is the trace:".c_red
-                            trace_s = result.trace.to_s.indented(str: " >> ".c_red)
+                            puts "           Here is an counter example:".c_red
+                            trace_s = result.trace.to_s.indented(str: "           >>  ".c_red)
                             puts trace_s + "\n"
                         end
                     }
@@ -146,7 +146,7 @@ module PgVerify
 
                 models.each { |model|
                     Shell::LoadingPrompt.while_loading("Checking for deadlocks") {
-                        NuSMV::Runner.new().run_check!(model)
+                        NuSMV::Runner.new().run_check!(model); "ok"
                     }
 
                     dcca = Model::DCCA.new(model, NuSMV::Runner.new)
@@ -156,7 +156,8 @@ module PgVerify
                     result.each { |hazard, crit_sets|
                         s = crit_sets.length == 1 ? "" : "s"
                         message = "Hazard #{hazard.text.to_s.c_string} (#{hazard.expression.to_s.c_blue}) "
-                        message += "has #{crit_sets.length.to_s.c_num} minimal critical cut set#{s}:"
+                        message += "has #{crit_sets.length.to_s.c_num} minimal critical fault set#{s}:" if crit_sets.length > 0
+                        message += "has no minimal critical fault sets, meaning it is safe!".c_success if crit_sets.length == 0
                         puts message
                         crit_sets.each { |set|
                             puts "\t{ #{set.map(&:to_s).map(&:c_blue).join(', ')} }"
@@ -178,7 +179,7 @@ module PgVerify
 
                 models.each { |model|
                     Shell::LoadingPrompt.while_loading("Checking for deadlocks") {
-                        NuSMV::Runner.new().run_check!(model)
+                        NuSMV::Runner.new().run_check!(model); "ok"
                     }
 
                     trace = Shell::LoadingPrompt.while_loading("Simulating model #{model.name.to_s.c_string}") {

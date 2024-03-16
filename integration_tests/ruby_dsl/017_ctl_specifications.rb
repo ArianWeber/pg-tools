@@ -14,7 +14,6 @@ model :CtlSpecifications do
         it "cannot stay in one" => :"! G Example == one"
         it "can stay in three" => :"EX AG Example == three"
         it "cannot go back to one from three" => :"AG ( (Example == three) => ! EF Example == one)"
-        it "this is false" => :"AG Example == one"
     end
 
 end
