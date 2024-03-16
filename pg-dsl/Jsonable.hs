@@ -84,7 +84,8 @@ instance Jsonable Trans where
       [ (preState t ++ " -> " ++ postState t) .=
         JsonObject
           [ "precon" .= JsonNull
-          , "guard" .= toJson (guard t)
+          , "guard" .=
+            JsonObject ["string" .= toJson (guard t), "type" .= JsonString "pl"]
           , "action" .= toJson (action t)
           ]
       ]
@@ -95,7 +96,8 @@ instance Jsonable Action where
     let s = show a
      in if s == ""
           then JsonNull
-          else JsonString s
+          else JsonObject
+                 ["string" .= JsonString s, "type" .= JsonString "action"]
 
 instance Jsonable Formula where
   toJson :: Formula -> Json
