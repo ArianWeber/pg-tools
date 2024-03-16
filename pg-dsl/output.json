@@ -1,154 +1,166 @@
 {
-    "Robot": [
-        {
-            "PersistentError": {
-                "states": [
-                    "No",
-                    "Yes"
-                ],
-                "variables": [],
-                "transitions": [
-                    {
-                        "No -> No": {
-                            "precon": null,
-                            "guard": null,
-                            "action": null
+    "Robot": {
+        "components": [
+            {
+                "PersistentError": {
+                    "states": [
+                        "No",
+                        "Yes"
+                    ],
+                    "variables": [],
+                    "transitions": [
+                        {
+                            "No -> No": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        },
+                        {
+                            "No -> Yes": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
                         }
-                    },
-                    {
-                        "No -> Yes": {
-                            "precon": null,
-                            "guard": null,
-                            "action": null
+                    ]
+                }
+            },
+            {
+                "TransientError": {
+                    "states": [
+                        "No",
+                        "Yes"
+                    ],
+                    "variables": [],
+                    "transitions": [
+                        {
+                            "No -> No": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        },
+                        {
+                            "No -> Yes": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        },
+                        {
+                            "Yes -> No": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        },
+                        {
+                            "Yes -> Yes": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
                         }
-                    }
-                ]
+                    ]
+                }
+            },
+            {
+                "LightBarrier": {
+                    "states": [
+                        "Signal",
+                        "Idle"
+                    ],
+                    "variables": [],
+                    "transitions": [
+                        {
+                            "Signal -> Signal": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        },
+                        {
+                            "Signal -> Idle": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        },
+                        {
+                            "Idle -> Signal": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        },
+                        {
+                            "Idle -> Idle": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "Robot": {
+                    "states": [
+                        "Inactive",
+                        "Busy",
+                        "Idle"
+                    ],
+                    "variables": [
+                        {
+                            "num": {
+                                "range": "0..7",
+                                "init": null
+                            }
+                        }
+                    ],
+                    "transitions": [
+                        {
+                            "Busy -> Inactive": {
+                                "precon": null,
+                                "guard": "num == 3",
+                                "action": null
+                            }
+                        },
+                        {
+                            "Busy -> Busy": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        },
+                        {
+                            "Busy -> Idle": {
+                                "precon": null,
+                                "guard": "num < 3",
+                                "action": null
+                            }
+                        },
+                        {
+                            "Idle -> Busy": {
+                                "precon": null,
+                                "guard": "LightBarrier == Signal",
+                                "action": "num := (1 + num)"
+                            }
+                        }
+                    ]
+                }
             }
-        },
-        {
-            "TransientError": {
-                "states": [
-                    "No",
-                    "Yes"
-                ],
-                "variables": [],
-                "transitions": [
-                    {
-                        "No -> No": {
-                            "precon": null,
-                            "guard": null,
-                            "action": null
-                        }
-                    },
-                    {
-                        "No -> Yes": {
-                            "precon": null,
-                            "guard": null,
-                            "action": null
-                        }
-                    },
-                    {
-                        "Yes -> No": {
-                            "precon": null,
-                            "guard": null,
-                            "action": null
-                        }
-                    },
-                    {
-                        "Yes -> Yes": {
-                            "precon": null,
-                            "guard": null,
-                            "action": null
-                        }
-                    }
-                ]
+        ],
+        "hazards": [
+            {
+                "label": "Hazard 2",
+                "expression": "AF (EF PersistentError == Yes && TransientError == Yes)"
+            },
+            {
+                "label": "Hazard 1",
+                "expression": "F Robot == Inactive"
             }
-        },
-        {
-            "LightBarrier": {
-                "states": [
-                    "Signal",
-                    "Idle"
-                ],
-                "variables": [],
-                "transitions": [
-                    {
-                        "Signal -> Signal": {
-                            "precon": null,
-                            "guard": null,
-                            "action": null
-                        }
-                    },
-                    {
-                        "Signal -> Idle": {
-                            "precon": null,
-                            "guard": null,
-                            "action": null
-                        }
-                    },
-                    {
-                        "Idle -> Signal": {
-                            "precon": null,
-                            "guard": null,
-                            "action": null
-                        }
-                    },
-                    {
-                        "Idle -> Idle": {
-                            "precon": null,
-                            "guard": null,
-                            "action": null
-                        }
-                    }
-                ]
-            }
-        },
-        {
-            "Robot": {
-                "states": [
-                    "Inactive",
-                    "Busy",
-                    "Idle"
-                ],
-                "variables": [
-                    {
-                        "num": {
-                            "range": "0..7",
-                            "init": null
-                        }
-                    }
-                ],
-                "transitions": [
-                    {
-                        "Busy -> Inactive": {
-                            "precon": null,
-                            "guard": "num == 3",
-                            "action": null
-                        }
-                    },
-                    {
-                        "Busy -> Busy": {
-                            "precon": null,
-                            "guard": null,
-                            "action": null
-                        }
-                    },
-                    {
-                        "Busy -> Idle": {
-                            "precon": null,
-                            "guard": "num < 3",
-                            "action": null
-                        }
-                    },
-                    {
-                        "Idle -> Busy": {
-                            "precon": null,
-                            "guard": "LightBarrier == Signal",
-                            "action": "num := (num + 1)"
-                        }
-                    }
-                ]
-            }
-        }
-    ]
+        ]
+    }
 }

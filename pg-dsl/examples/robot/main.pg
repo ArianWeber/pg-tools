@@ -3,4 +3,14 @@ model Robot {
         transient TransientError
         persistent PersistentError
     }
+
+    # Just some stuff that makes no sense
+    hazards {
+        "Hazard 1" {
+            F Robot = Inactive
+        }
+        "Hazard 2" {
+            AF TransientError = Yes & EF PersistentError = Yes
+        }
+    }
 }

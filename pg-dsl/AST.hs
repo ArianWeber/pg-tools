@@ -3,6 +3,7 @@ module AST
   , Model(..)
   , ProgramGraph
   , PG(..)
+  , Hazard(..)
   , State
   , VarDef(..)
   , Var
@@ -18,13 +19,15 @@ module AST
   , CTL(..)
   , RelOp(..)
   , ParserError(..)
+  , FParserError(..)
   ) where
 
-type AST = Either ParserError Model
+type AST = Either FParserError Model
 
 data Model = Model
   { modelName :: String
   , graphs    :: [PG]
+  , hazards   :: [Hazard]
   } deriving (Show, Eq)
 
 type ProgramGraph = Either ParserError PG
@@ -38,6 +41,15 @@ data PG = PG
   , initialFormula :: Formula
   , isFault        :: Bool
   } deriving (Show, Eq)
+
+data Hazard =
+  Hazard String (Either LTL CTL)
+  deriving (Eq)
+
+instance Show Hazard where
+  show :: Hazard -> String
+  show (Hazard s (Left ltl))  = s ++ ": " ++ show ltl
+  show (Hazard s (Right ctl)) = s ++ ": " ++ show ctl
 
 type State = String
 
@@ -247,3 +259,10 @@ instance Show ParserError where
   show :: ParserError -> String
   show e =
     pMsg e ++ " at line " ++ show (pLine e) ++ ", column " ++ show (pCol e)
+
+data FParserError =
+  FPError FilePath ParserError
+
+instance Show FParserError where
+  show :: FParserError -> String
+  show (FPError fp err) = show err ++ " in file " ++ fp

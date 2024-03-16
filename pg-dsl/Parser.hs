@@ -4,9 +4,9 @@ module Parser
   ) where
 
 import           AST   (Action (..), CTL (..), Expression (..), Formula (..),
-                        LTL (..), Model (..), PG (..), ParserError (..),
-                        ProgramGraph, Range (..), RelOp (..), State, Term (..),
-                        Trans (..), VarDef (..))
+                        Hazard (..), LTL (..), Model (..), PG (..),
+                        ParserError (..), ProgramGraph, Range (..), RelOp (..),
+                        State, Term (..), Trans (..), VarDef (..))
 import           Token (DToken (..), TError (..), Token (..), TokenList)
 
 parseMain :: TokenList -> Either ParserError Model
@@ -49,17 +49,20 @@ pMain (h:t) =
       case pErrors p of
         Right (g, p') -> pm4 g s p'
         Left e        -> Left e
-    pm4 g s (h:t) =
+    pm4 g s p =
+      case pHazards p of
+        Right (haz, p') -> pm5 haz g s p'
+        Left e          -> Left e
+    pm5 haz g s (h:t) =
       case token h of
-        TCurlyR -> Right (Model {modelName = s, graphs = g}, t)
+        TCurlyR -> Right (Model {modelName = s, graphs = g, hazards = haz}, t)
         _       -> raise h
 
 pErrors :: [DToken] -> Either ParserError ([PG], [DToken])
 pErrors p@(h:t) =
   case token h of
-    TEoF    -> Right ([], p)
     TErrors -> pe1 t
-    _       -> raise h
+    _       -> Right ([], p)
   where
     pe1 (h:t) =
       case token h of
@@ -78,6 +81,37 @@ pErrors p@(h:t) =
             then pe2 (mkPersistent s : acc) t
             else pe2 (mkTransient s : acc) t
         _ -> raise h
+
+pHazards :: [DToken] -> Either ParserError ([Hazard], [DToken])
+pHazards p@(h:t) =
+  case token h of
+    THazards -> ph1 t
+    _        -> Right ([], p)
+  where
+    ph1 (h:t) =
+      case token h of
+        TCurlyL -> ph2 [] t
+        _       -> raise h
+    ph2 acc (h:t) =
+      case token h of
+        TCurlyR   -> Right (acc, t)
+        TString s -> ph3 s acc t
+        _         -> raise h
+    ph3 s acc (h:t) =
+      case token h of
+        TCurlyL -> ph4 s acc t
+        _       -> raise h
+    ph4 s acc p =
+      case pLTL p of
+        Right (ltl, p') -> ph5 (Hazard s (Left ltl) : acc) p'
+        Left _ ->
+          case pCTL p of
+            Right (ctl, p') -> ph5 (Hazard s (Right ctl) : acc) p'
+            Left e          -> Left e
+    ph5 acc (h:t) =
+      case token h of
+        TCurlyR -> ph2 acc t
+        _       -> raise h
 
 pGraph :: [DToken] -> Either ParserError (PG, [DToken])
 pGraph (h:t) =

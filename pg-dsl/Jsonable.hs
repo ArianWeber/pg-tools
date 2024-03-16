@@ -19,7 +19,14 @@ instance Jsonable AST where
 
 instance Jsonable Model where
   toJson :: Model -> Json
-  toJson m = JsonObject [modelName m .= JsonArray (map toJson $ graphs m)]
+  toJson m =
+    JsonObject
+      [ modelName m .=
+        JsonObject
+          [ "components" .= JsonArray (map toJson $ graphs m)
+          , "hazards" .= JsonArray (map toJson $ hazards m)
+          ]
+      ]
 
 instance Jsonable PG where
   toJson :: PG -> Json
@@ -32,6 +39,15 @@ instance Jsonable PG where
           , "transitions" .= JsonArray (map toJson (transitions g))
           ]
       ]
+
+instance Jsonable Hazard where
+  toJson :: Hazard -> Json
+  toJson (Hazard s h) =
+    let f =
+          case h of
+            Left ltl  -> show ltl
+            Right ctl -> show ctl
+     in JsonObject ["label" .= JsonString s, "expression" .= JsonString f]
 
 instance Jsonable VarDef where
   toJson :: VarDef -> Json
@@ -66,12 +82,18 @@ instance Jsonable Action where
 
 instance Jsonable Formula where
   toJson :: Formula -> Json
-  toJson f =
-    case f of
-      FTrue -> JsonNull
-      FFalse -> JsonBool False
-      _ ->
-        let s = show f
-         in if s == "true"
-              then JsonNull
-              else JsonString s
+  toJson FTrue  = JsonNull
+  toJson FFalse = JsonBool False
+  toJson f      = JsonString $ show f
+
+instance Jsonable LTL where
+  toJson :: LTL -> Json
+  toJson LTLTrue  = JsonNull
+  toJson LTLFalse = JsonBool False
+  toJson f        = JsonString $ show f
+
+instance Jsonable CTL where
+  toJson :: CTL -> Json
+  toJson CTLTrue  = JsonNull
+  toJson CTLFalse = JsonBool False
+  toJson f        = JsonString $ show f

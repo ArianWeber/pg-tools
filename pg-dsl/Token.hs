@@ -68,6 +68,8 @@ data Token
   | TErrors
   | TTransient
   | TPersistent
+  | THazards
+  | TString String
   | TNumber Int
   | TLower String
   | TUpper String
@@ -134,6 +136,8 @@ instance Show Token where
   show TErrors      = "'errors'"
   show TTransient   = "'transient'"
   show TPersistent  = "'persistent'"
+  show THazards     = "'hazards'"
+  show (TString s)  = show s
   show (TNumber n)  = "'" ++ show n ++ "'"
   show (TLower s)   = "'" ++ s ++ "'"
   show (TUpper s)   = "'" ++ s ++ "'"

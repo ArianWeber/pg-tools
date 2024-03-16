@@ -131,6 +131,13 @@ tok acc l c p@('t':'r':'a':'n':'s':'i':'e':'n':'t':t)
 tok acc l c p@('p':'e':'r':'s':'i':'s':'t':'e':'n':'t':t)
   | nextAlphaNum t = tokLower acc l c p
   | otherwise = tok (dec TPersistent l c : acc) l (c + 10) t
+tok acc l c p@('h':'a':'z':'a':'r':'d':'s':t)
+  | nextAlphaNum t = tokLower acc l c p
+  | otherwise = tok (dec THazards l c : acc) l (c + 7) t
+tok acc l c ('"':t) =
+  case readString l (c + 1) t of
+    Right (c', p', s) -> tok (dec (TString s) l c : acc) l c' p'
+    Left e            -> Left e
 tok acc l c p@(x:_)
   | isNumber x =
     let (c', p', n) = readNumber c p
@@ -164,6 +171,19 @@ comment = comment' ""
     comment' acc i s@('\r':_)      = (i, s, reverse acc)
     comment' acc i s@('\n':_)      = (i, s, reverse acc)
     comment' acc i (c:s)           = comment' (c : acc) (i + 1) s
+
+readString :: Int -> Int -> String -> Either TError (Int, String, String)
+readString = readString' ""
+  where
+    readString' acc l c []            = strErr TEoF l $ c + 1
+    readString' acc l c ('\r':'\n':_) = strErr TNewline l $ c + 1
+    readString' acc l c ('\n':_)      = strErr TNewline l $ c + 1
+    readString' acc l c ('\r':_)      = strErr TNewline l $ c + 1
+    readString' acc l c ('"':xs)      = Right (c + 1, xs, reverse acc)
+    readString' acc l c (x:xs)        = readString' (x : acc) l (c + 1) xs
+    strErr x l c =
+      let m = "Found " ++ show x ++ " while parsing string"
+       in Left $ TError {tMsg = m, tLine = l, tCol = c}
 
 readNumber :: Int -> String -> (Int, String, Int)
 readNumber = readNumber' ""
