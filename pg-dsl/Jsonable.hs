@@ -14,7 +14,7 @@ instance Jsonable String where
 
 instance Jsonable AST where
   toJson :: AST -> Json
-  toJson (Left e)  = JsonObject ["error" .= JsonString (show e)]
+  toJson (Left e)  = JsonObject ["error" .= JsonString e]
   toJson (Right m) = toJson m
 
 instance Jsonable Model where

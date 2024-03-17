@@ -10,6 +10,7 @@ import           GHC.Base                  (returnIO)
 import           Jsonable                  (Jsonable (toJson))
 import           Parser                    (parse, parseMain)
 import           Tokenizer                 (tokenize)
+import           TypeCheck                 (checkTypes)
 
 main :: IO ()
 main = do
@@ -17,13 +18,20 @@ main = do
   allFiles <- getDirectoryContentsRecursive prefix
   let pgFiles = filter isGraphFile allFiles
   contents <- mapM (readFile . (prefix ++)) pgFiles
-  let graphs = inspect $ zip pgFiles $ map (parse . tokenize) contents
+  let inspected = inspect $ zip pgFiles $ map (parse . tokenize) contents
       mainFile = prefix ++ "main.pg"
   mainContent <- readFile mainFile
   let modelRaw = inspectMain mainFile $ (parseMain . tokenize) mainContent
-      model = mergeGraphs modelRaw graphs
-  LBS.writeFile "./output.json" $ renderJson $ toJson model
-  print model
+      model = mergeGraphs modelRaw inspected
+      checkedModel =
+        case model of
+          Right m ->
+            case checkTypes m of
+              Nothing -> Right m
+              Just s  -> Left s
+          err -> err
+  LBS.writeFile "./output.json" $ renderJson $ toJson checkedModel
+  print checkedModel
 
 isGraphFile :: String -> Bool
 isGraphFile s = ".pg" `isSuffixOf` s && not ("main.pg" `isSuffixOf` s)
@@ -44,9 +52,9 @@ inspectMain :: FilePath -> Either ParserError Model -> Either FParserError Model
 inspectMain fp (Left err) = Left $ FPError fp err
 inspectMain _ (Right m)   = Right m
 
-mergeGraphs :: AST -> Either FParserError [PG] -> AST
-mergeGraphs (Left e) _ = Left e
-mergeGraphs _ (Left e) = Left e
+mergeGraphs :: Either FParserError Model -> Either FParserError [PG] -> AST
+mergeGraphs (Left e) _ = Left $ show e
+mergeGraphs _ (Left e) = Left $ show e
 mergeGraphs (Right m) (Right g) =
   Right $
   Model

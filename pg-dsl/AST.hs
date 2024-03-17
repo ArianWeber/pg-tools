@@ -23,7 +23,7 @@ module AST
   , FParserError(..)
   ) where
 
-type AST = Either FParserError Model
+type AST = Either String Model
 
 data Model = Model
   { modelName :: String
