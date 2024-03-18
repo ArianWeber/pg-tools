@@ -239,7 +239,12 @@ pInt (h:t) =
         _        -> raise h
     pi2 s (h:t) =
       case token h of
+        TMinus    -> pi2' s t
         TNumber i -> pi3 i s t
+        _         -> raise h
+    pi2' s (h:t) =
+      case token h of
+        TNumber i -> pi3 (-i) s t
         _         -> raise h
     pi3 i s (h:t) =
       case token h of
@@ -247,11 +252,16 @@ pInt (h:t) =
         _     -> raise h
     pi4 i s (h:t) =
       case token h of
+        TMinus    -> pi4' i s t
         TNumber j -> pi5 i j s t
+        _         -> raise h
+    pi4' i s (h:t) =
+      case token h of
+        TNumber j -> pi5 i (-j) s t
         _         -> raise h
     pi5 i j s (h:t) =
       case token h of
-        TSquareR -> Right (VarDef s (RInt i j), t)
+        TSquareR -> Right (VarDef s (RInt (min i j) (max i j)), t)
         _        -> raise h
 
 pEnum :: [DToken] -> Either ParserError (VarDef, [DToken])
@@ -667,8 +677,9 @@ pTerm = pt1 [] []
         TUpper s -> Right (TermUpper s, t)
         TMinus ->
           case pTerm t of
-            Right (term, p') -> Right (Negative term, p')
-            Left e           -> Left e
+            Right (Const c, p') -> Right (Const (-c), p')
+            Right (term, p')    -> Right (Negative term, p')
+            Left e              -> Left e
         _ -> raise h
 
 mkTransient :: String -> PG

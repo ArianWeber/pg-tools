@@ -7,26 +7,29 @@ import           CST
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 
-checkTypes :: Model -> Maybe String
+checkTypes :: Model -> Either String Env
 checkTypes m =
   case buildEnv (graphs m) of
-    Left e    -> Just $ show e
+    Left e    -> Left $ show e
     Right env -> ct1 env m
   where
-    ct1 :: Env -> Model -> Maybe String
+    ct1 :: Env -> Model -> Either String Env
     ct1 env m =
       case ct2 env (graphs m) of
-        Nothing ->
+        Right env ->
           case checkHazards env (hazards m) of
-            Nothing -> checkSpecs env $ specs m
-            err     -> err
+            Nothing ->
+              case checkSpecs env $ specs m of
+                Nothing  -> Right env
+                Just err -> Left err
+            Just err -> Left err
         err -> err
-    ct2 :: Env -> [PG] -> Maybe String
-    ct2 _ [] = Nothing
+    ct2 :: Env -> [PG] -> Either String Env
+    ct2 env [] = Right env
     ct2 env (pg:pgs) =
       case checkPG env pg of
-        Nothing -> ct2 env pgs
-        err     -> err
+        Nothing  -> ct2 env pgs
+        Just err -> Left err
 
 buildEnv :: [PG] -> Either String Env
 buildEnv = be1 emptyEnv
@@ -43,7 +46,7 @@ buildEnv = be1 emptyEnv
 
 addName :: Env -> PG -> Either String Env
 addName env pg
-  | Map.member (name pg) (eGraph env) = Left $ raiseDef (name pg) $ name pg
+  | name pg `Map.member` eGraph env = Left $ raiseDef (name pg) $ name pg
   | otherwise =
     case dups (states pg) of
       Nothing ->
@@ -141,7 +144,7 @@ checkF env n (Proposition r a b) =
   case a of
     (TermUpper _) -> checkGraphProp env n r a b
     (TermLower s) ->
-      if Map.member s (eEnum env)
+      if s `Map.member` eEnum env
         then checkEnumProp env n r a b
         else ca a b
     _ -> ca a b
@@ -172,7 +175,7 @@ checkLTL env (LTLProp r a b) =
   case a of
     (TermUpper _) -> checkGraphProp env "Main module" r a b
     (TermLower s) ->
-      if Map.member s (eEnum env)
+      if s `Map.member` eEnum env
         then checkEnumProp env "Main module" r a b
         else ca a b
     _ -> ca a b
@@ -207,7 +210,7 @@ checkCTL env (CTLProp r a b) =
   case a of
     (TermUpper _) -> checkGraphProp env "Main module" r a b
     (TermLower s) ->
-      if Map.member s (eEnum env)
+      if s `Map.member` eEnum env
         then checkEnumProp env "Main module" r a b
         else ca a b
     _ -> ca a b
@@ -277,8 +280,8 @@ checkArithm _ _ (Const _) = Nothing
 checkArithm env n (TermUpper s) =
   Just $ n ++ ": " ++ s ++ " not allowed in arithmetic expression"
 checkArithm env n (TermLower s)
-  | Map.member s (eInt env) = Nothing
-  | s `elem` eBool env || Map.member s (eEnum env) = raiseType n s "int"
+  | s `Map.member` eInt env = Nothing
+  | s `elem` eBool env || s `Map.member` eEnum env = raiseType n s "int"
   | otherwise = raiseUndef n s
 checkArithm env n (Negative t) = checkArithm env n t
 checkArithm env n t = ct1 env n t
@@ -297,7 +300,7 @@ dups = dups' Set.empty
   where
     dups' _ [] = Nothing
     dups' s (x:xs)
-      | Set.member x s = Just x
+      | x `elem` s = Just x
       | otherwise = dups' (Set.insert x s) xs
 
 isDefined :: String -> Env -> Bool

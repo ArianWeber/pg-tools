@@ -9,6 +9,7 @@ import           Distribution.Utils.Json   (renderJson)
 import           GHC.Base                  (returnIO)
 import           Jsonable                  (Jsonable (toJson))
 import           Parser                    (parse, parseMain)
+import           RangeCheck                (checkRanges)
 import           Tokenizer                 (tokenize)
 import           TypeCheck                 (checkTypes)
 
@@ -27,10 +28,13 @@ main = do
         case model of
           Right m ->
             case checkTypes m of
-              Nothing -> Right m
-              Just s  -> Left s
+              Right env ->
+                case checkRanges env m of
+                  Nothing  -> Right m
+                  Just err -> Left err
+              Left s -> Left s
           err -> err
-  LBS.writeFile "./output.json" $ renderJson $ toJson checkedModel
+  LBS.writeFile "./output.json" $ renderJson $ toJson $ checkedModel
   print checkedModel
 
 isGraphFile :: String -> Bool
