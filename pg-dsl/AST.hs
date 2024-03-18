@@ -3,6 +3,8 @@ module AST
   , Model(..)
   , ProgramGraph
   , PG(..)
+  , Env(..)
+  , emptyEnv
   , Hazard(..)
   , Spec(..)
   , State
@@ -23,6 +25,9 @@ module AST
   , FParserError(..)
   ) where
 
+import qualified Data.Map as Map
+import qualified Data.Set as Set
+
 type AST = Either String Model
 
 data Model = Model
@@ -30,6 +35,7 @@ data Model = Model
   , graphs    :: [PG]
   , hazards   :: [Hazard]
   , specs     :: [Spec]
+  , environ   :: Env
   } deriving (Show, Eq)
 
 type ProgramGraph = Either ParserError PG
@@ -43,6 +49,18 @@ data PG = PG
   , initialFormula :: Formula
   , isFault        :: Bool
   } deriving (Show, Eq)
+
+data Env = Env
+  { eBool  :: Set.Set String
+  , eInt   :: Map.Map String (Int, Int)
+  , eEnum  :: Map.Map String [String]
+  , eGraph :: Map.Map String [String]
+  } deriving (Show, Eq)
+
+emptyEnv :: Env
+emptyEnv =
+  Env
+    {eBool = Set.empty, eInt = Map.empty, eEnum = Map.empty, eGraph = Map.empty}
 
 data Hazard =
   Hazard String (Either LTL CTL)

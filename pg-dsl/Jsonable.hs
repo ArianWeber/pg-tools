@@ -3,6 +3,7 @@ module Jsonable
   ) where
 
 import           AST
+import qualified Data.Map                as Map
 import           Distribution.Utils.Json (Json (..), (.=))
 
 class Jsonable a where
@@ -23,26 +24,25 @@ instance Jsonable Model where
     JsonObject
       [ modelName m .=
         JsonObject
-          [ "components" .= JsonArray (map toJson $ graphs m)
+          [ "components" .= JsonArray (map (pgJson $ environ m) $ graphs m)
           , "hazards" .= JsonArray (map toJson $ hazards m)
           , "specification" .= JsonArray (map toJson $ specs m)
           ]
       ]
 
-instance Jsonable PG where
-  toJson :: PG -> Json
-  toJson g =
-    JsonObject
-      [ name g .=
-        JsonObject
-          [ "states" .= JsonArray (map toJson (states g))
-          , "variables" .= JsonArray (map toJson (variables g))
-          , "init" .=
-            JsonObject
-              ["string" .= JsonString (jsonInit g), "type" .= JsonString "pl"]
-          , "transitions" .= JsonArray (map toJson (transitions g))
-          ]
-      ]
+pgJson :: Env -> PG -> Json
+pgJson env g =
+  JsonObject
+    [ name g .=
+      JsonObject
+        [ "states" .= JsonArray (map toJson (states g))
+        , "variables" .= JsonArray (map toJson (variables g))
+        , "init" .=
+          JsonObject
+            ["string" .= JsonString (jsonInit g), "type" .= JsonString "pl"]
+        , "transitions" .= JsonArray (map (transJson env) (transitions g))
+        ]
+    ]
 
 instance Jsonable Hazard where
   toJson :: Hazard -> Json
@@ -77,18 +77,30 @@ instance Jsonable VarDef where
 mkObj :: String -> Json -> Json
 mkObj s r = JsonObject [s .= JsonObject ["range" .= r, "init" .= JsonNull]]
 
-instance Jsonable Trans where
-  toJson :: Trans -> Json
-  toJson t =
-    JsonObject
-      [ (preState t ++ " -> " ++ postState t) .=
-        JsonObject
-          [ "precon" .= JsonNull
-          , "guard" .=
-            JsonObject ["string" .= toJson (guard t), "type" .= JsonString "pl"]
-          , "action" .= toJson (action t)
-          ]
-      ]
+transJson :: Env -> Trans -> Json
+transJson env t =
+  JsonObject
+    [ (preState t ++ " -> " ++ postState t) .=
+      JsonObject
+        [ "precon" .= computePrecon env (action t)
+        , "guard" .=
+          JsonObject ["string" .= toJson (guard t), "type" .= JsonString "pl"]
+        , "action" .= toJson (action t)
+        ]
+    ]
+
+computePrecon :: Env -> Action -> Json
+computePrecon _ (Action []) = JsonNull
+computePrecon env act = cp "" env act
+  where
+    cp acc env (Action []) =
+      JsonObject ["string" .= JsonString acc, "type" .= JsonString "pl"]
+    cp acc env (Action (h:t)) = cp (compPrecon env h ++ " && ") env (Action t)
+
+compPrecon :: Env -> Assign -> String
+compPrecon env (v, t) =
+  let (i, j) = eInt env Map.! v
+   in show t ++ " >= " ++ show i ++ " && " ++ show t ++ " <= " ++ show j
 
 instance Jsonable Action where
   toJson :: Action -> Json

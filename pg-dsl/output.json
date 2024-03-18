@@ -198,7 +198,10 @@
                         },
                         {
                             "Idle -> Busy": {
-                                "precon": null,
+                                "precon": {
+                                    "string": "(num + 1) >= 0 && (num + 1) <= 7 && ",
+                                    "type": "pl"
+                                },
                                 "guard": {
                                     "string": "LightBarrier == Signal",
                                     "type": "pl"

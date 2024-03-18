@@ -3,7 +3,6 @@ module RangeCheck
   ) where
 
 import           AST
-import           CST
 import qualified Data.Map as Map
 
 checkRanges :: Env -> Model -> Maybe String

@@ -1,7 +1,6 @@
 module Main where
 
-import           AST                       (AST, FParserError (..), Model (..),
-                                            PG, ParserError, ProgramGraph)
+import           AST
 import qualified Data.ByteString.Lazy      as LBS
 import           Data.List                 (isSuffixOf)
 import           Distribution.Simple.Utils (getDirectoryContentsRecursive)
@@ -30,7 +29,7 @@ main = do
             case checkTypes m of
               Right env ->
                 case checkRanges env m of
-                  Nothing  -> Right m
+                  Nothing  -> Right m {environ = env}
                   Just err -> Left err
               Left s -> Left s
           err -> err
@@ -66,4 +65,5 @@ mergeGraphs (Right m) (Right g) =
     , graphs = graphs m ++ g
     , hazards = hazards m
     , specs = specs m
+    , environ = emptyEnv
     }

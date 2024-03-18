@@ -3,7 +3,6 @@ module TypeCheck
   ) where
 
 import           AST
-import           CST
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 
@@ -307,11 +306,6 @@ isDefined :: String -> Env -> Bool
 isDefined s env =
   (s `elem` eBool env) ||
   (s `Map.member` eInt env) || (s `Map.member` eEnum env)
-
-emptyEnv :: Env
-emptyEnv =
-  Env
-    {eBool = Set.empty, eInt = Map.empty, eEnum = Map.empty, eGraph = Map.empty}
 
 raiseG :: FilePath -> String -> String -> Maybe String
 raiseG fp v t = Just $ "File " ++ fp ++ ": " ++ v ++ " is not a defined " ++ t

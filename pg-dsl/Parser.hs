@@ -58,7 +58,14 @@ pMain (h:t) =
       case token h of
         TCurlyR ->
           Right
-            (Model {modelName = s, graphs = g, hazards = haz, specs = sp}, t)
+            ( Model
+                { modelName = s
+                , graphs = g
+                , hazards = haz
+                , specs = sp
+                , environ = emptyEnv
+                }
+            , t)
         _ -> raise h
 
 pErrors :: [DToken] -> Either ParserError ([PG], [DToken])
