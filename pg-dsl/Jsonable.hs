@@ -83,11 +83,16 @@ transJson env t =
     [ (preState t ++ " -> " ++ postState t) .=
       JsonObject
         [ "precon" .= computePrecon env (action t)
-        , "guard" .=
-          JsonObject ["string" .= toJson (guard t), "type" .= JsonString "pl"]
+        , "guard" .= guardJson (guard t)
         , "action" .= toJson (action t)
         ]
     ]
+
+guardJson :: Formula -> Json
+guardJson f =
+  case toJson f of
+    JsonNull -> JsonNull
+    x        -> JsonObject ["string" .= x, "type" .= JsonString "pl"]
 
 computePrecon :: Env -> Action -> Json
 computePrecon _ (Action []) = JsonNull
@@ -95,6 +100,7 @@ computePrecon env act = cp "" env act
   where
     cp acc env (Action []) =
       JsonObject ["string" .= JsonString acc, "type" .= JsonString "pl"]
+    cp acc env (Action [h]) = cp (compPrecon env h) env (Action [])
     cp acc env (Action (h:t)) = cp (compPrecon env h ++ " && ") env (Action t)
 
 compPrecon :: Env -> Assign -> String

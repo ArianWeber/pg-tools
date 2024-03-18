@@ -16,20 +16,14 @@
                         {
                             "No -> No": {
                                 "precon": null,
-                                "guard": {
-                                    "string": null,
-                                    "type": "pl"
-                                },
+                                "guard": null,
                                 "action": null
                             }
                         },
                         {
                             "No -> Yes": {
                                 "precon": null,
-                                "guard": {
-                                    "string": null,
-                                    "type": "pl"
-                                },
+                                "guard": null,
                                 "action": null
                             }
                         }
@@ -51,40 +45,28 @@
                         {
                             "No -> No": {
                                 "precon": null,
-                                "guard": {
-                                    "string": null,
-                                    "type": "pl"
-                                },
+                                "guard": null,
                                 "action": null
                             }
                         },
                         {
                             "No -> Yes": {
                                 "precon": null,
-                                "guard": {
-                                    "string": null,
-                                    "type": "pl"
-                                },
+                                "guard": null,
                                 "action": null
                             }
                         },
                         {
                             "Yes -> No": {
                                 "precon": null,
-                                "guard": {
-                                    "string": null,
-                                    "type": "pl"
-                                },
+                                "guard": null,
                                 "action": null
                             }
                         },
                         {
                             "Yes -> Yes": {
                                 "precon": null,
-                                "guard": {
-                                    "string": null,
-                                    "type": "pl"
-                                },
+                                "guard": null,
                                 "action": null
                             }
                         }
@@ -106,40 +88,28 @@
                         {
                             "Signal -> Signal": {
                                 "precon": null,
-                                "guard": {
-                                    "string": null,
-                                    "type": "pl"
-                                },
+                                "guard": null,
                                 "action": null
                             }
                         },
                         {
                             "Signal -> Idle": {
                                 "precon": null,
-                                "guard": {
-                                    "string": null,
-                                    "type": "pl"
-                                },
+                                "guard": null,
                                 "action": null
                             }
                         },
                         {
                             "Idle -> Signal": {
                                 "precon": null,
-                                "guard": {
-                                    "string": null,
-                                    "type": "pl"
-                                },
+                                "guard": null,
                                 "action": null
                             }
                         },
                         {
                             "Idle -> Idle": {
                                 "precon": null,
-                                "guard": {
-                                    "string": null,
-                                    "type": "pl"
-                                },
+                                "guard": null,
                                 "action": null
                             }
                         }
@@ -179,10 +149,7 @@
                         {
                             "Busy -> Busy": {
                                 "precon": null,
-                                "guard": {
-                                    "string": null,
-                                    "type": "pl"
-                                },
+                                "guard": null,
                                 "action": null
                             }
                         },
@@ -199,7 +166,7 @@
                         {
                             "Idle -> Busy": {
                                 "precon": {
-                                    "string": "(num + 1) >= 0 && (num + 1) <= 7 && ",
+                                    "string": "(num + 1) >= 0 && (num + 1) <= 7",
                                     "type": "pl"
                                 },
                                 "guard": {
