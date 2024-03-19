@@ -71,12 +71,11 @@ module PgVerify
 
                 # Return "ok" if the FSM has no deadlocks
                 return nil if output.include?("The transition relation is total: No deadlock state exists")
-                
+
                 # Otherwise compute and return the deadlock state
                 lines = output.split("\n").drop_while { |str| 
                     !(str.start_with?("A deadlock state is:") || str.start_with?("successors is:"))
                 }
-                lines = output.split("\n").drop_while { |str| !str.start_with?("A deadlock state is:") } if lines.empty?
                 lines = lines[1, lines.length - 1]
 
                 var_state = {}

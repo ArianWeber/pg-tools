@@ -39,7 +39,10 @@ module PgVerify
                 return value.c_green if [ "On", "Yes", "Active" ].include?(value)
                 return value.c_red if [ "Off", "No", "Idle" ].include?(value)
 
-                settings_color = Settings.trace.colors[value.to_s]
+
+                settings_color = Settings.trace.colors.find { |key, val| File.fnmatch?(key.to_s, value) }
+                settings_color = settings_color[1] unless settings_color.blank?
+                puts "#{settings_color}"
                 return value.send(:"c_#{settings_color}") unless settings_color.blank?
 
                 return "#{value}" 
