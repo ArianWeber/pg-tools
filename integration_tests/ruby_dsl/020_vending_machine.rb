@@ -16,8 +16,8 @@ model :VendingMachine do
   coins = coins.map { |c, v| [c, (v / 10).to_i] }.to_h
 
 
-  MAX_MONEY = 100
-  START_MONEY = 20
+  max_money = 100
+  start_money = 20
 
   transient error :CoinReadFails
 
@@ -26,8 +26,8 @@ model :VendingMachine do
       grab_states  = products.keys.map { |product| :"grab_#{product}" }
       insert_states = coins.keys.map { |coin| :"insert_#{coin}" }
 
-      var pocket_money: (0..MAX_MONEY), init: START_MONEY
-      var value_in_products: (0..MAX_MONEY), init: 0
+      var pocket_money: (0..max_money), init: start_money
+      var value_in_products: (0..max_money), init: 0
 
       states :inserting, *insert_states, \
              :pressing, *press_states, \
@@ -57,7 +57,7 @@ model :VendingMachine do
       # Grab a product and take note of the value
       products.each { |product, value|
         transition :waiting => :grab_product do
-          precon "value_in_products + #{value} < #{MAX_MONEY}"
+          precon "value_in_products + #{value} < #{max_money}"
           guard  "LED == green && Dispenser == dispensed_#{product}"
           action "value_in_products := value_in_products + #{value}"
         end
@@ -72,7 +72,7 @@ model :VendingMachine do
 
       # Grab the change and be done
       transition :grab_change => :done do
-        precon "pocket_money + change <= #{MAX_MONEY}"
+        precon "pocket_money + change <= #{max_money}"
         action "pocket_money := pocket_money + change"
       end
   end
@@ -97,14 +97,14 @@ model :VendingMachine do
   end
 
   graph :Controller do
-    var budget: (0..MAX_MONEY), init: 0
+    var budget: (0..max_money), init: 0
 
     dispense_states = products.keys.map { |product| :"dispense_#{product}" }
 
     states :accepting, *dispense_states, :rejected, :done, init: :accepting
 
     transition :accepting => :accepting do
-      precon "budget + read_value <= #{MAX_MONEY}"
+      precon "budget + read_value <= #{max_money}"
       guard "read_value > 0"
       action "budget := budget + read_value"
     end
@@ -159,7 +159,7 @@ model :VendingMachine do
 
   graph :CoinDispenser do
     states :idle, :dispensed_change, init: :idle
-    var change: (0..MAX_MONEY), init: 0
+    var change: (0..max_money), init: 0
 
     # Eject the change money
     transition :idle => :dispensed_change do
@@ -182,7 +182,7 @@ model :VendingMachine do
 
   end
 
-  hazard "The user looses money" => :"User == done && pocket_money + value_in_products < #{START_MONEY}"
-  hazard "The machine looses money" => :"User == done && pocket_money + value_in_products > #{START_MONEY}"
+  # hazard "The user looses money" => :"User == done && pocket_money + value_in_products < #{start_money}"
+  # hazard "The machine looses money" => :"User == done && pocket_money + value_in_products > #{start_money}"
 
 end
