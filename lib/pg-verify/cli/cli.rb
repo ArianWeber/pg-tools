@@ -136,7 +136,7 @@ module PgVerify
                         puts "[ #{stat_string} ] #{result.spec.text}"
                         puts "           #{result.spec.expression.to_s.c_blue}"
                         unless result.success
-                            puts "           Here is an counter example:".c_red
+                            puts "           Here is a counter example:".c_red
                             trace_s = result.trace.to_s.indented(str: "           >>  ".c_red)
                             puts trace_s + "\n"
                         end
