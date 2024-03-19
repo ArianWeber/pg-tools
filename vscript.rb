@@ -51,7 +51,7 @@ task :integration_test do
             "script" => source,
             "json-file" => File.join(work_dir, File.basename(source, '.rb') + ".json"),
         }
-        commands = [ "show puml", "test", "dcca" ]
+        commands = [ "show puml", "test", "dcca", "show png", "simulate" ]
         args.each { |argument, file|
             commands.each { |command|
                 log "pgv #{command} #{argument} | #{File.basename(file)}"

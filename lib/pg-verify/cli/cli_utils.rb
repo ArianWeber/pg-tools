@@ -27,7 +27,7 @@ module PgVerify
             end
 
             raise NoDefaultFileError.new(default_script_file) unless File.file?(default_script_file)
-            return Interpret::PgScript.new.interpret(dsl_script_file)
+            return Interpret::PgScript.new.interpret(default_script_file)
         end
 
     end

@@ -42,8 +42,7 @@ module PgVerify
                     components = self.class.select_components(options[:only], options[:hide], model)
                     puml = Transform::PumlTransformation.new(render_labels: !hide_labels).transform_graph(model, only: components)
                     png = PlantumlBuilder::Formats::PNG.new(puml).load
-                    out_name = File.basename(script_file, '.*')
-                    out_name += "-" + model.name.to_s.gsub(/\W+/, '_').downcase + ".png"
+                    out_name = model.name.to_s.gsub(/\W+/, '_').downcase + ".png"
                     out_path = File.expand_path(out_name, Settings.outdir)
                     FileUtils.mkdir_p(Settings.outdir)
                     File.binwrite(out_path, png)
