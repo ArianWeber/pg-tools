@@ -199,7 +199,19 @@ module PgVerify
             method_option :force, :type => :numeric, default: 10
             method_option :random, :type => :boolean, default: false
             method_option :png, :type => :boolean, default: false
+            # Hide labels or parts of labels
+            method_option :"hide-labels", :type => :boolean, default: false
+            method_option :"hide-precons", :type => :boolean, default: false
+            method_option :"hide-guards", :type => :boolean, default: false
+            method_option :"hide-actions", :type => :boolean, default: false
             def simulate()
+                render_options = {
+                    render_labels: !options[:"hide-labels"],
+                    render_precons: !options[:"hide-precons"],
+                    render_guards: !options[:"hide-guards"],
+                    render_actions: !options[:"hide-actions"]
+                }
+
                 models = CliUtils.load_models(options)
                 runner = NuSMV::Runner.new
 
@@ -225,7 +237,7 @@ module PgVerify
                     Shell::LoadingPrompt.while_loading("Rendering states") { |printer|
                         trace.states.each_with_index { |variable_state, index|
                             printer.printl("Step #{index + 1}/#{trace.states.length}")
-                            puml = Transform::PumlTransformation.new.transform_graph(model, variable_state: variable_state)
+                            puml = Transform::PumlTransformation.new(render_options).transform_graph(model, variable_state: variable_state)
                             png = PlantumlBuilder::Formats::PNG.new(puml).load
                             out_path = File.expand_path("step-#{index}.png", out_dir)
                             File.binwrite(out_path, png)
