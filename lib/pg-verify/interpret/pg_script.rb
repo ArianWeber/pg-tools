@@ -15,6 +15,7 @@ module PgVerify
             end
         
             def interpret(file, validate: true)
+                raise "Not a file path string: '#{file}'::#{file.class}" unless file.is_a?(String)
                 file = File.expand_path(file)
                 raise NoSuchScriptError.new(file) unless File.file?(file)
                 @script_file ||= file

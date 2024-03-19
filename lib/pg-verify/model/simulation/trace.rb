@@ -5,9 +5,11 @@ module PgVerify
 
             attr_accessor :model
             attr_accessor :states
+            attr_accessor :loop_index
 
-            def initialize(model, states)
+            def initialize(model, states, loop_index: -1)
                 @model, @states = model, states
+                @loop_index = loop_index
             end
 
             def to_s(include_steps: true)
@@ -18,11 +20,17 @@ module PgVerify
 
                 parts = vars.map { |var| 
                     var_string = state_vars.varname?(var) ? var.to_s.c_state.c_bold : var.to_s.c_string
-                    var_string + "\n" + @states.each_with_index.map{ |state, index| value_str(var, state[var], index) }.join("\n") 
+                    var_string + "\n" + @states.each_with_index.map{ |state, index| value_str(var, state[var], index) }.join("\n")
                 }
                 str = "Step".c_num.c_bold + "\n" + (0...@states.length).map { |i| "#{i + 1}" } .join("\n")
                 str = "" unless include_steps
                 parts.each { |part| str = str.line_combine(part, separator: "  ") }
+
+                unless @loop_index.nil? || @loop_index < 0
+                    loop_str = (0...@states.length).map { |i| i == @loop_index + 1 ? "<- loop".c_blue : "" } .join("\n")
+                    str = str.line_combine(loop_str, separator: "  ")
+                    str += "\n" + "Loop starts at #{@loop_index + 1}".c_sidenote
+                end
                 
                 return str
             end

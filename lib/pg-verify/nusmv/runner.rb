@@ -92,6 +92,12 @@ module PgVerify
                 loop_index = -1
 
                 nusmv_output.split("\n").each { |line|
+                    # Mark a loop for the following state
+                    if line.include?("Loop starts here")
+                        loop_index = var_states.length
+                        next
+                    end
+
                     # Wait for heading of new state
                     if line.match(/\s*-> State: .+ <-/)
                         # Complete and store the old state if any
@@ -109,11 +115,6 @@ module PgVerify
                     # Skip lines before the first state
                     next if current_var_state.nil?
 
-                    if line.include?("Loop starts here")
-                        loop_index == var_states.length - 1
-                        next
-                    end
-
                     # Parse the variable state
                     key, val = parse_var_assignment_in_trace(line)
                     next if key.nil? || val.nil?
@@ -127,8 +128,7 @@ module PgVerify
                     }  
                     var_states << current_var_state
                 end
-
-                return Model::Trace.new(program_graph, var_states)
+                return Model::Trace.new(program_graph, var_states, loop_index: loop_index)
             end
 
             def parse_var_assignment_in_trace(line)

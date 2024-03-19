@@ -16,13 +16,22 @@ module PgVerify
             method_option :script, :type => :string
             method_option :"json-file", :type => :string
             method_option :"yaml-file", :type => :string
+            # Hide labels or parts of labels
             method_option :"hide-labels", :type => :boolean, default: false
+            method_option :"hide-precons", :type => :boolean, default: false
+            method_option :"hide-guards", :type => :boolean, default: false
+            method_option :"hide-actions", :type => :boolean, default: false
             def puml()
-                hide_labels = options[:"hide-labels"]
+                render_options = {
+                    render_labels: !options[:"hide-labels"],
+                    render_precons: !options[:"hide-precons"],
+                    render_guards: !options[:"hide-guards"],
+                    render_actions: !options[:"hide-actions"]
+                }
                 models = CliUtils.load_models(options)
                 models.each { |model|
                     components = self.class.select_components(options[:only], options[:hide], model)
-                    puml = Transform::PumlTransformation.new(render_labels: !hide_labels).transform_graph(model, only: components)
+                    puml = Transform::PumlTransformation.new(render_options).transform_graph(model, only: components)
                     puts puml
                 }
             end
@@ -33,17 +42,26 @@ module PgVerify
             method_option :script, :type => :string
             method_option :"json-file", :type => :string
             method_option :"yaml-file", :type => :string
+            # Hide labels or parts of labels
             method_option :"hide-labels", :type => :boolean, default: false
+            method_option :"hide-precons", :type => :boolean, default: false
+            method_option :"hide-guards", :type => :boolean, default: false
+            method_option :"hide-actions", :type => :boolean, default: false
             def png()
-                hide_labels = options[:"hide-labels"]
+                render_options = {
+                    render_labels: !options[:"hide-labels"],
+                    render_precons: !options[:"hide-precons"],
+                    render_guards: !options[:"hide-guards"],
+                    render_actions: !options[:"hide-actions"]
+                }
+
                 models = CliUtils.load_models(options)
 
                 models.each { |model|
                     components = self.class.select_components(options[:only], options[:hide], model)
-                    puml = Transform::PumlTransformation.new(render_labels: !hide_labels).transform_graph(model, only: components)
+                    puml = Transform::PumlTransformation.new(render_options).transform_graph(model, only: components)
                     png = PlantumlBuilder::Formats::PNG.new(puml).load
-                    out_name = File.basename(script_file, '.*')
-                    out_name += "-" + model.name.to_s.gsub(/\W+/, '_').downcase + ".png"
+                    out_name = model.name.to_s.gsub(/\W+/, '_').downcase + ".png"
                     out_path = File.expand_path(out_name, Settings.outdir)
                     FileUtils.mkdir_p(Settings.outdir)
                     File.binwrite(out_path, png)
@@ -136,7 +154,7 @@ module PgVerify
                         puts "[ #{stat_string} ] #{result.spec.text}"
                         puts "           #{result.spec.expression.to_s.c_blue}"
                         unless result.success
-                            puts "           Here is an counter example:".c_red
+                            puts "           Here is a counter example:".c_red
                             trace_s = result.trace.to_s.indented(str: "           >>  ".c_red)
                             puts trace_s + "\n"
                         end
