@@ -6,9 +6,15 @@ module PgVerify
         class PumlTransformation
 
             attr_accessor :render_labels
+            attr_accessor :render_precons
+            attr_accessor :render_guards
+            attr_accessor :render_actions
 
-            def initialize(render_labels: true)
-                @render_labels = render_labels
+            def initialize(render_options = {})
+                @render_labels = render_options[:render_labels].nil? ? true : render_options[:render_labels]
+                @render_precons = render_options[:render_precons].nil? ? true : render_options[:render_precons]
+                @render_guards = render_options[:render_guards].nil? ? true : render_options[:render_guards]
+                @render_actions = render_options[:render_actions].nil? ? true : render_options[:render_actions]
             end
 
             def transform_graph(graph, variable_state: nil, only: nil)
@@ -65,8 +71,12 @@ module PgVerify
             end
         
             def transform_transition(component, transition)
-                label = [ transition.precon, transition.guard ].map(&:to_s).reject(&:empty?).join(" && ")
-                label += " / " + transition.action.to_s unless transition.action.nil?
+                precon = @render_precons ? transition.precon : nil
+                guard  = @render_guards  ? transition.guard : nil
+                action = @render_actions ? transition.action : nil
+
+                label = [ precon, guard ].map(&:to_s).reject(&:empty?).join(" && ")
+                label += " / " + action.to_s unless action.nil?
                 label = ": #{label}" unless label.strip.empty?
                 label = "" unless @render_labels
                 return "#{component.name}_#{transition.src_state} --> #{component.name}_#{transition.tgt_state} #{label}"
