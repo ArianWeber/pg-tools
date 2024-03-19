@@ -198,14 +198,14 @@
                 "label": "Specification 2",
                 "expression": {
                     "string": "G TransientError == No",
-                    "type": "pl"
+                    "type": "tl"
                 }
             },
             {
                 "label": "Specification 1",
                 "expression": {
                     "string": "(X Robot == Idle || F Robot == Busy)",
-                    "type": "pl"
+                    "type": "tl"
                 }
             }
         ]

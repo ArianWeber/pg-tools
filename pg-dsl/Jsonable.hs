@@ -63,7 +63,7 @@ instance Jsonable Spec where
      in JsonObject
           [ "label" .= JsonString s
           , "expression" .=
-            JsonObject ["string" .= JsonString f, "type" .= JsonString "pl"]
+            JsonObject ["string" .= JsonString f, "type" .= JsonString "tl"]
           ]
 
 instance Jsonable VarDef where
