@@ -7,6 +7,7 @@ To get started you can run `pg-verify doctor` to verify your installation and gu
 you through the steps needed to install external addons like the NuSMV model checker.
 
 You can always run `pg-verify help` to get a list of available commands.
+Run `pg-verify help <command>` to get more information about a specific command and its options.
 For example try running `pg-verify show png` to render a PNG image of your program graph
 and save that to your working directory.
 
@@ -15,6 +16,7 @@ and save that to your working directory.
 There are a couple of prelude files and directories in your project to get you started:
 
 - `program-graph.rb`: This file defines the default program graph you will be working on
+- `.pg-verify.yml`: This file can be used to configure pg-verify
 - `addon/`: This is the directory where you will place addon resources like the NuSMV executable.
 
 ## Writing specifications

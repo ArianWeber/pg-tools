@@ -66,14 +66,16 @@ module PgVerify
 
             def run_check(program_graph)
                 commands = [ "go", "check_fsm", "quit" ]
-                nusmv_s = Transform::NuSmvTransformation.new.transform_graph(program_graph)
+                nusmv_s = Transform::NuSmvTransformation.new.transform_graph(program_graph, include_specs: false)
                 output = eval_nusmv(nusmv_s, commands: commands)
 
                 # Return "ok" if the FSM has no deadlocks
                 return nil if output.include?("The transition relation is total: No deadlock state exists")
-                
+
                 # Otherwise compute and return the deadlock state
-                lines = output.split("\n").drop_while { |str| !str.start_with?("A deadlock state is:") }
+                lines = output.split("\n").drop_while { |str| 
+                    !(str.start_with?("A deadlock state is:") || str.start_with?("successors is:"))
+                }
                 lines = lines[1, lines.length - 1]
 
                 var_state = {}
