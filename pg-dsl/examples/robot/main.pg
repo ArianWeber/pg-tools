@@ -17,7 +17,7 @@ model Robot {
     # More stuff that makes no sense
     specify {
         "Specification 1" {
-            X Robot = Idle | F Robot = Busy
+            G nofaults => X Robot = Idle | F Robot = Busy
         }
         "Specification 2" {
             G TransientError = No

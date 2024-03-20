@@ -169,6 +169,7 @@ checkLTL _ LTLTrue = Nothing
 checkLTL _ LTLFalse = Nothing
 checkLTL env (LTLVar s)
   | s `elem` eBool env = Nothing
+  | s == "nofaults" = Nothing
   | otherwise = Just $ raiseDef "Main module" s
 checkLTL env (LTLProp r a b) =
   case a of
@@ -204,6 +205,7 @@ checkCTL _ CTLTrue = Nothing
 checkCTL _ CTLFalse = Nothing
 checkCTL env (CTLVar s)
   | s `elem` eBool env = Nothing
+  | s == "nofaults" = Nothing
   | otherwise = Just $ raiseDef "Main module" s
 checkCTL env (CTLProp r a b) =
   case a of

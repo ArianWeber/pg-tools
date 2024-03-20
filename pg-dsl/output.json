@@ -204,7 +204,7 @@
             {
                 "label": "Specification 1",
                 "expression": {
-                    "string": "(X Robot == Idle || F Robot == Busy)",
+                    "string": "(G (TransientError == No && PersistentError == No) => (X Robot == Idle || F Robot == Busy))",
                     "type": "tl"
                 }
             }

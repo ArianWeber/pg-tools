@@ -209,7 +209,7 @@ nextAlphaNum "" = False
 nextAlphaNum s  = isAsciiAlphaNum $ head s
 
 isAsciiAlphaNum :: Char -> Bool
-isAsciiAlphaNum x = isAscii x && (isAlpha x || isNumber x)
+isAsciiAlphaNum x = isAscii x && (isAlpha x || isNumber x) || x == '_'
 
 dec :: Token -> Int -> Int -> DToken
 dec t l c = DToken {token = t, line = l, column = c}

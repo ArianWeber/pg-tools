@@ -231,14 +231,16 @@ pVars p@(h:t) =
 pBool :: [DToken] -> Either ParserError (VarDef, [DToken])
 pBool (h:t) =
   case token h of
-    TLower s -> Right (VarDef s RBool, t)
-    _        -> raise h
+    TLower "nofaults" -> raise h
+    TLower s          -> Right (VarDef s RBool, t)
+    _                 -> raise h
 
 pInt :: [DToken] -> Either ParserError (VarDef, [DToken])
 pInt (h:t) =
   case token h of
-    TLower s -> pi1 s t
-    _        -> raise h
+    TLower "nofaults" -> raise h
+    TLower s          -> pi1 s t
+    _                 -> raise h
   where
     pi1 s (h:t) =
       case token h of
@@ -274,8 +276,9 @@ pInt (h:t) =
 pEnum :: [DToken] -> Either ParserError (VarDef, [DToken])
 pEnum (h:t) =
   case token h of
-    TLower s -> pe1 s t
-    _        -> raise h
+    TLower "nofaults" -> raise h
+    TLower s          -> pe1 s t
+    _                 -> raise h
   where
     pe1 s (h:t) =
       case token h of
@@ -283,8 +286,9 @@ pEnum (h:t) =
         _       -> raise h
     pe2 vs s (h:t) =
       case token h of
-        TLower v -> pe3 (v : vs) s t
-        _        -> raise h
+        TLower "nofaults" -> raise h
+        TLower v          -> pe3 (v : vs) s t
+        _                 -> raise h
     pe3 vs s (h:t) =
       case token h of
         TComma  -> pe2 vs s t
@@ -420,9 +424,10 @@ pAction p@(h:t) =
         _       -> raise h
     pa2 acc (h:t) =
       case token h of
-        TLower s -> pa3 s acc t
-        TCurlyR  -> Right (Action acc, t)
-        _        -> raise h
+        TLower "nofaults" -> raise h
+        TLower s          -> pa3 s acc t
+        TCurlyR           -> Right (Action acc, t)
+        _                 -> raise h
     pa3 v acc (h:t) =
       case token h of
         TWalrus -> pa4 v acc t
@@ -452,8 +457,9 @@ pExpression p =
 pSingle :: [DToken] -> Either ParserError (String, [DToken])
 pSingle (h:t) =
   case token h of
-    TLower s -> ps1 s t
-    _        -> raise h
+    TLower "nofaults" -> raise h
+    TLower s          -> ps1 s t
+    _                 -> raise h
   where
     ps1 s p@(h:_) =
       case token h of
@@ -491,6 +497,7 @@ pFormula = pf1 [] []
       case token h of
         TTrue -> Right (FTrue, t)
         TFalse -> Right (FFalse, t)
+        TLower "nofaults" -> raise h
         TLower s -> Right (FVar s, t)
         TNot ->
           case pf3 t of
@@ -680,6 +687,7 @@ pTerm = pt1 [] []
     ptNext (h:t) =
       case token h of
         TNumber n -> Right (Const n, t)
+        TLower "nofaults" -> raise h
         TLower s -> Right (TermLower s, t)
         TUpper s -> Right (TermUpper s, t)
         TMinus ->

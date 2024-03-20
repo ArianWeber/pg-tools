@@ -21,14 +21,31 @@ instance Jsonable AST where
 instance Jsonable Model where
   toJson :: Model -> Json
   toJson m =
-    JsonObject
-      [ modelName m .=
-        JsonObject
-          [ "components" .= JsonArray (map (pgJson $ environ m) $ graphs m)
-          , "hazards" .= JsonArray (map toJson $ hazards m)
-          , "specification" .= JsonArray (map toJson $ specs m)
+    let m' = replaceNofaults m
+     in JsonObject
+          [ modelName m' .=
+            JsonObject
+              [ "components" .=
+                JsonArray (map (pgJson $ environ m') $ graphs m')
+              , "hazards" .= JsonArray (map toJson $ hazards m')
+              , "specification" .= JsonArray (map toJson $ specs m')
+              ]
           ]
-      ]
+
+replaceNofaults :: Model -> Model
+replaceNofaults m =
+  m
+    { hazards = map (replaceHazard (graphs m)) $ hazards m
+    , specs = map (replaceSpec (graphs m)) $ specs m
+    }
+
+replaceHazard :: [PG] -> Hazard -> Hazard
+replaceHazard pgs (Hazard s (Left ltl))  = Hazard s (Left $ replLTL pgs ltl)
+replaceHazard pgs (Hazard s (Right ctl)) = Hazard s (Right $ replCTL pgs ctl)
+
+replaceSpec :: [PG] -> Spec -> Spec
+replaceSpec pgs (Spec s (Left ltl))  = Spec s (Left $ replLTL pgs ltl)
+replaceSpec pgs (Spec s (Right ctl)) = Spec s (Right $ replCTL pgs ctl)
 
 pgJson :: Env -> PG -> Json
 pgJson env g =
@@ -131,9 +148,10 @@ instance Jsonable LTL where
 
 instance Jsonable CTL where
   toJson :: CTL -> Json
-  toJson CTLTrue  = JsonNull
-  toJson CTLFalse = JsonBool False
-  toJson f        = JsonString $ show f
+  toJson CTLTrue             = JsonNull
+  toJson CTLFalse            = JsonBool False
+  toJson (CTLVar "nofaults") = undefined
+  toJson f                   = JsonString $ show f
 
 jsonInit :: PG -> String
 jsonInit pg
@@ -142,3 +160,71 @@ jsonInit pg
   where
     initState =
       Proposition Equal (TermUpper $ name pg) (TermUpper $ initialState pg)
+
+nofaults :: [PG] -> Formula
+nofaults pgs =
+  agg $
+  map
+    ((\x -> Proposition Equal (TermUpper x) (TermUpper "No")) . name)
+    (filter isFault pgs)
+  where
+    agg [] = FTrue
+    agg x  = foldr And (head x) (tail x)
+
+nofaultsLTL :: [PG] -> LTL
+nofaultsLTL pgs =
+  agg $
+  map
+    ((\x -> LTLProp Equal (TermUpper x) (TermUpper "No")) . name)
+    (filter isFault pgs)
+  where
+    agg [] = LTLTrue
+    agg x  = foldr LTLAnd (head x) (tail x)
+
+nofaultsCTL :: [PG] -> CTL
+nofaultsCTL pgs =
+  agg $
+  map
+    ((\x -> CTLProp Equal (TermUpper x) (TermUpper "No")) . name)
+    (filter isFault pgs)
+  where
+    agg [] = CTLTrue
+    agg x  = foldr CTLAnd (head x) (tail x)
+
+replF :: [PG] -> Formula -> Formula
+replF pgs (FVar "nofaults") = nofaults pgs
+replF pgs (Not f)           = Not (replF pgs f)
+replF pgs (And f g)         = And (replF pgs f) (replF pgs g)
+replF pgs (Or f g)          = Or (replF pgs f) (replF pgs g)
+replF pgs (Implies f g)     = Implies (replF pgs f) (replF pgs g)
+replF pgs (Equiv f g)       = Equiv (replF pgs f) (replF pgs g)
+
+replLTL :: [PG] -> LTL -> LTL
+replLTL pgs (LTLVar "nofaults") = nofaultsLTL pgs
+replLTL pgs (LTLNot f)          = LTLNot (replLTL pgs f)
+replLTL pgs (LTLX f)            = LTLX (replLTL pgs f)
+replLTL pgs (LTLF f)            = LTLF (replLTL pgs f)
+replLTL pgs (LTLG f)            = LTLG (replLTL pgs f)
+replLTL pgs (LTLAnd f g)        = LTLAnd (replLTL pgs f) (replLTL pgs g)
+replLTL pgs (LTLOr f g)         = LTLOr (replLTL pgs f) (replLTL pgs g)
+replLTL pgs (LTLImplies f g)    = LTLImplies (replLTL pgs f) (replLTL pgs g)
+replLTL pgs (LTLEquiv f g)      = LTLEquiv (replLTL pgs f) (replLTL pgs g)
+replLTL pgs (LTLU f g)          = LTLU (replLTL pgs f) (replLTL pgs g)
+replLTL _ x                     = x
+
+replCTL :: [PG] -> CTL -> CTL
+replCTL pgs (CTLVar "nofaults") = nofaultsCTL pgs
+replCTL pgs (CTLNot f)          = CTLNot (replCTL pgs f)
+replCTL pgs (CTLEX f)           = CTLEX (replCTL pgs f)
+replCTL pgs (CTLEF f)           = CTLEF (replCTL pgs f)
+replCTL pgs (CTLEG f)           = CTLEG (replCTL pgs f)
+replCTL pgs (CTLAX f)           = CTLAX (replCTL pgs f)
+replCTL pgs (CTLAF f)           = CTLAF (replCTL pgs f)
+replCTL pgs (CTLAG f)           = CTLAG (replCTL pgs f)
+replCTL pgs (CTLAnd f g)        = CTLAnd (replCTL pgs f) (replCTL pgs g)
+replCTL pgs (CTLOr f g)         = CTLOr (replCTL pgs f) (replCTL pgs g)
+replCTL pgs (CTLImplies f g)    = CTLImplies (replCTL pgs f) (replCTL pgs g)
+replCTL pgs (CTLEquiv f g)      = CTLEquiv (replCTL pgs f) (replCTL pgs g)
+replCTL pgs (CTLEU f g)         = CTLEU (replCTL pgs f) (replCTL pgs g)
+replCTL pgs (CTLAU f g)         = CTLAU (replCTL pgs f) (replCTL pgs g)
+replCTL _ x                     = x
