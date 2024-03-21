@@ -58,6 +58,7 @@ pgJson env g =
           JsonObject
             ["string" .= JsonString (jsonInit g), "type" .= JsonString "pl"]
         , "transitions" .= JsonArray (map (transJson env) (transitions g))
+        , "represents_fault" .= JsonBool (isFault g)
         ]
     ]
 
