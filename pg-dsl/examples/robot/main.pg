@@ -1,26 +1,21 @@
 model Robot {
+    # Stoerungen
     errors {
-        transient TransientError
-        persistent PersistentError
+        persistent AusKnopfKaputt
     }
 
-    # Just some stuff that makes no sense
+    # Gefahren
     hazards {
-        "Hazard 1" {
-            F Robot = Inactive
-        }
-        "Hazard 2" {
-            AF TransientError = Yes & EF PersistentError = Yes
+        "num ist zu gross" {
+            F num = 5
         }
     }
 
-    # More stuff that makes no sense
+    # Plausibilitaetschecks
     specify {
-        "Specification 1" {
-            G nofaults => X Robot = Idle | F Robot = Busy
-        }
-        "Specification 2" {
-            G TransientError = No
+        "Einmal inactive, immer inactive" {
+            G AusKnopfKaputt = No
+            => G (Robot = Inactive => (G Robot = Inactive))
         }
     }
 }

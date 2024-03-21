@@ -20,7 +20,11 @@ graph Robot {
         Busy -> Busy {}
 
         Busy -> Inactive {
-            guard { num = 3 }
+            guard { num >= 3 }
+        }
+
+        Inactive -> Idle {
+            guard { AusKnopfKaputt != No }
         }
     }
 }

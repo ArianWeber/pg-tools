@@ -286,12 +286,13 @@ data ParserError = ParserError
 
 instance Show ParserError where
   show :: ParserError -> String
-  show e =
-    pMsg e ++ " at line " ++ show (pLine e) ++ ", column " ++ show (pCol e)
+  show = pMsg
 
 data FParserError =
   FPError FilePath ParserError
 
 instance Show FParserError where
   show :: FParserError -> String
-  show (FPError fp err) = show err ++ " in file " ++ fp
+  show (FPError fp err) =
+    pMsg err ++
+    " at " ++ fp ++ ":" ++ show (pLine err) ++ "." ++ show (pCol err)
