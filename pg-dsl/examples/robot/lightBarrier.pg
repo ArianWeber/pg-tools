@@ -1,0 +1,15 @@
+graph LightBarrier {
+    states { Idle, Signal }
+
+    init: Idle {}
+
+    transitions {
+        Idle -> Idle {}
+
+        Idle -> Signal {}
+
+        Signal -> Idle {}
+
+        Signal -> Signal {}
+    }
+}
