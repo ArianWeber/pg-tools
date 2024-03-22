@@ -52,18 +52,26 @@ module PgVerify
                 return "rectangle #{component.name} {\n#{indented(str)}\n}"
             end
         
+            # Render an initial state when possible.
+            # For the very common case, that the component defines a single initial state
+            # detect that using a regex. When the component does not define a single initial state
+            # which we optionally do not enforce (as it can be useful) we just omit this.
             def transform_initial(graph, component)
-                return "" # TODO: Find initial states
-                # initial_state_name = "#{component.name}_initial"
-                # str = "circle initial as #{initial_state_name} \n"
-                # str += "#{initial_state_name} --> #{component.name}_#{component.initial_state}"
+                return "" if component.init_expression.nil?
+                candidates = component.init_expression.expression_string.scan(/#{component.name}\s+==\s+(\w+)/).flatten
+                return "" unless candidates.length == 1
+                initial_state = candidates.first
+
+                initial_state_name = "#{component.name}_initial"
+                str = "circle initial as #{initial_state_name} \n"
+                str += "#{initial_state_name} --> #{component.name}_#{initial_state}"
         
-                # vars = graph.variables.select_by_owner(component.name)
-                # init_var_s = vars.map(&:init_expression).compact.join(' && ')
+                vars = graph.variables.select_by_owner(component.name)
+                init_var_s = vars.map(&:init_expression).compact.join(' && ')
         
-                # str += ": #{init_var_s}" unless init_var_s.empty?
-                # str += "\n"
-                # return str
+                str += ": #{init_var_s}" unless init_var_s.empty?
+                str += "\n"
+                return str
             end
         
             def transform_state(component, state)
