@@ -111,11 +111,14 @@ module PgVerify
                 actual_cut_sets = result.values.first.map { |cut_set| Set.new(cut_set) }
                 
                 next if Set.new(actual_cut_sets) == Set.new(expected_cut_sets)
+
+                expected = expected_cut_sets.map { |set| "{#{set.to_a.join(", ")}}" }.join(", ")
+                actual   = actual_cut_sets.map { |set| "{#{set.to_a.join(", ")}}" }.join(", ")
                 
                 Warning.new("Failed DCCA for #{File.basename(test_file)}",
-                   "The DCCA for hazard #{result.keys.first.expression.to_s.c_blue} yielded unexpected cut sets:\n" \
-                   "Expected: #{expected_cut_sets}\n" \
-                   "Got     : #{actual_cut_sets}\n"
+                   "The DCCA for hazard #{result.keys.first.expression.to_s.c_blue} yielded unexpected fault sets:\n" \
+                   "Expected: #{expected}\n" \
+                   "Got     : #{actual}\n"
                 )
             }.compact
 
