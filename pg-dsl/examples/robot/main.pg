@@ -1,20 +1,20 @@
 model Robot {
     # Stoerungen
     errors {
-        persistent AusKnopfKaputt
+        persistent Errorgraph
     }
 
     # Gefahren
     hazards {
         "num ist zu gross" {
-            F num = 5
+            num = 5
         }
     }
 
     # Plausibilitaetschecks
     specify {
         "Einmal inactive, immer inactive" {
-            G AusKnopfKaputt = No
+            G nofaults
             => G (Robot = Inactive => (G Robot = Inactive))
         }
     }

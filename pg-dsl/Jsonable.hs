@@ -110,14 +110,14 @@ guardJson :: Formula -> Json
 guardJson f =
   case toJson f of
     JsonNull -> JsonNull
-    x        -> JsonObject ["string" .= x, "type" .= JsonString "pl"]
+    x        -> JsonObject ["string" .= x, "type" .= JsonString "guard"]
 
 computePrecon :: Env -> Action -> Json
 computePrecon _ (Action []) = JsonNull
 computePrecon env act = cp "" env act
   where
     cp acc env (Action []) =
-      JsonObject ["string" .= JsonString acc, "type" .= JsonString "pl"]
+      JsonObject ["string" .= JsonString acc, "type" .= JsonString "guard"]
     cp acc env (Action [h]) = cp (compPrecon env h) env (Action [])
     cp acc env (Action (h:t)) = cp (compPrecon env h ++ " && ") env (Action t)
 

@@ -1,0 +1,37 @@
+graph T {
+    vars {
+        int t [0..62]
+        int timeout [62..62]   
+    }
+
+    states { Closed, Open, Count }
+
+    init: Closed { t = 0 }
+
+    transitions {
+        Closed -> Count {
+            guard { S = Closed & (S1 = Closed | K1 = Closed) }
+            action { t := 0 }
+        }
+        Count -> Closed {
+            guard {
+                ! (S = Closed & (S1 = Closed | K1 = Closed))
+                | (FT != No & t = timeout)
+            }
+        }
+        Count -> Count {
+            guard { S = Closed & (S1 = Closed | K1 = Closed) & t < timeout }
+            action { t := t + 1 }
+        }
+        Count -> Open {
+            guard {
+                S = Closed & (S1 = Closed | K1 = Closed)
+                & t = timeout
+                & FT = No
+            }
+        }
+        Open -> Closed {
+            guard { ! (S = Closed & (S1 = Closed | K1 = Closed)) }
+        }
+    }
+}

@@ -1,0 +1,49 @@
+model Drucktank {
+    errors {
+        transient FS1
+        persistent FK1
+        persistent FK2
+        persistent FT
+        persistent FS
+    }
+    
+    hazards {
+        "Tank ruptured" {
+            D = Ruptured
+        }
+    }
+    
+    specify {
+        # Specifications with no error graphs
+        # "Spec1" {
+        #     (F S1 = Closed => F pr > 0)
+        # }
+        # "Spec2" {
+        #     G T != Open
+        # }
+        # "Spec3" {
+        #     (F S1 = Closed) => (G F pr > 0)
+        # }
+        # "Spec4" {
+        #     G D != Ruptured
+        # }
+        # "Spec5" {
+        #     G (pr = 60 => X X X M = Off)
+        # }
+        "Spec6" {
+            EF T = Open
+        }
+        "Spec7" {
+            EG T != Open
+        }
+        "Spec8" {
+            EF D = Ruptured
+        }
+        "Spec9" {
+            (G nofaults) => G T != Open
+        }
+        "Spec10" {
+            (G nofaults) => ((F S1 = Closed) => G F pr > 0)
+        }
+    }
+}

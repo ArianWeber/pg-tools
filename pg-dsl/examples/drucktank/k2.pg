@@ -1,0 +1,14 @@
+graph K2 {
+    states { Open, Closed }
+
+    init: Open {}
+
+    transitions {
+        Open -> Closed {
+            guard { S = Closed & (S1 = Closed | K1 = Closed) }
+        }
+        Closed -> Open {
+            guard { (S = Open | S1 != Closed & K1 = Open) & FK2 = No }
+        }
+    }
+}

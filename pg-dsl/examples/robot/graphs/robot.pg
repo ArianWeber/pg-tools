@@ -1,6 +1,8 @@
 graph Robot {
     vars {
         int num [0..7]
+        bool truthy
+        enum options { option1, option2, option3 }
     }
     
     states { Idle, Busy, Inactive }
@@ -24,7 +26,7 @@ graph Robot {
         }
 
         Inactive -> Idle {
-            guard { AusKnopfKaputt != No }
+            guard { Errorgraph != No }
         }
     }
 }

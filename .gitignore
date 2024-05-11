@@ -16,3 +16,4 @@ NuSMV-*/
 !./data/project-template/addon
 /addon
 out/
+vendor/

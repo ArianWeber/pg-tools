@@ -1,0 +1,21 @@
+graph M {
+    vars {
+        int pr_motor [0..2]
+    }
+
+    states { Off, On }
+
+    init: Off { pr_motor = 0 }
+
+    transitions {
+        Off -> On {
+            guard { K2 = Closed }
+            action { pr_motor := 2 }
+        }
+
+        On -> Off {
+            guard { K2 = Open }
+            action { pr_motor := 0 }
+        }
+    }
+}

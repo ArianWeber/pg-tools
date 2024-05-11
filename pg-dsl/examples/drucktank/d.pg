@@ -1,0 +1,26 @@
+graph D {
+    vars {
+        int pr [0..66]
+        int pr_in [0..2]
+        int pr_out [1..1]
+        int pr_rupture [66..66]
+    }
+
+    states { Intact, Ruptured }
+
+    init: Intact {
+        pr = 0 & pr_in = pr_motor & pr_out = 1 & pr_rupture = 66
+    }
+
+    transitions {
+        Intact -> Intact {
+            guard { pr + pr_in - pr_out >= 0 & pr < pr_rupture }
+            action { pr := pr + pr_in - pr_out }
+        }
+
+        Intact -> Ruptured {
+            guard { pr >= pr_rupture }
+            action { pr := 0 }
+        }
+    }
+}

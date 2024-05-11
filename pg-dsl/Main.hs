@@ -24,7 +24,7 @@ import           TypeCheck                 (checkTypes)
 
 main :: IO ()
 main = do
-  args <- getArgs
+  let args = ["-d", "./examples/drucktank"]
   let (fp, cmd) = parseArgs args
       basepath =
         if fp /= "" && last fp == '/'

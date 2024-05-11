@@ -1,0 +1,16 @@
+graph S1 {
+    states { Start, Closed, Open }
+
+    init: Start {}
+
+    transitions {
+        Start -> Start {}
+        Start -> Closed {}
+        Closed -> Open {
+            guard { FS1 = No }
+        }
+        Open -> Closed {
+            guard { FS1 != No }
+        }
+    }
+}
