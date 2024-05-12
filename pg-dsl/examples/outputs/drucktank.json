@@ -1,0 +1,605 @@
+{
+    "Drucktank": {
+        "components": [
+            {
+                "FS": {
+                    "states": [
+                        "No",
+                        "Yes"
+                    ],
+                    "variables": [],
+                    "init": {
+                        "string": "FS == No",
+                        "type": "pl"
+                    },
+                    "transitions": [
+                        {
+                            "No -> No": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        },
+                        {
+                            "No -> Yes": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        }
+                    ],
+                    "represents_fault": true
+                }
+            },
+            {
+                "FT": {
+                    "states": [
+                        "No",
+                        "Yes"
+                    ],
+                    "variables": [],
+                    "init": {
+                        "string": "FT == No",
+                        "type": "pl"
+                    },
+                    "transitions": [
+                        {
+                            "No -> No": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        },
+                        {
+                            "No -> Yes": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        }
+                    ],
+                    "represents_fault": true
+                }
+            },
+            {
+                "FK2": {
+                    "states": [
+                        "No",
+                        "Yes"
+                    ],
+                    "variables": [],
+                    "init": {
+                        "string": "FK2 == No",
+                        "type": "pl"
+                    },
+                    "transitions": [
+                        {
+                            "No -> No": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        },
+                        {
+                            "No -> Yes": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        }
+                    ],
+                    "represents_fault": true
+                }
+            },
+            {
+                "FK1": {
+                    "states": [
+                        "No",
+                        "Yes"
+                    ],
+                    "variables": [],
+                    "init": {
+                        "string": "FK1 == No",
+                        "type": "pl"
+                    },
+                    "transitions": [
+                        {
+                            "No -> No": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        },
+                        {
+                            "No -> Yes": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        }
+                    ],
+                    "represents_fault": true
+                }
+            },
+            {
+                "FS1": {
+                    "states": [
+                        "No",
+                        "Yes"
+                    ],
+                    "variables": [],
+                    "init": {
+                        "string": "FS1 == No",
+                        "type": "pl"
+                    },
+                    "transitions": [
+                        {
+                            "No -> No": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        },
+                        {
+                            "No -> Yes": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        },
+                        {
+                            "Yes -> No": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        },
+                        {
+                            "Yes -> Yes": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        }
+                    ],
+                    "represents_fault": true
+                }
+            },
+            {
+                "S": {
+                    "states": [
+                        "Open",
+                        "Closed"
+                    ],
+                    "variables": [
+                        {
+                            "stopPr": {
+                                "range": "60..60",
+                                "init": null
+                            }
+                        },
+                        {
+                            "fillPr": {
+                                "range": "3..3",
+                                "init": null
+                            }
+                        }
+                    ],
+                    "init": {
+                        "string": "(S == Closed && (fillPr == 3 && stopPr == 60))",
+                        "type": "pl"
+                    },
+                    "transitions": [
+                        {
+                            "Open -> Closed": {
+                                "precon": null,
+                                "guard": {
+                                    "string": "pr <= fillPr",
+                                    "type": "pl"
+                                },
+                                "action": null
+                            }
+                        },
+                        {
+                            "Closed -> Open": {
+                                "precon": null,
+                                "guard": {
+                                    "string": "(pr >= stopPr && FS == No)",
+                                    "type": "pl"
+                                },
+                                "action": null
+                            }
+                        }
+                    ],
+                    "represents_fault": false
+                }
+            },
+            {
+                "M": {
+                    "states": [
+                        "On",
+                        "Off"
+                    ],
+                    "variables": [
+                        {
+                            "pr_motor": {
+                                "range": "0..2",
+                                "init": null
+                            }
+                        }
+                    ],
+                    "init": {
+                        "string": "(M == Off && pr_motor == 0)",
+                        "type": "pl"
+                    },
+                    "transitions": [
+                        {
+                            "On -> Off": {
+                                "precon": {
+                                    "string": "0 >= 0 && 0 <= 2",
+                                    "type": "pl"
+                                },
+                                "guard": {
+                                    "string": "K2 == Open",
+                                    "type": "pl"
+                                },
+                                "action": {
+                                    "string": "pr_motor := 0",
+                                    "type": "action"
+                                }
+                            }
+                        },
+                        {
+                            "Off -> On": {
+                                "precon": {
+                                    "string": "2 >= 0 && 2 <= 2",
+                                    "type": "pl"
+                                },
+                                "guard": {
+                                    "string": "K2 == Closed",
+                                    "type": "pl"
+                                },
+                                "action": {
+                                    "string": "pr_motor := 2",
+                                    "type": "action"
+                                }
+                            }
+                        }
+                    ],
+                    "represents_fault": false
+                }
+            },
+            {
+                "K2": {
+                    "states": [
+                        "Closed",
+                        "Open"
+                    ],
+                    "variables": [],
+                    "init": {
+                        "string": "K2 == Open",
+                        "type": "pl"
+                    },
+                    "transitions": [
+                        {
+                            "Closed -> Open": {
+                                "precon": null,
+                                "guard": {
+                                    "string": "((S == Open || (S1 != Closed && K1 == Open)) && FK2 == No)",
+                                    "type": "pl"
+                                },
+                                "action": null
+                            }
+                        },
+                        {
+                            "Open -> Closed": {
+                                "precon": null,
+                                "guard": {
+                                    "string": "(S == Closed && (S1 == Closed || K1 == Closed))",
+                                    "type": "pl"
+                                },
+                                "action": null
+                            }
+                        }
+                    ],
+                    "represents_fault": false
+                }
+            },
+            {
+                "D": {
+                    "states": [
+                        "Ruptured",
+                        "Intact"
+                    ],
+                    "variables": [
+                        {
+                            "pr_rupture": {
+                                "range": "66..66",
+                                "init": null
+                            }
+                        },
+                        {
+                            "pr_out": {
+                                "range": "1..1",
+                                "init": null
+                            }
+                        },
+                        {
+                            "pr_in": {
+                                "range": "0..2",
+                                "init": null
+                            }
+                        },
+                        {
+                            "pr": {
+                                "range": "0..66",
+                                "init": null
+                            }
+                        }
+                    ],
+                    "init": {
+                        "string": "(D == Intact && (((pr == 0 && pr_in == pr_motor) && pr_out == 1) && pr_rupture == 66))",
+                        "type": "pl"
+                    },
+                    "transitions": [
+                        {
+                            "Intact -> Ruptured": {
+                                "precon": {
+                                    "string": "0 >= 0 && 0 <= 66",
+                                    "type": "pl"
+                                },
+                                "guard": {
+                                    "string": "pr >= pr_rupture",
+                                    "type": "pl"
+                                },
+                                "action": {
+                                    "string": "pr := 0",
+                                    "type": "action"
+                                }
+                            }
+                        },
+                        {
+                            "Intact -> Intact": {
+                                "precon": {
+                                    "string": "((pr + pr_in) - pr_out) >= 0 && ((pr + pr_in) - pr_out) <= 66",
+                                    "type": "pl"
+                                },
+                                "guard": {
+                                    "string": "(((pr + pr_in) - pr_out) >= 0 && pr < pr_rupture)",
+                                    "type": "pl"
+                                },
+                                "action": {
+                                    "string": "pr := ((pr + pr_in) - pr_out)",
+                                    "type": "action"
+                                }
+                            }
+                        }
+                    ],
+                    "represents_fault": false
+                }
+            },
+            {
+                "T": {
+                    "states": [
+                        "Count",
+                        "Open",
+                        "Closed"
+                    ],
+                    "variables": [
+                        {
+                            "timeout": {
+                                "range": "62..62",
+                                "init": null
+                            }
+                        },
+                        {
+                            "t": {
+                                "range": "0..62",
+                                "init": null
+                            }
+                        }
+                    ],
+                    "init": {
+                        "string": "(T == Closed && t == 0)",
+                        "type": "pl"
+                    },
+                    "transitions": [
+                        {
+                            "Open -> Closed": {
+                                "precon": null,
+                                "guard": {
+                                    "string": "! (S == Closed && (S1 == Closed || K1 == Closed))",
+                                    "type": "pl"
+                                },
+                                "action": null
+                            }
+                        },
+                        {
+                            "Count -> Open": {
+                                "precon": null,
+                                "guard": {
+                                    "string": "(((S == Closed && (S1 == Closed || K1 == Closed)) && t == timeout) && FT == No)",
+                                    "type": "pl"
+                                },
+                                "action": null
+                            }
+                        },
+                        {
+                            "Count -> Count": {
+                                "precon": {
+                                    "string": "(t + 1) >= 0 && (t + 1) <= 62",
+                                    "type": "pl"
+                                },
+                                "guard": {
+                                    "string": "((S == Closed && (S1 == Closed || K1 == Closed)) && t < timeout)",
+                                    "type": "pl"
+                                },
+                                "action": {
+                                    "string": "t := (t + 1)",
+                                    "type": "action"
+                                }
+                            }
+                        },
+                        {
+                            "Count -> Closed": {
+                                "precon": null,
+                                "guard": {
+                                    "string": "! ((S == Closed && (S1 == Closed || K1 == Closed)) || (FT != No && t == timeout))",
+                                    "type": "pl"
+                                },
+                                "action": null
+                            }
+                        },
+                        {
+                            "Closed -> Count": {
+                                "precon": {
+                                    "string": "0 >= 0 && 0 <= 62",
+                                    "type": "pl"
+                                },
+                                "guard": {
+                                    "string": "(S == Closed && (S1 == Closed || K1 == Closed))",
+                                    "type": "pl"
+                                },
+                                "action": {
+                                    "string": "t := 0",
+                                    "type": "action"
+                                }
+                            }
+                        }
+                    ],
+                    "represents_fault": false
+                }
+            },
+            {
+                "K1": {
+                    "states": [
+                        "Closed",
+                        "Open"
+                    ],
+                    "variables": [],
+                    "init": {
+                        "string": "K1 == Open",
+                        "type": "pl"
+                    },
+                    "transitions": [
+                        {
+                            "Closed -> Open": {
+                                "precon": null,
+                                "guard": {
+                                    "string": "(T == Open && FK1 == No)",
+                                    "type": "pl"
+                                },
+                                "action": null
+                            }
+                        },
+                        {
+                            "Open -> Closed": {
+                                "precon": null,
+                                "guard": {
+                                    "string": "(T != Open && S1 == Closed)",
+                                    "type": "pl"
+                                },
+                                "action": null
+                            }
+                        }
+                    ],
+                    "represents_fault": false
+                }
+            },
+            {
+                "S1": {
+                    "states": [
+                        "Open",
+                        "Closed",
+                        "Start"
+                    ],
+                    "variables": [],
+                    "init": {
+                        "string": "S1 == Start",
+                        "type": "pl"
+                    },
+                    "transitions": [
+                        {
+                            "Open -> Closed": {
+                                "precon": null,
+                                "guard": {
+                                    "string": "FS1 != No",
+                                    "type": "pl"
+                                },
+                                "action": null
+                            }
+                        },
+                        {
+                            "Closed -> Open": {
+                                "precon": null,
+                                "guard": {
+                                    "string": "FS1 == No",
+                                    "type": "pl"
+                                },
+                                "action": null
+                            }
+                        },
+                        {
+                            "Start -> Closed": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        },
+                        {
+                            "Start -> Start": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        }
+                    ],
+                    "represents_fault": false
+                }
+            }
+        ],
+        "hazards": [
+            {
+                "label": "Tank ruptured",
+                "expression": "D == Ruptured"
+            }
+        ],
+        "specification": [
+            {
+                "label": "Spec10",
+                "expression": {
+                    "string": "(G (FT == No && (FK2 == No && (FK1 == No && (FS1 == No && FS == No)))) => (F S1 == Closed => G F pr > 0))",
+                    "type": "tl"
+                }
+            },
+            {
+                "label": "Spec9",
+                "expression": {
+                    "string": "(G (FT == No && (FK2 == No && (FK1 == No && (FS1 == No && FS == No)))) => G T != Open)",
+                    "type": "tl"
+                }
+            },
+            {
+                "label": "Spec8",
+                "expression": {
+                    "string": "EF D == Ruptured",
+                    "type": "tl"
+                }
+            },
+            {
+                "label": "Spec7",
+                "expression": {
+                    "string": "EG T != Open",
+                    "type": "tl"
+                }
+            },
+            {
+                "label": "Spec6",
+                "expression": {
+                    "string": "EF T == Open",
+                    "type": "tl"
+                }
+            }
+        ]
+    }
+}

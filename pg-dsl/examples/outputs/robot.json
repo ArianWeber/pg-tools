@@ -1,0 +1,172 @@
+{
+    "Robot": {
+        "components": [
+            {
+                "Errorgraph": {
+                    "states": [
+                        "No",
+                        "Yes"
+                    ],
+                    "variables": [],
+                    "init": {
+                        "string": "Errorgraph == No",
+                        "type": "pl"
+                    },
+                    "transitions": [
+                        {
+                            "No -> No": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        },
+                        {
+                            "No -> Yes": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        }
+                    ],
+                    "represents_fault": true
+                }
+            },
+            {
+                "LightBarrier": {
+                    "states": [
+                        "Signal",
+                        "Idle"
+                    ],
+                    "variables": [],
+                    "init": {
+                        "string": "LightBarrier == Idle",
+                        "type": "pl"
+                    },
+                    "transitions": [
+                        {
+                            "Signal -> Signal": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        },
+                        {
+                            "Signal -> Idle": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        },
+                        {
+                            "Idle -> Signal": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        },
+                        {
+                            "Idle -> Idle": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        }
+                    ],
+                    "represents_fault": false
+                }
+            },
+            {
+                "Robot": {
+                    "states": [
+                        "Inactive",
+                        "Busy",
+                        "Idle"
+                    ],
+                    "variables": [
+                        {
+                            "num": {
+                                "range": "0..7",
+                                "init": null
+                            }
+                        }
+                    ],
+                    "init": {
+                        "string": "(Robot == Idle && num == 0)",
+                        "type": "pl"
+                    },
+                    "transitions": [
+                        {
+                            "Inactive -> Idle": {
+                                "precon": null,
+                                "guard": {
+                                    "string": "Errorgraph != No",
+                                    "type": "guard"
+                                },
+                                "action": null
+                            }
+                        },
+                        {
+                            "Busy -> Inactive": {
+                                "precon": null,
+                                "guard": {
+                                    "string": "num >= 3",
+                                    "type": "guard"
+                                },
+                                "action": null
+                            }
+                        },
+                        {
+                            "Busy -> Busy": {
+                                "precon": null,
+                                "guard": null,
+                                "action": null
+                            }
+                        },
+                        {
+                            "Busy -> Idle": {
+                                "precon": null,
+                                "guard": {
+                                    "string": "num < 3",
+                                    "type": "guard"
+                                },
+                                "action": null
+                            }
+                        },
+                        {
+                            "Idle -> Busy": {
+                                "precon": {
+                                    "string": "(num + 1) >= 0 && (num + 1) <= 7",
+                                    "type": "guard"
+                                },
+                                "guard": {
+                                    "string": "LightBarrier == Signal",
+                                    "type": "guard"
+                                },
+                                "action": {
+                                    "string": "num := (num + 1)",
+                                    "type": "action"
+                                }
+                            }
+                        }
+                    ],
+                    "represents_fault": false
+                }
+            }
+        ],
+        "hazards": [
+            {
+                "label": "num ist zu gross",
+                "expression": "num == 5"
+            }
+        ],
+        "specification": [
+            {
+                "label": "Einmal inactive, immer inactive",
+                "expression": {
+                    "string": "(G Errorgraph == No => G (Robot == Inactive => G Robot == Inactive))",
+                    "type": "tl"
+                }
+            }
+        ]
+    }
+}
