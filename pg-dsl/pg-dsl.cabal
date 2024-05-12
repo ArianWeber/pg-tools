@@ -1,0 +1,49 @@
+cabal-version:      2.4
+name:               pg-dsl
+version:            0.1.0.0
+synopsis:
+    A simple, domain specific language for modelling program graphs
+
+-- A longer description of the package.
+-- description:
+homepage:           https://github.com/ArianWeber/pg-tools
+
+-- A URL where users can report bugs.
+-- bug-reports:
+license:            MIT
+license-file:       LICENSE
+author:             Benjamin Sühling
+maintainer:         benjamin@suehling.net
+
+-- A copyright notice.
+-- copyright:
+category:           Language
+extra-source-files:
+    CHANGELOG.md
+    README.md
+
+executable pgdsl
+    main-is:          Main.hs
+
+    -- Modules included in this executable, other than Main.
+    other-modules:
+        AST,
+        Jsonable,
+        Parser,
+        RangeCheck,
+        Token,
+        Tokenizer,
+        TypeCheck
+
+    -- LANGUAGE extensions used by modules in this package.
+    -- other-extensions:
+    build-depends:
+        base ^>=4.17.2.0,
+        containers ^>=0.6.7,
+        Cabal ^>=3.8.1.0,
+        directory ^>=1.3.7.1,
+        filepath ^>=1.4.2.2,
+        process ^>=1.6.17.0,
+        bytestring ^>=0.11.5.2
+    hs-source-dirs:   app
+    default-language: GHC2021

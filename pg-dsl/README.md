@@ -2,10 +2,22 @@
 
 ## Installation
 
-### Compile GHC project to ./build/ directory:
-`ghc -o ./build/pgdsl ./Main.hs -odir ./build -hidir ./build`
+To install the project from source, you need [Cabal](https://cabal.readthedocs.io/en/stable/index.html) and [GHC](https://www.haskell.org/ghc/) installed on your system. The easiest way to install is via [GHCup](https://www.haskell.org/ghcup/).
 
-### Language Support
+Once this is done, you can go on and install pg-dsl.
+
+### Make sure to cd into the correct directory
+
+If you're currently on the reposiory's top level, you achieve this with `cd pg-dsl`
+
+### Build the project
+`cabal build`
+
+### Install the project
+
+To have the project available in your path, run `cabal install`
+
+### Get language support
 
 To have Syntax Highlighting and Code Snippets available, you can install the [PG Tools extension](https://marketplace.visualstudio.com/items?itemName=bsuehling.pg-tools) for VSCode.
 
